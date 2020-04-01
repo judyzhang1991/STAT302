@@ -4,27 +4,54 @@ author: "Jingyang(Judy) Zhang"
 date: "3/31/2020"
 output: html_document
 ---
+# CH2 Getting Started with ggplot2 #
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+## 2.1 Introduction ##
+```{r}
+library(tidyverse)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+## 2.2 Fuel Economy Data ##
+```{r}
+mpg
+dat=mpg
 ```
 
-## Including Plots
+- ``cty``: miles per gallon (mpg) for city driving
 
-You can also embed plots, for example:
+- ``hwy``: miles per gallon (mpg) for highway driving
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+- ``displ``: engine displacement in liters
+
+- ``drv``: drivetrain: fromt wheel (f), rear wheel (r), or four whell (4)
+
+- ``model``: model of car: 38 models, selected as they had a new edition every year btw 1999 and 2008
+
+- ``class``: a categ variable describing the "type" if car: two seater, SUV, compact, etc. 
+
+### 2.2.1 Exercises ###
+1. List five functions that you could use to get more information about the ``mpg`` dataset.
+
+mean(), median(), sd(), plot(), histogram
+
+2. How can you find out what other datasets are included with ggplot2? 
+Use google search to find the reference page of the ggplot2 official website. Other datasets included with ggplot2 are ``diamonds``, ``economics``, ``economics_long``, ``midwest``, etc. 
+
+3. Aprt from the US, most countries use fuel consumption (fuel consumed over fixed distance) rather than fuel economy (distance travelled with fixed amount of fuel). How could you convert ``cty`` and ``hwy`` intro the European standard of $1/100$km? 
+
+First, mpg is fuel economy as it measures the distance (miles) travelled with fixed amount of fuel (per gallon). 
+Assume we have $x$ mpg, to convert it to $1/100$ km, we have:
+
+1 gallon correspond to $x$ miles $\Rightarrow$ 1 gallon correspond to $1.609x$ km $\Rightarrow$ $\frac{100}{1.609x}\times 1$ per $100$ km. 
+
+
+4. Which manufacturer has the most models in this dataset? Which model has the most variations? Does your answer change if you remove the redundant specification of driven train (e.g. "pathfinder 4wd", "a4 quattro") from the model name?
+
+```{r}
+ggplot(dat, aes(x=as.factor(manufacturer)))+
+  geom_bar()+
+  geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Dodge has the most models in this dataset. 
