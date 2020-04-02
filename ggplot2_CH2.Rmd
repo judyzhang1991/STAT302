@@ -46,7 +46,7 @@ Assume we have $x$ mpg, to convert it to $1/100$ km, we have:
 1 gallon correspond to $x$ miles $\Rightarrow$ 1 gallon correspond to $1.609x$ km $\Rightarrow$ $\frac{100}{1.609x}\times 1$ per $100$ km. 
 
 
-4. Which manufacturer has the most models in this dataset? Which model has the most variations? Does your answer change if you remove the redundant specification of driven train (e.g. "pathfinder 4wd", "a4 quattro") from the model name?
+4. Which manufacturer has the most models in this dataset? Which model has the most variations? Does your answer change if you remove the redundant specification of drive train (e.g. "pathfinder 4wd", "a4 quattro") from the model name?
 
 ```{r}
 ggplot(dat, aes(x=as.factor(manufacturer)))+
@@ -55,3 +55,104 @@ ggplot(dat, aes(x=as.factor(manufacturer)))+
 ```
 
 Dodge has the most models in this dataset. 
+
+!!! Does your answer change if you remove the redundant specification of drive train (e.g. "pathfinder 4wd", "a4 quattro") from the model name? !!!
+```{r}
+ggplot(dat, aes(x=as.factor(model)))+
+  geom_bar()+
+  geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+```
+
+
+## 2.3 Key Components ##
+1. Every ggplot2 has three key components:
+
+a. Data (supplied in ``ggplot()``)
+
+b. Aesthetic Mappings: a set of aesthetic mappings between variables in the data and visual properties (supplied in ``ggplot()``)
+
+c. Layer: at least one layer which describes how to render each observation. Layers are usually created with a \textbf{geom} function (add to a ``ggplot()`` using ``+``)
+
+
+2. Example
+```{r}
+ggplot(mpg, aes(x=displ, y=hwy))+
+  geom_point()
+```
+
+a. Data: mpg
+
+b. Aesthetic Mappings: engine size (``displ``) mapped to x position; fuel economy on highway (``hwy``) mapped to y position
+
+c. Layer: points
+
+d. The plot shows a strong correlation: as the engine size gets bigger, the fuel economy gets worse. There are also some outliers: some cars with large engines get higher fuel economiy than average (Hybrid car??). 
+
+
+3. The first two unnamed arguments to ``aes()``: will be mapped to x and y. 
+
+
+### 2.3.1. Exercises ###
+1. How would you describe the relationship between ``cty`` and ``hwy``? Do you have any concerns about drawing conclusions from that plot?
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+geom_point()
+```
+
+The relationship between ``cty`` and ``hwy`` should be strongly positively correlated which means the higher fuel economy when driving in the city correspond to higher fuel economy when driving on highway. 
+
+Concerns about drawing conclusions from just a scatter plot are:
+
+??????????
+
+
+2. What does ``ggplot(mpg, aes(model, manufacturer))+geom_point()`` show? Is it useful? How could you modify the data to make it more informative?
+
+```{r}
+ggplot(mpg, aes(model, manufacturer))+
+  geom_point()
+
+
+```
+
+
+The plot shows a scatter plot with model mapped to x position and manufacturer mapped to y position. It shows model and its corresponding manufacturer. It is not very useful as the information can be obtained by looking at the data itself. 
+
+To make it more useful, we can modify the data by grouping 
+
+3. Describe the data, aesthetic mappings and layers used for each of the following plots. You will need to guess a little because you have not seen all the datasets and functions yet, but use your common sense. See if you can predict what the plot will look like before running the code. 
+a. ``ggplot(mpg, aes(cty, hwy))+geom_points()``:
+
+(1) Data: mpg
+
+(2) Aesthetic Mappings: fuel economy when driving in the city (``cty``) mapped to x position and fuel economy when driving on highway (``hwy``) mapped to y position
+
+(3) Layer: points
+
+
+b. ``ggplot(diamonds, aes(carat, price))+geom_point()``:
+
+(1) Data: diamonds
+
+(2) Aesthetic Mappings: carat of diamonds (``carat``) mapped to x position and price of diamonds (``price``) mapped to y position
+
+(3) Layer: points
+
+
+c. ``ggplot(economics, aes(date, unemploy))+geom_line()``:
+
+(1) Data: economics
+
+(2) Aesthetic Mappings: date (``date``) mapped to x position and a measure of unemployment such as unemployment rate (``unemploy``) mapped to y position
+
+(3) Layer: line
+
+
+d. ``ggplot(mpg, aes(cty))+geom_histogram()``:
+
+(1) Data: mpg
+
+(2) Aesthetic Mappings: fuel economy when driving in the city (``cty``) is mapped to x position, corresponding frequency of the values of the fuel economy when driving in the city (``cty``) is mapped to y position
+
+(3) Layer: histogram
