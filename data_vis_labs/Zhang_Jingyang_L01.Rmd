@@ -16,7 +16,11 @@ The goals of this lab are to (1) ensure that the major software for this course 
 **Don't worry if you cannot do everything here by yourself.** You are just getting started and the learning curve is steep, but remember that the instructional team and your classmates will be there to provide support. Persevere and put forth an honest effort and this course will payoff.
 
 ```{r load-packages, warning=FALSE, message=FALSE}
-# Load package(s) - We will do this together 
+# Load package(s) - We will do this together
+
+library(tidyverse)
+library(ggstance)
+library(skimr)
 ```
 
 <br>
@@ -24,6 +28,7 @@ The goals of this lab are to (1) ensure that the major software for this course 
 ## Dataset
 
 We'll be using data from the [**lego** package](https://github.com/seankross/lego) which is already in the `/data` subdirectory, along with many other processed datasets, as part of the zipped folder for this lab. 
+
 
 <br><br>
 
@@ -36,6 +41,7 @@ Complete the following tasks. For many of these you'll need to simply indicate t
 
 Download and install [R Software](https://cran.rstudio.com/).
 
+<strong>DONE</strong>
 <br><br>
 
 ### Task 2
@@ -44,7 +50,7 @@ Download and install [R Software](https://cran.rstudio.com/).
 2. Open RStudio and ensure it and R have been properly installed. 
 3. Go to **Tools** > **Global Options** and change the two indicated settings below and click **Applly**.
 
-
+<strong>DONE</strong>
 
 <br>
 
@@ -54,6 +60,8 @@ Install the following packages:
 - `tidyverse`
 - `ggstance`
 - `skimr`
+
+<strong>DONE</strong>
 
 <br><br>
 
@@ -65,10 +73,13 @@ Install the following packages:
 4. Appropriately rename `template_L01.Rmd` for submission (e.g. *Kuper_Arend_L01.Rmd*).
 5. Compile the *_L01.Rmd file with `Cmd/Ctrl + Shift + K`.
 
+<strong>DONE</strong>
+
 <br><br>
 
 ### Task 5 
 Optional: It is always handy to have a versatile text editor and I would suggest downloading [Sublime Text](https://www.sublimetext.com/). It is free to use.
+<strong>DONE</strong>
 
 <br><br>
 
@@ -81,6 +92,12 @@ Let's look at some interesting patterns in the history of LEGO! We'll be using d
 ### Inspect the data
 
 The **lego** package provides a helpful dataset some interesting variables. Let's take a quick look at the data.
+```{r}
+load(file="data/legosets.rda")
+
+skim(legosets)
+```
+
 
 <br><br>
 
@@ -88,14 +105,77 @@ The **lego** package provides a helpful dataset some interesting variables. Let'
 
 First, let's look at the average cost of LEGO sets over time. The main variable of interest here is `USD_MSRP`, or the manufacturer's suggested retail price in constant dollars (i.e. not adjusted for inflation).
 
+```{r}
+# Overall mean cost
+mean_cost=mean(legosets$USD_MSRP, na.rm = TRUE)
+
+mean_cost
+
+# Mean cost by year
+
+mean_cost_yr=legosets %>% 
+  group_by(Year) %>%
+  summarise(
+   count=n(),
+   sum=sum(USD_MSRP, na.rm=TRUE),
+   mean=mean(USD_MSRP, na.rm=TRUE)
+  )
+
+mean_cost_yr
+
+
+```
+
+
 <br><br>
 
 ### Pieces per year
 
 Next, let’s look at how the number of pieces per set has changed over time. Because Duplo sets are much smaller (since they’re designed for toddlers), we’ll make a special indicator variable for them.
 
+```{r}
+
+# Overall mean pieces
+mean_pieces=mean(legosets$Pieces, na.rm = TRUE)
+
+mean_pieces
+
+# Mean pieces by year
+
+mean_pieces_yr=legosets %>% 
+  group_by(Year) %>%
+  summarise(
+   count=n(),
+   sum=sum(Pieces, na.rm=TRUE),
+   mean=mean(Pieces, na.rm=TRUE)
+  )
+
+mean_pieces_yr
+
+
+```
+```{r}
+
+```
+
+?????? DUPLO?????
+
 <br><br>
 
 ### LEGO set themes
 
 In the 1990s, [LEGO began partnering with famous brands and franchises](https://www.cnbc.com/2018/04/27/lego-marketing-strategy-made-it-world-favorite-toy-brand.html) to boost its own sales. First, let's see how many different "themes" LEGO now offers:
+
+```{r}
+# List of unique themes
+unique(legosets$Theme)
+
+# Number of unique themes
+length(unique(legosets$Theme)) #115
+
+```
+
+
+
+
+
