@@ -10,6 +10,7 @@ output: html_document
 ```{r}
 library(tidyverse)
 library(reshape)
+library(ggpubr)
 ```
 
 
@@ -513,3 +514,38 @@ ggplot(mpg, aes(displ, hwy))+
 
 
 ### 2.6.2 Boxplots and Jittered Points ###
+
+1. Three Techniques for Alleviating Overplotting (i.e. many points are plotted in the same location s.t. it's difficult to see the dist):
+
+a. Jittering ``geom_jitter()``: adds a little random noise to the data which can help avoid overplotting. 
+
+(1) Strength & Weakness: jittered plots show every pt but only work with relatively small datasets. 
+
+b. Boxplots ``geom_boxplot()``: summarises the shape of the dist with a handful of summary statistics: min, max, first quartile (25th percentile; Q1), median (50th percentile; Q2), third quartile (75th percentile; Q3). 
+
+(1) Strength & Weakness: boxplots summarise the bulk of the dist with only 5 numbers.
+
+Interquartile Range (IQR)=Q3-Q1=$q_{n}(0.75)-q_{n}(0.25)$.
+
+c. Violoin plots ``geom_violin``: shows a compact representation of the "density" of the dist, highlighting the areas where more points are found. 
+
+(1) Strength & Weakness: violin plots give the richest display but rely on the cal of a density estimate, which can be hard to interpret. 
+
+```{r}
+jitter=ggplot(mpg, aes(drv, hwy))+geom_jitter()
+box=ggplot(mpg, aes(drv, hwy))+geom_boxplot()
+violin=ggplot(mpg, aes(drv, hwy))+geom_violin()
+
+ggarrange(jitter, box, violin + rremove("x.text"), 
+          labels = c("Jittering", "Boxplot", "Violin Plot"),
+          ncol = 2, nrow = 2)
+
+```
+
+2. For jittered points: ``geom_jitter()`` offers the same control over aesthetics as ``geom_point()``: ``size``, ``color``, ``shape``. 
+
+
+3. For ``geom_boxplot()`` and ``geom_violin()``: can control the outline ``color`` or the internal ``fill`` color. 
+
+
+### 2.6.3. Histogram and Frequency Polygons ###
