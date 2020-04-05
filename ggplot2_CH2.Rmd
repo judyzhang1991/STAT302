@@ -549,3 +549,101 @@ ggarrange(jitter, box, violin + rremove("x.text"),
 
 
 ### 2.6.3. Histogram and Frequency Polygons ###
+
+1. Histograms; Frequency Polygons: show the dist of a single numeric var. 
+
+a. Provide more info about dist than boxplots
+
+b. Need more space than boxplots
+
+```{r}
+ggplot(mpg, aes(hwy))+geom_histogram()
+
+ggplot(mpg, aes(hwy))+geom_freqpoly()
+```
+
+c. Both histograms and freq polygons work in the same way:
+
+(1) Bin the data
+
+(2) Count the number of obs in each bin
+
+(3) Difference: histograms use bars; freq polygons use lines. 
+
+d. ``binwidth`` argument: controls the width of the bins.
+
+(1) ``breaks`` argument: allows for unevenly spaced bins.
+
+e. Default splits data into $30$ bins.
+
+
+```{r}
+ggplot(mpg, aes(hwy))+
+  geom_freqpoly(binwidth=2.5)
+
+ggplot(mpg, aes(hwy))+
+  geom_freqpoly(binwidth=1)
+```
+
+
+2. Density Plot ``geom_density()``: an alt. to the freq polygons. 
+
+a. Density plots are harder to interpret since the underlying computations are more complex. 
+
+b. Density plots make assumptions that are not true for all data (assume the underlying dist is cts, unbounded and smooth).
+
+3. To compare the dists of diff subgroups: map a categorical var to:
+
+a. ``fill`` argument: for ``geom_histogram()``
+
+b. ``color`` argument: for ``geom_freqpoly()``
+
+c. Facetting: makes comparisons a little harder but it's easier to see the dist of each group. 
+
+```{r}
+ggplot(mpg, aes(displ, color=drv))+
+  geom_freqpoly(binwidth=0.5)
+
+ggplot(mpg, aes(displ, fill=drv))+
+  geom_histogram(binwidth=0.5)+
+  facet_wrap(~drv, ncol=1)
+```
+
+
+
+### 2.6.4 Bar Charts ###
+
+1. Bar chart ``geom_bar()``: the discrete analogue of the histogram. 
+
+```{r}
+ggplot(mpg, aes(manufacturer))+
+  geom_bar()
+```
+
+2. There are two rather different plots that are both commonly called bar charts:
+
+a. Form 1: expects unsummarised data, and each obs contributes one unit to the height of each bar. 
+
+b. Form 2: used for presummarised data. 
+
+c. Example: three drugs with their avg effect
+```{r}
+drugs=data.frame(
+  drug=c("a","b","c"),
+  effect=c(4.2, 9.7, 6.1)
+)
+```
+(1) To display this sort of data, need to tell ``geom_bar()`` to not run the default stat which bins and counts the data (i.e. if count the data, will all be 1, 1, 1). 
+
+(2) In this case it's better to use ``geom_point()`` as pts take up less space than bars, and not require that the y axis includes 0. 
+
+```{r}
+ggplot(drugs, aes(drug, effect))+geom_bar(stat="identity")
+
+ggplot(drugs, aes(drug, effect))+geom_point()
+```
+
+
+### 2.6.5 Time Series with Line and Path Plots ###
+
+
