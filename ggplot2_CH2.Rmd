@@ -536,10 +536,18 @@ jitter=ggplot(mpg, aes(drv, hwy))+geom_jitter()
 box=ggplot(mpg, aes(drv, hwy))+geom_boxplot()
 violin=ggplot(mpg, aes(drv, hwy))+geom_violin()
 
-ggarrange(jitter, box, violin + rremove("x.text"), 
+
+##NOTE: par(mfrow=c(x,y)) does NOT work for ggplot
+
+ggarrange(jitter, box, violin+ rremove("x.text"), 
           labels = c("Jittering", "Boxplot", "Violin Plot"),
           ncol = 2, nrow = 2)
 
+# rremove: removes the object x.text for violin plot
+
+ggarrange(jitter, box, violin, 
+          labels = c("Jittering", "Boxplot", "Violin Plot"),
+          ncol = 2, nrow = 2)
 ```
 
 2. For jittered points: ``geom_jitter()`` offers the same control over aesthetics as ``geom_point()``: ``size``, ``color``, ``shape``. 
@@ -646,4 +654,312 @@ ggplot(drugs, aes(drug, effect))+geom_point()
 
 ### 2.6.5 Time Series with Line and Path Plots ###
 
+1. Line plot, Path plots: typically used for time series data. 
+
+a. Line plots: join the pts from left to right. A line plot is a path plot of the data sorted by $x$ value. 
+
+(1) Line plots usually have time on the x-axis, showing how a single variable has changed over time. 
+
+b. Path plots: join the pts in the order that they appear in the dataset. 
+
+(1) Path plots show how two vars have simultaneously changed over time, with time encoded in the way taht obs are connected. 
+
+2. Example: Line plot for unemployment rate (First), Line plot for median number of weeks unemployed (Second)
+
+```{r}
+# Unemployment rate
+unemp_rate=ggplot(economics, aes(date, unemploy/pop))+geom_line()
+
+
+# Median number of weeks unemployed
+unemp_length=ggplot(economics, aes(date, uempmed))+geom_line()
+
+
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+```
+
+
+a. Use a path plot to draw both time series on the same plot.
+
+```{r}
+ggplot(economics, aes(unemploy/pop, uempmed))+
+  geom_path()+
+  geom_point()
+```
+This plot has many line corssings, the direction in which time flows is NOT easy to see. 
+
+b. Use a path plot to draw both time series on the same plot and use color for the year(date). 
+```{r}
+
+# Converte date to year
+year=function(x){
+  as.POSIXlt(x)$year+1900
+}
+## as.POSIX*: Functions to manipulate objects of classes "POSIXlt" and "POSIXct" representing calendar dates and times.
+
+ggplot(economics, aes(unemploy/pop, uempmed))+
+  geom_path(color="grey50")+
+  geom_point(aes(color=year(date)))
+
+
+
+```
+We can see that unemployment rate and length of unemployment are highly correlated, but in recent years the length of unmployment has been increasing relative to the unemployment rate. 
+
+
+3. With longitudinal data, often want to display multiple time series on each plot, each series representing one individual. To do this, need to map the ``group`` aesthetic to a variable encoding the group membership of each obs. 
+
+
+
+### 2.6.6. Exercises ###
+
+1. What is the problem with the plot create by ``ggplot(mpg, aes(cty, hwy))+geom_point()``? Which of the geoms described above is most effective at remedying the problem?
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+geom_point()
+
+```
+
+?????????????????????
+It's better to fit a smoother to the data so that we can see the general trend of the relationship between ``hwy`` and ``cty`` better. The geom that should be use is ``geom_smooth()``.
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+
+  geom_point()+
+  geom_smooth(method="lm")
+```
+
+2. One challenge with ``ggplot(mpg, aes(class, hwy))+geom_boxplot()`` is that the ordering of ``class`` is alphabetical, which is not teribbly useful. How could you change the factor level to be more informative?
+
+```{r}
+ggplot(mpg, aes(class, hwy))+geom_boxplot()
+```
+
+
+Rather than reordering the factor by hand, you can do it automatically based on the data: ``ggplot(mpg, aes(reorder(class, hwy), hwy))+geom_boxplot()``. 
+```{r}
+ggplot(mpg, aes(reorder(class, hwy), hwy))+geom_boxplot()
+```
+
+What does ``reorder()`` do? Read the documentation.
+
+``reorder()`` is a generic function. The ``default`` method treats its frist argument as a categorical variable, and reorder its levels based on the values of a second variable, usually numeric. 
+
+In our case, ``reorder(class, hwy)`` will reorder the levels of ``class`` based on the value of ``hwy`` ascendingly. 
+
+
+3. Explore the distribution of the carat variable in the ``diamonds`` dataset. What biwidth reveals the most interesting patterns?
+
+```{r}
+
+fifty=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 50 )
+
+two_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 200)
+
+eight_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 800 )
+
+fifteen_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 1500 )
+
+
+
+ggarrange(fifty, two_hundred, eight_hundred, fifteen_hundred, labels=c("Binwidth=50", "Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+
+ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 50)+
+  xlim(0, 2500)
+
+```
+
+Using binwidth of $\$50$ we can see a drop at price $\$1500$, this is not show in plots using binwdith greater than $\$50$. Using binwidth of $\$50$ also shows that there is no diamond priced below $\$250$ in this dataset. 
+
+
+
+4. Explore the distribution of the price variable in the ``diamonds`` data. How does the distribution vary by cut?
+
+```{r}
+ggplot(diamonds, aes(price))+
+  geom_histogram()+
+  facet_wrap(~cut)
+
+```
+????????????
+We can see that the distribution peaks at different number for different cut. The peak for cut fair is the lowest while the peak for idea is the hightest. 
+
+
+5. You now know at least three ways to compare the distributions of subgroups: ``geom_violin()``, ``geom_freqpoly`` and the color aesthetic, or ``geom_histogram`` and facetting. Whatt are the strengths and weak nesses of each approach? What other approaches could you try?
+
+``geom_violin()``: 
+
+Strength: show a compact representation of the "density" of the distribution by groups in one plot so it will be easier to compare. 
+
+Weakness: relys on the calculation of a density estimate, which can be hard to interpret. 
+
+``geom_freqpoly`` and the color aesthetic:
+
+```{r}
+ggplot(diamonds, aes(price))+
+  geom_freqpoly(aes(color=cut))
+```
+
+
+Strength: able to display mutliple distributions by groups in one plot so it will be easier to compare. 
+
+Weakness: when there are a lot of groups, there are many lines in the plot and can be hard to see and compare. 
+
+
+``geom_histogram`` and facetting:
+
+Strength: able to show distributions of groups in multiple plots so it is clear to see the distribution within each plot and there is no overlappings. 
+
+Weakness: it can be difficult to compare since distributions of groups are in different plots. 
+
+
+Other approaches:
+- Boxplots by group
+
+- Overlapping densities
+
+- Ridgeline plot
+
+
+6. Read the documentation for ``geom_bar()``. What does the ``weight`` aesthetic do? 
+
+The ``weight`` aesthetic can be used to create weighted histogra and barcharts where the height of the bar no longer represent a count of observations, but a sum over other variable. 
+
+
+7. Using the techniques already discussed in this chapter, come up with three ways to visualise a 2d categorical distribution. Try them out by visualizing the distribution of ``model`` and ``manufacturer``, ``trans`` and ``class``, and ``cyl`` and ``trans``.
+
+???????????????????????????????????????
+``model`` and ``manufacturer``:
+
+```{r}
+
+```
+
+
+
+## 2.7 Modifying the Axes ##
+
+1. ```` and `````: modify the x- and y-axis labels:
+```{r}
+
+# Without specify, use variable name as label
+varnamelabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)
+
+withlabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)+
+  xlab("city driving (mpg)")+
+  ylab("highway driving (mpg)")
+
+# Remove the axis labels with NULL
+nulllabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)+
+  xlab(NULL)+
+  ylab(NULL)
+
+
+ggarrange(varnamelabel, withlabel, nulllabel, labels = c("Variable Name Label", "With Label", "Null Label"), ncol=2, nrow=2)
+```
+
+2. ``xlim`` and ``ylim``: modify the limits of axes:
+
+```{r}
+noset=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25)
+
+
+# Remove drv level 4 and display only hwy btw 20 to 30
+set=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25)+
+  xlim("f", "r")+
+  ylim(20,30)
+
+
+# For cts scales, use NA to set only one limit
+# Changing the axes limits sets values outside the range to NA. Suppress the associated warning with na.rm=TRUE
+setone=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25, na.rm=TRUE)+
+  ylim(NA, 30)
+
+
+ggarrange(noset, set, setone, labels = c("Do not set Limits", "Set Limits", "Set only One Limit"), ncol=2, nrow=2)
+```
+
+a. Changing the axes limits sets values outside the range to ``NA``.
+
+
+
+## 2.8 Output ##
+
+1. Save a plot to a variable so you can manupulate it later:
+```{r}
+
+# Save the plot as a plot object
+p=ggplot(mpg, aes(displ, hwy, color=factor(cyl)))+
+  geom_point()
+```
+
+Once you have a plot object, you can do the following:
+
+a. Render it on screen with ``print()``: this happens automatically when running interactively, but inside a loop or function, you will need to ``print()`` it yourself. 
+
+```{r}
+print(p)
+```
+
+b. Save it to disk with ``ggsave()``.
+```{r}
+ggsave("Ch2_plot.png", p, width=5, height=5)
+```
+
+c. Briefly describe the plot's structure with ``summary()``.
+
+```{r}
+summary(p)
+```
+
+
+d. Save a cached copy of the plot to disk with ``saveRDS()``: this saves a complete copy of the plot object, so you can easily re-create it with ``readRDS()``.
+
+```{r}
+saveRDS(p, "ch2_plotRDS.rds")
+q=readRDS("ch2_plotRDS.rds")
+q
+```
+
+The plot structure is not guarantted to stay the same over time, so use this for short-term chaching, not long term storage. 
+
+
+
+## 2.9 Quick Plots ##
+
+1. ``qplot()``: define a plot in a single call, picking a geom by default if you do NOT supply one. To use it, provide a set of aesthetics and a data set:
+
+```{r}
+qplot(displ, hwy, data=mpg)
+
+qplot(displ, data=mpg)
+```
+
+a. Unless otherwise specified, ``qplot`` tries to pick a sensible geometry and statistic based on the arguments provided. 
+
+(1) Supply ``qplot`` x and y variables: it will create a scatterplot.
+
+(2) Supply ``qplot`` x only: it will create a histogram or bar chart dep on the type of var. 
+
+b. ``qplot`` assumes that all variables should be scaled by default. 
+
+c. If you want to set an aesthetic to a constant, need to use ``I()``:
+
+```{r}
+qplot(displ, hwy, data=mpg, color="blue")
+
+qplot(displ, hwy, data=mpg, color=I("blue"))
+```
 
