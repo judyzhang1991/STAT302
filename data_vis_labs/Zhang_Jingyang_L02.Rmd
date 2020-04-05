@@ -1,0 +1,151 @@
+---
+title: "L02 ggplot I"
+subtitle: "Data Visualization (STAT 302)"
+author: "Jingyang Zhang"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    highlight: "tango"
+---
+
+## Overview
+
+The goal of this lab is to begin the process of unlocking the power of `ggplot2` through constructing and experimenting with a few basic plots.
+
+## Datasets
+
+We'll be using data from the `blue_jays.rda` dataset which is already in the `/data` subdirectory in our **data_vis_labs** project. Below is a description of the variables contained in the dataset.
+
+* `BirdID` - ID tag for bird
+* `KnownSex` - Sex coded as F or M
+* `BillDepth` - Thickness of the bill measured at the nostril (in mm)
+* `BillWidth` - Width of the bill (in mm)
+* `BillLength` - Length of the bill (in mm)
+* `Head` - Distance from tip of bill to back of head (in mm)
+* `Mass` - Body mass (in grams)
+* `Skull` - Distance from base of bill to back of skull (in mm)
+* `Sex` - Sex coded as `0 = female` or `1 = male`
+
+We'll also be using a subset of the BRFSS (Behavioral Risk Factor Surveillance System) survey collected annually by the Centers for Disease Control and Prevention (CDC). The data can be found in the provided `cdc.txt` file --- place this file in your `/data` subdirectory. The dataset contains 20,000 complete observations/records of 9 variables/fields, described below.
+
+* `genhlth` - How would you rate your general health? (excellent, very good, good, fair, poor)
+* `exerany` - Have you exercised in the past month? (`1 = yes`, `0 = no`) 
+* `hlthplan` - Do you have some form of health coverage? (`1 = yes`, `0 = no`) 
+* `smoke100` - Have you smoked at least 100 cigarettes in your life time? (`1 = yes`, `0 = no`) 
+* `height` -  height in inches
+* `weight` - weight in pounds
+* `wtdesire` - weight desired in pounds
+* `age` - in years
+* `gender` - `m` for males and `f` for females
+
+Notice we are setting a seed. This signifies we will be doing something that relies on a random process (e.g., random sampling). In order for our results to be reproducible we set the seed. This ensures that every time you run the code or someone else does, it will produce the exact same output. It is good coding etiquette to set the seed towards the top of your document/code.
+
+```{r load-packages, warning=FALSE, message=FALSE}
+# Set the seed for reproducibility
+set.seed(31412718)
+
+# Load package(s)
+load("data/blue_jays.rda")
+```
+
+```{r load-packages-hidden, warning=FALSE, message=FALSE, echo = FALSE}
+# Load package(s)
+library(tidyverse)
+library(ggpubr)
+```
+
+## Exercises
+
+Complete the following exercises.
+
+<br>
+
+### Exercise 1
+
+Using `blue_jay` dataset, construct the following scatterplots of `Head` by `Mass`:
+
+1. One with the `color` aesthetic set to Northwestern purple (`#4E2A84`), `shape` aesthetic set a solid/filled triangle, and `size` aesthetic set to 2.
+
+
+```{r}
+
+ggplot(blue_jays, aes(Head, Mass))+
+  geom_point(color="#4E2A84", shape=17, size=2)
+```
+
+2. One using `Sex` or `KnownSex` mapped to the `color` aesthetic. That is, determine which is more appropriate and explain why. Also set the `size` aesthetic to 2.
+
+```{r}
+ggplot(blue_jays, aes(Head, Mass, color=Sex))+
+  geom_point(shape=17, size=2)
+
+
+ggplot(blue_jays, aes(Head, Mass, color=as.factor(KnownSex)))+
+  geom_point(shape=17, size=2)
+
+```
+Use ``KnownSex`` is more appropriate because ``Sex`` is coded as $1$ for male and $0$ for female which should be interpreted as a categorical variable, but ggplot treats it as a numerical variable. Because of this, instead of having two distinct colors for each sex, we have a gradation of one color for sex which is not appropriate because there is no middle value between the two levels of ``Sex``.
+
+<br>
+
+Consider the `color` aesthetic in the plots for (1) and (2). Explain why these two usages of the `color` aesthetic are meaningfully different. 
+
+The first usage of `color` aesthetic is not inside the ``aes`` argument and is therefore treated at the face value, that is to color all data points using the color specified. 
+
+The second usage of `color` aesthetic is inside the ``aes`` argument and is therefore telling ggplot to color by the variable specified. 
+
+If we are more interested in the relationship between ``Head`` and ``Mass`` by sex, then we should use the second plot. If we are only interested in the relationship between ``Head`` and ``Mass`` in genderal without caring about whether the relationship differs between male and female, then we should use the first plot. 
+
+<br>
+
+### Exercise 2
+
+Using a random subsample of size 100 from the `cdc` dataset (code provided below), construct a scatterplot of `weight` by `height`. Construct 5 more scatterplots of `weight` by `height` that make use of aesthetic attributes `color` and `shape` (maybe `size` too). You can define both aesthetics at the same time in each plot or one at a time. Just experiment. --- Should be six total plots.
+
+<br>
+
+```{r cdc-small, warning=FALSE, message=FALSE}
+# Read in the cdc dataset
+cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
+  mutate(genhlth = factor(genhlth,
+    levels = c("excellent", "very good", "good", "fair", "poor")
+  ))
+
+# Selecting a random subset of size 100
+cdc_small <- cdc %>% sample_n(100)
+```
+
+Scatterplot of `weight` by `height`
+```{r}
+
+ggplot(cdc_small, aes(weight, height))+
+  geom_point()
+
+```
+
+
+
+5 more scatterplots of `weight` by `height` that make use of aesthetic attributes `color` and `shape` (maybe `size` too)
+```{r}
+p1=ggplot(cdc_small, aes(weight, height, color=gender))+
+  geom_point()
+
+p2=ggplot(cdc_small, aes(weight, height, shape=gender))+
+  geom_point()
+
+p3=ggplot(cdc_small, aes(weight, height, color=as.factor(smoke100), shape=gender))+
+  geom_point()
+
+p4=ggplot(cdc_small, aes(weight, height, color=gender, shape=as.factor(smoke100)))+
+  geom_point()
+
+
+p5=ggplot(cdc_small, aes(weight, height, color=gender, size=age))+
+  geom_point(shape=1)
+
+
+ggarrange(p1,p2,p3,p4,p5, labels=c("Plot1", "Plo2", "Plot3", "Plot4", "Plot5"), ncol=2, nrow=3, font.label = list(size=8, color="red"), hjust=0.05)
+
+```
+
