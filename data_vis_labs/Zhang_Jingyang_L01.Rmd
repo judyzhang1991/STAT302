@@ -50,6 +50,7 @@ Download and install [R Software](https://cran.rstudio.com/).
 2. Open RStudio and ensure it and R have been properly installed. 
 3. Go to **Tools** > **Global Options** and change the two indicated settings below and click **Applly**.
 
+![](screen_shot/rstudio-workspace.png)
 <strong>DONE</strong>
 
 <br>
