@@ -1595,7 +1595,8 @@ div.tocify {
 <div id="task-1" class="section level3">
 <h3>Task 1</h3>
 <p>Download and install <a href="https://cran.rstudio.com/">R Software</a>.</p>
-<p><strong>DONE</strong> <br><br></p>
+<p><strong>DONE</strong></p>
+<p><br><br></p>
 </div>
 <div id="task-2" class="section level3">
 <h3>Task 2</h3>
@@ -1956,14 +1957,16 @@ div.tocify {
 ##  9  1979     6   771 128. 
 ## 10  1980    28  4913 182. 
 ## # ... with 35 more rows</code></pre>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co"># Create indicator variable for Duplo</span></a>
+<a class="sourceLine" id="cb11-2" title="2">legosets<span class="op">$</span>duplo=<span class="kw">with</span>(legosets, <span class="kw">ifelse</span>(Theme<span class="op">==</span><span class="st">&quot;Duplo&quot;</span>, <span class="dv">1</span>, <span class="dv">0</span>))</a></code></pre></div>
 <p>?????? DUPLO?????</p>
 <p><br><br></p>
 </div>
 <div id="lego-set-themes" class="section level3">
 <h3>LEGO set themes</h3>
 <p>In the 1990s, <a href="https://www.cnbc.com/2018/04/27/lego-marketing-strategy-made-it-world-favorite-toy-brand.html">LEGO began partnering with famous brands and franchises</a> to boost its own sales. First, let’s see how many different “themes” LEGO now offers:</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="co"># List of unique themes</span></a>
-<a class="sourceLine" id="cb11-2" title="2"><span class="kw">unique</span>(legosets<span class="op">$</span>Theme)</a></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="co"># List of unique themes</span></a>
+<a class="sourceLine" id="cb12-2" title="2"><span class="kw">unique</span>(legosets<span class="op">$</span>Theme)</a></code></pre></div>
 <pre><code>##   [1] &quot;Advanced Models&quot;              &quot;Duplo&quot;                       
 ##   [3] &quot;Juniors&quot;                      &quot;Classic&quot;                     
 ##   [5] &quot;Architecture&quot;                 &quot;Minecraft&quot;                   
@@ -2022,10 +2025,64 @@ div.tocify {
 ## [111] &quot;Building Set with People&quot;     &quot;LEGOLAND&quot;                    
 ## [113] &quot;Universal Building Set&quot;       &quot;Homemaker&quot;                   
 ## [115] &quot;Samsonite&quot;</code></pre>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1"><span class="co"># Number of unique themes</span></a>
-<a class="sourceLine" id="cb13-2" title="2"><span class="kw">length</span>(<span class="kw">unique</span>(legosets<span class="op">$</span>Theme)) <span class="co">#115</span></a></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="co"># Number of unique themes</span></a>
+<a class="sourceLine" id="cb14-2" title="2"><span class="kw">length</span>(<span class="kw">unique</span>(legosets<span class="op">$</span>Theme)) <span class="co">#115</span></a></code></pre></div>
 <pre><code>## [1] 115</code></pre>
 </div>
+</div>
+<div id="class-notes" class="section level2">
+<h2>Class Notes</h2>
+<p><strong>Types of Variables</strong> Categorical/Factor; Continuous/Numeric</p>
+<p><strong>Two Questions to Ask Before Deciding the Graphics:</strong> 1. How many variables? Uivariate or multivariate? 2. Type of variable(s)?</p>
+<p><strong>When and why we use a ?</strong></p>
+<ol style="list-style-type: decimal">
+<li>Histogram:</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>cts/numerical, can be discrete but cts works better</p></li>
+<li><p>univariate</p></li>
+</ol>
+<ol start="2" style="list-style-type: decimal">
+<li>Boxplot: 5 summary of the data: min, 0.25 Percentile (first quadrat), Median (second quadrat), 0.75 Percentile (third quadrat), max</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>cts/numerical</p></li>
+<li><p>univarite</p></li>
+</ol>
+<ol start="3" style="list-style-type: decimal">
+<li>Bar plot (or called frequency plot): how frequent does the category/factor level show up (measured by the height of the bar)</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>categorical/factor</p></li>
+<li><p>univariate</p></li>
+<li><p>Histogram and bar plot are for different types of variables:</p></li>
+</ol>
+<ol style="list-style-type: decimal">
+<li><p>Histogram: for cts variable, usually does not have spaces in between bars</p></li>
+<li><p>Bar plot: for categorical variable, usually has spaces in between bars</p></li>
+</ol>
+<ol start="4" style="list-style-type: decimal">
+<li>Scatterplot: shows relathips between two numerical variables</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>cts/numerical</p></li>
+<li><p>bivariate</p></li>
+</ol>
+<ol start="5" style="list-style-type: decimal">
+<li>Segmented/Stacked Bar Plot: shading categories within a bar (another categorical var)</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>categorical by categorical</p></li>
+<li><p>bivariate</p></li>
+</ol>
+<ol start="6" style="list-style-type: decimal">
+<li>Side-by-Side/Grouped Boxplot: boxplots for multiple groups so we can compare</li>
+</ol>
+<ol style="list-style-type: lower-alpha">
+<li><p>cts/numerical by categorical</p></li>
+<li><p>bivariate</p></li>
+</ol>
+<p><strong>We are able to take the above basic graphics and add additional aesthetics (i.e. information) and turn them to more than bivariate graphics (e.g. multivariate, showing relationships among more than 2 variables)</strong></p>
 </div>
 
 

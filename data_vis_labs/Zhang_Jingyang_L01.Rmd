@@ -41,7 +41,8 @@ Complete the following tasks. For many of these you'll need to simply indicate t
 
 Download and install [R Software](https://cran.rstudio.com/).
 
-<strong>DONE</strong>
+__DONE__
+
 <br><br>
 
 ### Task 2
@@ -62,7 +63,7 @@ Install the following packages:
 - `ggstance`
 - `skimr`
 
-<strong>DONE</strong>
+__DONE__
 
 <br><br>
 
@@ -74,7 +75,7 @@ Install the following packages:
 4. Appropriately rename `template_L01.Rmd` for submission (e.g. *Kuper_Arend_L01.Rmd*).
 5. Compile the *_L01.Rmd file with `Cmd/Ctrl + Shift + K`.
 
-<strong>DONE</strong>
+__DONE__
 
 <br><br>
 
@@ -154,8 +155,104 @@ mean_pieces_yr=legosets %>%
 mean_pieces_yr
 
 
+
 ```
+
+
+Looking at Duplo v.s. Non-Duplo
 ```{r}
+
+# Create indicator variable for Duplo
+legosets$duplo=with(legosets, ifelse(Theme=="Duplo", 1, 0))
+
+# Mean cost by year without Duplor
+
+mean_cost_yr_nodup=legosets %>% 
+  filter(duplo==0) %>%
+  group_by(Year) %>%
+  summarise(
+   count_nodup=n(),
+   mean_nodup=mean(USD_MSRP, na.rm=TRUE)
+  )
+
+mean_cost_yr_nodup
+
+# Mean cost by year for just Duplor
+
+mean_cost_yr_dup=legosets %>% 
+  filter(duplo==1) %>%
+  group_by(Year) %>%
+  summarise(
+   count_dup=n(),
+   mean_dup=mean(USD_MSRP, na.rm=TRUE)
+  )
+
+mean_cost_yr_dup
+
+cost_combo=merge(mean_cost_yr_nodup, mean_cost_yr_dup, by=1, all=TRUE)
+
+
+
+# Mean pieces by year without duplo
+
+mean_pieces_yr_nodup=legosets %>% 
+  filter(duplo==0) %>%
+  group_by(Year) %>%
+  summarise(
+   count_nodup=n(),
+   mean_nodup=mean(Pieces, na.rm=TRUE)
+  )
+
+mean_pieces_yr_nodup
+
+
+
+
+
+
+
+
+# Mean pieces by year without duplo
+
+mean_pieces_yr_dup=legosets %>% 
+  filter(duplo==1) %>%
+  group_by(Year) %>%
+  summarise(
+   count_dup=n(),
+   mean_dup=mean(Pieces, na.rm=TRUE)
+  )
+
+mean_pieces_yr_dup
+
+pieces_combo=merge(mean_pieces_yr_nodup, mean_pieces_yr_dup, by=1, all=TRUE)
+
+
+
+
+
+```
+
+
+Visualize Mean Cost with or without Duplo
+
+```{r}
+
+
+
+p=ggplot()+
+  geom_line(data=mean_cost_yr, aes(x=as.factor(Year), y=mean), color="red", linetype="dashed", size=1.5, group=1)+
+  geom_line(data=mean_cost_yr_nodup, aes(x=as.factor(Year), y=mean), color="black", size=1.2, group=1)+
+  labs(linetype="Themes")+
+  theme(
+    legend.position = c(0.95, 0.95),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6,6,6,6),
+    axis.text.x=element_text(angle=90, hjust=1, size=7))
+  
+
+
+print(p)
 
 ```
 
@@ -179,4 +276,101 @@ length(unique(legosets$Theme)) #115
 
 
 
+
+## Class Notes ##
+
+__Types of Variables__
+
+Categorical/Factor; Continuous/Numeric
+
+__Two Questions to Ask Before Deciding the Graphics:__
+
+1. How many variables? Uivariate or multivariate?
+
+2. Type of variable(s)?
+
+
+__When and why we use a ?__
+
+1. Histogram: 
+
+a. cts/numerical, can be discrete but cts works better
+
+b. univariate
+
+
+2. Boxplot: 5 summary of the data: min, 0.25 Percentile (first quadrat), Median (second quadrat), 0.75 Percentile (third quadrat), max
+
+a. cts/numerical
+
+b. univarite
+
+
+
+3. Bar plot (or called frequency plot): how frequent does the category/factor level show up (measured by the height of the bar)
+
+a. categorical/factor
+
+b. univariate
+
+c. Histogram and bar plot are for different types of variables:
+
+(1) Histogram: for cts variable, usually does not have spaces in between bars
+
+(2) Bar plot: for categorical variable, usually has spaces in between bars
+
+
+
+4. Scatterplot: shows relathips between two numerical variables
+
+a. cts/numerical
+
+b. bivariate
+
+
+5. Segmented/Stacked Bar Plot: shading categories within a bar (another categorical var)
+
+a. categorical by categorical
+
+b. bivariate
+
+
+
+6. Side-by-Side/Grouped Boxplot: boxplots for multiple groups so we can compare
+
+a. cts/numerical by categorical
+
+b. bivariate
+
+
+
+__We are able to take the above basic graphics and add additional aesthetics (i.e. information) and turn them to more than bivariate graphics (e.g. multivariate, showing relationships among more than 2 variables)__
+
+
+```{r}
+nmonths = 24
+x = seq(as.Date("2015/1/1"), by = "month", length.out = nmonths)
+
+prescription1 <- data.frame(
+  x,
+  Percent.Change = 25 + runif(nmonths,1,100)
+)
+
+prescription2 <- data.frame(
+  x,
+  Percent.Change = 75 + runif(nmonths,1,50)
+)
+
+cols = c("dates", "Difference")
+colnames(prescription1) = cols
+colnames(prescription2) = cols
+
+p = ggplot() + 
+  geom_line(data = prescription1, aes(x = dates, y = Difference), color = "blue") +
+  geom_line(data = prescription2, aes(x = dates, y = Difference), color = "red") +
+  xlab('Dates') +
+  ylab('percent.change')
+
+print(p)
+```
 
