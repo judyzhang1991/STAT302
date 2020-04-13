@@ -1,0 +1,563 @@
+---
+title: "ggplot2_CH3"
+author: "Jingyang(Judy) Zhang"
+date: "3/31/2020"
+output: html_document
+---
+# CH3 Toolbox #
+
+## 3.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+```
+
+1. In general, there are __three__ purposes for a layer:
+
+a. <strong>To Display the Data:</strong> pattern detection on spot gross structure, local structure, and outliers. 
+
+b. <strong>To Display a Statistical Summary of the Data:</strong> displaymodel predictions in the context of the data. 
+
+(1) Showing the data helps us imrpove the model
+
+(2) Showing the model helps us reveal subtleties of the data that might otherwise miss. 
+
+(3) Summaries are usually drawn on top of the data. 
+
+c. <strong>To Add Additional Metadata:</strong> context, annotations, and references. 
+
+(1) A metadata layer displays background context, annotations that help to give meaning to the raw data, or fixed references that aid comparisons across panels. 
+
+(2) Metadata can be useful in the background and foreground. 
+(a) A map is often used as a background layer with spatial data. 
+
+(b) Background metadata should be rendered so that it does not interfere with your perception of the data, so is usually displayed underneath the data and formatted so that it is minimally perceptible. 
+
+(3) Other metadata is used to highlight important features of the data such as render inflection points or outliers so that they pop out at the viewer. This should be the very last layer drawn. 
+
+
+## 3.2 Basic Plot Types
+
+1. Basic plot type geoms are the fundamental building blocks of ggplot2. 
+
+a. Most of these geoms are associated with a named plot: when that geom is used by itself in a plot, that plot has a special name. 
+
+b. Each of these geoms is two dimensional and requires both $x$ and $y$ aesthetics. 
+
+c. All of these geoms understand ``color`` and ``size`` aesthetics, and the filled geoms (bar, tile, polygon) and also understand ``fill``.
+
+2. Basic Plot Types Geoms
+
+a. ``geom_area()``: draws an __area plot__, which is a line plot filled to the y-axis (filled lines). 
+
+(1) Multiple groups will be stacked on top of each other. 
+
+b. ``geom_bar(stat="identity")``: makes a __bar chart__. 
+
+(1) Need ``stat="identity"`` as the default stat autmatically counts the values (so is essentially a 1d geom). 
+
+(2) The identity stat leaves the data unchanged. 
+
+(3) Multiple bars in the same location will be stacked on top of one another. 
+
+c. ``geom_line()``: makes a __line plot__.
+
+(1) The ``group`` aesthetic determines which observations are connected. 
+
+(2) ``geom_line()`` connects points from __left to right__. 
+
+(3) ``geom_path()`` connects points in the order they appear in the data. 
+
+(4) Both ``geom_line()`` and ``geom_path()`` understand the aesthetic ``linetype``, which maps a categorical variable to solid, dotted and dashed lines. 
+
+
+d. ``geom_point()``: produces a __scatterplot__.
+
+(1) ``geom_point()`` also understands the ``shape`` aesthetic. 
+
+e. ``geom_polygon()``: draws __polygons__, <u>which are filled paths</u>. 
+
+(1) Each vertex of the polygon requires a separate row in the data. 
+
+(2) It is often useful to merge a data frame of polygon coordinates with the data just prior to plotting. 
+
+f. ``geom_rect()``, ``geom_tile()``, ``geom_raster()``: draw __rectangles__. 
+
+(1) ``geom_rect()`` is parametrised by the four corners of the rectangle, ``xmin``, ``ymin``, ``xmax``, ``ymax``.
+
+(2) ``geom_tile()`` is exactly the same but parametrised by the center of the rect and its size, ``x``, ``y``, ``width``, ``height``.
+
+(3) ``geom_raster()`` is a fast special case of ``geom_tile()`` used when all the tiles are the same size. 
+
+
+
+```{r}
+df=data.frame(
+  x=c(3,1,5),
+  y=c(2,4,6),
+  label=c("a","b","c")
+)
+
+p=ggplot(df, aes(x,y,label=label))+
+  labs(x=NULL, y=NULL)+ # Hide axis label
+  theme(plot.title=element_text(size=12)) # Shrink plot title
+  
+```
+
+
+```{r}
+p+geom_point()+ggtitle("point")
+
+p+geom_text()+ggtitle("text")
+
+p+geom_bar(stat="identity")+ggtitle("bar")
+
+p+geom_tile()+ggtitle("raster")
+
+p+geom_line()+ggtitle("line")
+
+p+geom_area()+ggtitle("area")
+
+p+geom_path()+ggtitle("path")
+
+p+geom_polygon()+ggtitle("polygon")
+
+```
+
+
+### 3.2.1 Exercises ###
+1. What geoms would you use to draw each of the following named plots?
+
+a. Scatterplot: ``geom_point()``
+
+b. Line Chart: ``geom_line()``
+
+c. Histogram: ``geom_histogram()``
+
+d. Bar Chart: ``geom_bar(stat="identity")``
+
+e. Pie Chart: ``geom_bar(stat="identity")``
+```{r}
+# Create Data
+data <- data.frame(
+  group=LETTERS[1:5],
+  value=c(13,7,9,21,2)
+)
+
+# Basic piechart
+ggplot(data, aes(x="", y=value, fill=group)) +
+  geom_bar(stat="identity", width=1, color="white") +
+  coord_polar("y", start=0) +
+  
+  theme_void() # remove background, grid, numeric labels
+```
+
+
+2. What is the difference between ``geom_path()`` and ``geom_polygon()``? What is the difference between ``geom_path()`` and ``geom_line()``?
+
+
+Difference between ``geom_path()`` and ``geom_polygon()``: ``geom_path()`` connects points in the order they appear in the data while ``geom_polygon()`` draws polygons, which are filled paths. 
+
+
+Difference between ``geom_path()`` and ``geom_line()``: ``geom_line()`` connects points from left to right while ``geom_path()`` connects points in the order they appear in the data. 
+
+
+3. What low-level geoms are used to draw ``geom_smooth()``? What about ``geom_boxplot()`` and ``geom_violin()``?
+
+``geom_smooth()``: ``geom_line()``
+
+``geom_boxplot``: ``geom_rect()``
+
+``geom_violin()``: ``geom_polygon()``
+
+
+
+
+## 3.3 Labels ~~
+
+1. ``geom_text()``: main tool to add ``labels`` at the specified ``x`` and ``y`` positions.
+
+a. ``geom_text()`` has the most aesthetics of any geom.
+
+(1) ``family``: gives the name of a font. 
+
+(a) There are only three fonts that are guarantted to work everywhere __"sans"__ (the default), __"serif"__, or __"mono"__.
+
+```{r}
+df=data.frame(x=1, y=1:3, family=c("sans", "serif", "mono"))
+
+ggplot(df, aes(x,y))+
+  geom_text(aes(label=family, family=family))
+
+```
+
+
+(2) ``fontface``: specifies the face: __"plain"__ (the default), __"bold"__, or __"italic"__.
+
+```{r}
+df=data.frame(x=1, y=3:1, face=c("plain", "bold", "italic"))
+
+ggplot(df, aes(x,y))+
+  geom_text(aes(label=face, fontface=face))
+```
+
+
+(3) ``hjust`` and ``vjust``: adjust the alighment of text. 
+
+(a) ``hjust`` takes values __"left"__, __"center"__, __"right"__, __"inward"__, __"outward"__. 
+
+
+(b) ``vjust`` takes values __"bottom"__, __"middle"__, __"top"__, __"inward"__, __"outward"__.
+
+(c) The default alignment is centered. 
+
+(d) One of the most useful alignments is __"inward"__: it aligns text towards the middle of the plot. 
+
+
+```{r}
+df=data.frame(
+  x=c(1,1,2,2,1.5),
+  y=c(1,2,1,2,1.5),
+  text=c("bottom-left", "bottom-right", "top-left", "top-right", "center")
+)
+
+ggplot(df, aes(x,y))+
+  geom_text(aes(label=text))
+
+ggplot(df, aes(x,y))+
+  geom_text(aes(label=text), vjust="inward", hjust="inward")
+
+```
+
+(4) ``size``: controls the font size. 
+
+(a) ggplot2 uses mm rather than the usual points (pts). This makes it consistent with other size units in ggplot2. 
+
+(b) There are 72.27 pts in a inch, so to convert from points to mm, just multiply by $72.27/25.4$.
+
+(5) ``angle``: specifies the rotation o f the text in degrees. 
+
+
+b. ``geom_text()`` has three parameters. Unlike aesthetics, these only take single values, so they must be the same for all labels. 
+
+(1) ``nudge_x``, (2) ``nudge_y``: nudge the text a little horizontally or vertically.
+
+```{r}
+df=data.frame(trt=c("a","b","c"), resp=c(1.2,3.4,2.5))
+
+
+
+ggplot(df, aes(resp, trt))+
+  geom_point()+
+  geom_text(aes(label=paste0("(",resp,")")))+
+  xlim(1,3.6)
+
+ggplot(df, aes(resp, trt))+
+  geom_point()+
+  geom_text(aes(label=paste0("(",resp,")")), nudge_y=-0.25)+
+  xlim(1,3.6) # manually tweaked the x-axis to make sure all the text fit on the plot
+
+```
+
+(3) ``check_overlap=TRUE``: overlapping labels will be automatically removed.
+
+(a) Algorithm: labels are ploted in the order they appear in the data frame; if a label would overlap with an existing point, it is omitted. 
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_text(aes(label=model))+
+  xlim(1,8)
+
+
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_text(aes(label=model), check_overlap=TRUE)+
+  xlim(1,8)
+```
+
+
+2. ``geom_label()``: a variation on ``geom_text()``. It draws a rounded rectangle behind the text. It is useful for adding labels to plots with busy backgrounds. 
+```{r}
+label=data.frame(waiting=c(55,80), eruptions=c(2,4.3), label=c("peak one","peak two"))
+
+ggplot(faithfuld, aes(waiting, eruptions))+
+  geom_tile(aes(fill=density))+
+  geom_label(data=label, aes(label=label))
+```
+
+
+3. Challenges of Labelling Data
+
+a. Text does not affect the limits of the plot. A label has an absolute size, regardless of the size of the plot.
+
+b. If you want to label many points, it is difficult to avoid overlaps. ``check_overlap=TRUE`` offers little control over which labels are removed. 
+
+(1) If all else fails, you may need to manually label points in a drawing tool. 
+
+4. Text labels can also serve as an alternative to a legend. This usually makes the plot easier to read as it puts the labels closer to the data. 
+
+a. The ``directlabels`` package provides a number of tools to add labels directly to the plot. 
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color=class))+
+  geom_point()
+
+
+ggplot(mpg, aes(displ, hwy, color=class))+
+  geom_point(show.legend = FALSE)+
+  directlabels::geom_dl(aes(label=class), method="smart.grid") # smart.grid is a reasonable place to start for scatterplots
+```
+
+
+
+## 3.4 Annotations ##
+1. Annotations add metadata to your plot. But metadata is just data, so you can use:
+
+a. ``geom_text()``: add text descriptions or to label points. Labelling outliers and other important points is very useful. 
+
+b. ``geom_rect()``: highlight interesting rectangular regions of the plot. 
+
+(1) ``geom_rect()`` has aesthetics ``xmin``, ``xmax``, ``ymin``, ``ymax``.
+
+c. ``geom_line()``, ``geom_path()``, ``geom_segment()``: to add lines. 
+
+(1) All these geoms have an ``arrow`` parameter, which allows you to place an arrowhead on the line. Create arrowheads with ``arrow()``, which has arguments ``angle``, ``length``, ``ends``, ``type``.
+
+d. ``geom_vline()``, ``geom_hline()``, ``geom_abline()``: allow you to add reference lines (somtimes called rules), that span the full range of the plot. 
+
+2. Either put annotations in the foreground (using ``alpha`` if needed so you can still see the data), or in the background. 
+
+a. The default is in the background. 
+
+```{r}
+# Time series of unemploytment
+ggplot(economics, aes(date, unemploy))+
+  geom_line()
+```
+
+b. The use ``-Inf`` and ``Inf`` as positions. These refer to the top and bottom (or left and right) limits of the plot. 
+
+
+
+```{r}
+# Annotate the time series with which president was in power at the time
+
+presidential=subset(presidential, start>economics$date[1])
+
+ggplot(economics)+
+  geom_rect(
+    aes(xmin=start, xmax=end, fill=party),
+    ymin=-Inf, ymax=Inf, alpha=0.2, data=presidential
+  )+
+  geom_vline(
+    aes(
+      xintercept=as.numeric(start)
+    ),
+    data=presidential,
+    color="grey50", alpha=0.5
+  )+geom_text(
+    aes(x=start, y=2500, label=name),
+    data=presidential,
+    size=3, vjust=0, hjust=0, nudge_x=50
+  )+geom_line(aes(date, unemploy))+
+  scale_fill_manual(values=c("blue", "red"))
+
+```
+
+
+
+```{r}
+# Add a single annotation to a plot: have to create a one row data frame
+
+yrng=range(economics$unemploy)
+xrng=range(economics$date)
+
+caption=paste(strwrap("Unemployment rates in the US have varied a lot over the year", 40), collapse="\n")
+
+
+ggplot(economics, aes(date, unemploy))+
+  geom_line()+
+  geom_text(
+    aes(x,y,label=caption),
+    data=data.frame(x=xrng[1],y=yrng[2],caption=caption),
+    hjust=0, vjust=1, size=4
+  )
+
+
+# Easier to use the annotate() helper function which creates the data frame for you
+
+ggplot(economics, aes(date, unemploy))+
+  geom_line()+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4)
+
+
+```
+
+3. Annotations, particularly reference lines, are also useful when comparing groups across facets. 
+
+```{r}
+
+# Without reference lines
+ggplot(diamonds, aes(log10(carat), log10(price)))+
+  geom_bin2d()+
+  facet_wrap(~cut, nrow=1)
+
+
+# With reference lines
+
+mod_coef=coef(lm(log10(price)~log10(carat), data=diamonds))
+
+ggplot(diamonds, aes(log10(carat), log10(price)))+
+  geom_bin2d()+
+  geom_abline(intercept=mod_coef[1], slope=mod_coef[2], color="white", size=1)+
+  facet_wrap(~cut, nrow=1)
+```
+
+
+
+## 3.5 Collective Geoms ##
+
+
+
+
+
+
+
+## 3.6 Surface Plots ##
+
+1. ggplot2 does NOT support true 3d surfaces but it does support many common tools for representing ed surfaces in 2d.
+
+a. __Contours__
+
+b. __Coloured Tiles__
+
+c. __Bubble Plots__: work better with fewer observations
+
+```{r}
+ggplot(faithfuld, aes(eruptions, waiting))+
+  geom_contour(aes(z=density, color=..level..))
+
+
+ggplot(faithfuld, aes(eruptions, waiting))+
+  geom_raster(aes(fill=density))
+
+
+small=faithfuld[seq(1, nrow(faithfuld), by=10),]
+
+ggplot(small, aes(eruptions, waiting))+
+  geom_point(aes(size=density), alpha=1/3)+
+  scale_size_area()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Reading Quiz 3
+
+Q1
+```{r}
+x=c(3,6,2,7,5,0,4)
+y=c(2,7,4,4,8,2,3)
+data=data.frame(cbind(x,y))
+
+ggplot(data, aes(x=x, y=y))+
+  geom_line()
+
+
+ggplot(data, aes(x=x, y=y))+
+  geom_path()
+
+ggplot(data, aes(x=x, y=y))+
+  geom_area()
+
+
+ggplot(data, aes(x=x, y=y))+
+  geom_polygon()
+
+```
+
+
+Q3
+```{r}
+label=c("apple", "banana", "cat", "dog", "eggs", "friend", "grape")
+
+ggplot(data, aes(x,y))+
+  geom_text(aes(label=label,
+                family=c("serif", "serif", "serif", "serif", "mono", "mono", "mono"),
+                vjust="inward",
+                hjust="inward"
+                
+                ))
+
+
+
+```
+

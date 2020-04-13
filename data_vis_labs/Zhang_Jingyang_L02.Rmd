@@ -49,6 +49,9 @@ set.seed(31412718)
 load("data/blue_jays.rda")
 ```
 
+
+
+
 ```{r load-packages-hidden, warning=FALSE, message=FALSE, echo = FALSE}
 # Load package(s)
 library(tidyverse)

@@ -85,21 +85,59 @@ Optional: It is always handy to have a versatile text editor and I would suggest
 
 <br><br>
 
+
+
 ## Exercise 1
 
 Let's look at some interesting patterns in the history of LEGO! We'll be using data from the [**lego** package](https://github.com/seankross/lego) located `data/legosets.rda`. We will work through this exercise together in class.
-
 <br><br>
+
+.rda files are R binary files and can be load using the ``load()`` function. 
+```{r load-data}
+
+load(file="data/legosets.rda")
+
+```
+
 
 ### Inspect the data
 
 The **lego** package provides a helpful dataset some interesting variables. Let's take a quick look at the data.
-```{r}
-load(file="data/legosets.rda")
 
-skim(legosets)
+
+```{r inspect-data}
+
+# Print the dataset
+#legosets
+
+# Take a focused look at variables: gives us what 
+glimpse(legosets)
+
+# skim() may not work on everyone's computer
+#skim(legosets)
+
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+
 ```
 
+Number of variables: 15
+
+Number of observations: 6172 
+
+Missing data: all character variables do not have missing values. However, only two numerical variables ``Year``, ``duplo`` do not have missing values. All other numerical variables have missing values. 
+
+Unusuallness: 
+
+(1) There are some legosets with price 0 as the minimum value for ``GBP_MSRP``, ``USD_MSRP``, ``EUR_MSRP`` which may mean some of legosets are given out for free as promotions.
+
+(2) There are legosets with 0 pieces: Search Sub and Lego Minifigures. 
+
+Because of 0s in the data, we may want to look at median price and mean pieces instead of means. 
 
 <br><br>
 
@@ -107,23 +145,54 @@ skim(legosets)
 
 First, let's look at the average cost of LEGO sets over time. The main variable of interest here is `USD_MSRP`, or the manufacturer's suggested retail price in constant dollars (i.e. not adjusted for inflation).
 
-```{r}
+Require data wrangling to see price per year
+
+cmd-shift-m: shortcut for pipe operator %>%
+
+```{r add-duplo-ind}
+legosets=legosets %>% mutate(duplo=ifelse(Theme %in% c("Duplo"), 1, 0))
+```
+
+
+```{r price-per-year}
 # Overall mean cost
 mean_cost=mean(legosets$USD_MSRP, na.rm = TRUE)
 
 mean_cost
 
 # Mean cost by year
+## First drop missing values
+## Group by: calculating per variable
 
-mean_cost_yr=legosets %>% 
+avg_price_per_yr=legosets %>% 
+  drop_na(USD_MSRP) %>%
   group_by(Year) %>%
   summarise(
    count=n(),
-   sum=sum(USD_MSRP, na.rm=TRUE),
-   mean=mean(USD_MSRP, na.rm=TRUE)
+   sum=sum(USD_MSRP),
+   mean_price_per_yr=mean(USD_MSRP)
   )
 
-mean_cost_yr
+avg_price_per_yr
+
+# Visualizing: scatterplot
+## aes: specify mappings: takes information in the data, columns(variables), and renders them into aesthetic attributes 
+## Inheritance: from base layer: data and aes but non-mapping will not be inheritated (e.g. size, colo, etc. )
+
+## USD variable is not adjusted for inflation
+
+
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+  geom_line(color="purple", size=0.5)+
+  geom_point(color="blue", size=0.5)+
+  geom_smooth()+
+  labs(
+    x = "Year",
+    y= "Mean Price Per Year (USD)",
+    title="Average Price of Lego Sets ",
+    subtitle="Amounts are reported in current USD",
+    caption="Source: LEGO"
+  )+theme_minimal()
 
 
 ```
@@ -135,7 +204,8 @@ mean_cost_yr
 
 Next, let’s look at how the number of pieces per set has changed over time. Because Duplo sets are much smaller (since they’re designed for toddlers), we’ll make a special indicator variable for them.
 
-```{r}
+```{r piece-per-year}
+
 
 # Overall mean pieces
 mean_pieces=mean(legosets$Pieces, na.rm = TRUE)
@@ -144,119 +214,41 @@ mean_pieces
 
 # Mean pieces by year
 
-mean_pieces_yr=legosets %>% 
-  group_by(Year) %>%
+avg_pieces_per_yr=legosets %>% 
+  drop_na(Pieces) %>%
+  group_by(Year, duplo) %>%
   summarise(
-   count=n(),
-   sum=sum(Pieces, na.rm=TRUE),
-   mean=mean(Pieces, na.rm=TRUE)
+   num_sets=n(),
+   sum=sum(Pieces),
+   mean_ps_per_yr=mean(Pieces)
   )
 
-mean_pieces_yr
-
-
-
-```
-
-
-Looking at Duplo v.s. Non-Duplo
-```{r}
-
-# Create indicator variable for Duplo
-legosets$duplo=with(legosets, ifelse(Theme=="Duplo", 1, 0))
-
-# Mean cost by year without Duplor
-
-mean_cost_yr_nodup=legosets %>% 
-  filter(duplo==0) %>%
-  group_by(Year) %>%
-  summarise(
-   count_nodup=n(),
-   mean_nodup=mean(USD_MSRP, na.rm=TRUE)
-  )
-
-mean_cost_yr_nodup
-
-# Mean cost by year for just Duplor
-
-mean_cost_yr_dup=legosets %>% 
-  filter(duplo==1) %>%
-  group_by(Year) %>%
-  summarise(
-   count_dup=n(),
-   mean_dup=mean(USD_MSRP, na.rm=TRUE)
-  )
-
-mean_cost_yr_dup
-
-cost_combo=merge(mean_cost_yr_nodup, mean_cost_yr_dup, by=1, all=TRUE)
-
-
-
-# Mean pieces by year without duplo
-
-mean_pieces_yr_nodup=legosets %>% 
-  filter(duplo==0) %>%
-  group_by(Year) %>%
-  summarise(
-   count_nodup=n(),
-   mean_nodup=mean(Pieces, na.rm=TRUE)
-  )
-
-mean_pieces_yr_nodup
+avg_pieces_per_yr
 
 
 
 
+ggplot(avg_pieces_per_yr, aes(Year,  mean_ps_per_yr))+
+  geom_line()+
+  facet_wrap(~duplo, ncol=1)+
+  labs(
+    x = "Year",
+    y= "Pieces",
+    title="Average Price of Lego Sets ",
+    subtitle="Average Number of Pieces in LEGO Sets",
+    caption="Source: LEGO"
+  )+theme_minimal()
 
 
 
-
-# Mean pieces by year without duplo
-
-mean_pieces_yr_dup=legosets %>% 
-  filter(duplo==1) %>%
-  group_by(Year) %>%
-  summarise(
-   count_dup=n(),
-   mean_dup=mean(Pieces, na.rm=TRUE)
-  )
-
-mean_pieces_yr_dup
-
-pieces_combo=merge(mean_pieces_yr_nodup, mean_pieces_yr_dup, by=1, all=TRUE)
-
-
-
-
-
-```
-
-
-Visualize Mean Cost with or without Duplo
-
-```{r}
-
-
-
-p=ggplot()+
-  geom_line(data=mean_cost_yr, aes(x=as.factor(Year), y=mean), color="red", linetype="dashed", size=1.5, group=1)+
-  geom_line(data=mean_cost_yr_nodup, aes(x=as.factor(Year), y=mean), color="black", size=1.2, group=1)+
-  labs(linetype="Themes")+
-  theme(
-    legend.position = c(0.95, 0.95),
-    legend.justification = c("right", "top"),
-    legend.box.just = "right",
-    legend.margin = margin(6,6,6,6),
-    axis.text.x=element_text(angle=90, hjust=1, size=7))
   
 
 
-print(p)
 
 ```
 
-?????? DUPLO?????
+
+
 
 <br><br>
 
@@ -265,15 +257,32 @@ print(p)
 In the 1990s, [LEGO began partnering with famous brands and franchises](https://www.cnbc.com/2018/04/27/lego-marketing-strategy-made-it-world-favorite-toy-brand.html) to boost its own sales. First, let's see how many different "themes" LEGO now offers:
 
 ```{r}
-# List of unique themes
-unique(legosets$Theme)
-
-# Number of unique themes
-length(unique(legosets$Theme)) #115
+legosets %>%
+  distinct(Theme)
 
 ```
 
 
+There are 115 distinct themes.
+
+```{r}
+theme_counts=legosets %>% 
+  count(Theme, sort=TRUE) %>%
+  # fct_inorder: turns chr into fct -- meaning a categorical variable
+  mutate(Theme=fct_inorder(Theme, ordered=TRUE))
+
+
+theme_counts %>% 
+  filter(n>150, Theme != "Duplo") %>%
+  ggplot(aes(x=fct_rev(Theme), y=n))+
+  # Not use geom_bar as it calculates the total for us
+  # Since we have already calculated the totals for each them use geom_col
+  geom_col() +
+  coord_flip()+
+  labs(x=NULL, y="Number of Sets")+
+  theme_minimal()
+
+```
 
 
 
@@ -346,31 +355,4 @@ b. bivariate
 
 __We are able to take the above basic graphics and add additional aesthetics (i.e. information) and turn them to more than bivariate graphics (e.g. multivariate, showing relationships among more than 2 variables)__
 
-
-```{r}
-nmonths = 24
-x = seq(as.Date("2015/1/1"), by = "month", length.out = nmonths)
-
-prescription1 <- data.frame(
-  x,
-  Percent.Change = 25 + runif(nmonths,1,100)
-)
-
-prescription2 <- data.frame(
-  x,
-  Percent.Change = 75 + runif(nmonths,1,50)
-)
-
-cols = c("dates", "Difference")
-colnames(prescription1) = cols
-colnames(prescription2) = cols
-
-p = ggplot() + 
-  geom_line(data = prescription1, aes(x = dates, y = Difference), color = "blue") +
-  geom_line(data = prescription2, aes(x = dates, y = Difference), color = "red") +
-  xlab('Dates') +
-  ylab('percent.change')
-
-print(p)
-```
 

@@ -965,7 +965,7 @@ qplot(displ, hwy, data=mpg, color=I("blue"))
 
 
 
-Reading Quiz 02
+## Reading Quiz 02 ##
 
 Q5
 ```{r}
@@ -1000,3 +1000,10 @@ Q14: A squential color scale can be based on a single hue (e.g. from dark blue t
 
 
 Q15: What would be an inappropriate accent color for a baseline of blue hues? PINK (FDV CH4 Color Scales: When working with accent colors, it is critical that the baseline colors do NOT compete for attention.)
+
+
+## Campuswire ##
+
+1. Conventions: plot ``y`` by ``x``; regress ``y`` by ``x``; plot ``y`` over ``x``.
+
+a. If it says make a plot of ``this`` and ``that``, then no clear indication on what should go on x-axis and what should go on y-axis. Use context/domain knowledge to determine which is the response variable (``y``) and which is the explanatory varible (``x``).
