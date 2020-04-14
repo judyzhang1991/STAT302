@@ -506,6 +506,102 @@ ggplot(Oxboys, aes(Occasion, height))+
 
 
 
+## 3.5.4 Matching Aesthetics to Graphic Objects ##
+
+1. Issue with Collective Geom: how the aesthetics of individual observations are mapped to the aesthetics of the complete entity. 
+
+a. Line and Paths: operate on an __off-by-one__ principle: there is one more observation than line segment, and so the aesthetic for the first observation is used for the first segment, the second observation for the second segment and so on. 
+
+(1) __off-by-on__ principle means the aesthetic for the last observation is NOT used. 
+
+
+2. Example (Off By One Principle)
+```{r}
+
+
+df=data.frame(x=1:3, y=1:3, color=c(1,3,5))
+
+
+# Treat color as a factor
+ggplot(df, aes(x,y, color=factor(color)))+
+  geom_line(aes(group=1), size=2)+
+  geom_point(size=5)
+
+# Treat color as numerical/cts
+ggplot(df, aes(x,y, color=color))+
+  geom_line(aes(group=1), size=2)+
+  geom_point(size=5)
+```
+
+
+
+3. Example (Linear Interpolation)
+```{r}
+xgrid=with(df, seq(min(x), max(x), length=50))
+
+interp=data.frame(
+  x=xgrid,
+  y=approx(df$x, df$y, xout=xgrid)$y,
+  color=approx(df$x, df$color, xout=xgrid)$y
+)
+
+
+ggplot(df, aes(x,y, color=color))+
+  geom_line(size=2)+
+  geom_point(size=5)
+
+ggplot(interp, aes(x,y, color=color))+
+  geom_line(size=2)+
+  geom_point(data=df,size=5)
+```
+
+(2) Limitation for Paths and Lines: line type must be constant over each individual line. In R there is no way to draw a line whivh has varying line type. 
+
+
+b. All Other Collective Geoms (e.g. polygons): the aesthetics from the individual components are only used if they are all the same, ow the default value is used. 
+
+(1) These issues are most relevant when mapping aesthetics to cts variables.
+
+(a) When introduce a mapping to a __discrete variable__: will by default split apart collective geoms into smaller pieces. This works particularly well for bar nad area plots, as stacking the individual pieces produces the SAME shape as the original ungroupd data.
+
+4. Example (Mapping Aesthetics to Discrete Variable)
+
+```{r}
+ggplot(mpg, aes(class))+
+  geom_bar()
+
+
+# drv is a discrete variable
+ggplot(mpg, aes(class, fill=drv))+
+  geom_bar()
+
+
+```
+
+(b) When introduce a mapping to a __continuous variable__: the default grouping will only be based on ``class`` (the variable that is discrete but is NOT the variable that we map to ``fill`` aesthetic). 
+
+(1) To show multiple colors, we need multiple bars for each ``class``, whcih we can get by overriding the grouping:
+
+5. Example (Mapping Aesthetic to Continuous Variable)
+
+```{r}
+# Not working as hwy is a cts variable
+ggplot(mpg, aes(class, fill=hwy))+
+  geom_bar()+
+  ggtitle("Wrong Plot")
+
+
+ggplot(mpg, aes(class, fill=hwy, group=hwy))+
+  geom_bar()+
+  ggtitle("Correct Plot")
+```
+
+The bars will be stacked in the order defined by the grouping variable. If you need fine control, need to create a factor with levels ordered as needed. 
+
+
+### 3.5.5 ### Exercises
+
+
 ## 3.6 Surface Plots ##
 
 1. ggplot2 does NOT support true 3d surfaces but it does support many common tools for representing ed surfaces in 2d.
