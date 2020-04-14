@@ -535,7 +535,11 @@ ggplot(df, aes(x,y, color=color))+
 
 
 
-3. Example (Linear Interpolation)
+__Example__ (Linear Interpolation)
+
+The following code makes everything cts and making sure EACH point has an ``x`` and ``y`` and color. 
+
+If you had a categorical variable but you want to make it cts in color, then use the following code. 
 ```{r}
 xgrid=with(df, seq(min(x), max(x), length=50))
 
@@ -628,6 +632,89 @@ ggplot(small, aes(eruptions, waiting))+
   scale_size_area()
 ```
 
+### 3.5.5 Exercises ###
+1. Draw a boxplot of ``hwy`` for each value of ``cyl``, withou turning ``cyl`` into a factor. What extra aesthetic do you need to set?
+
+```{r}
+ggplot(mpg, aes(hwy))+
+  geom_boxplot()+
+  facet_wrap(~cyl)
+```
+
+
+2. Modify the following plot so that you get one boxplot per integer value of ``displ``.
+
+```{r}
+ggplot(mpg, aes(displ, cty, group=displ))+
+  geom_boxplot()
+```
+
+???????????
+3. When illustrating the difference between mapping cts and discrete colors to a line, the discrete example needed ``aes(group=1)``. Why? What happens if that is ommitted? What is the difference between ``aes(group=1)`` and ``aes(group=2)``? Why?
+
+```{r}
+ggplot(mpg, aes(cyl, hwy, color=cyl, group=1))+
+  geom_line()
+```
+
+
+
+
+
+4. How many bars are in each of the following plots?
+(Hint: try adding an outline around each bar with ``color="white"``)
+
+```{r}
+
+
+
+ggplot(mpg, aes(drv))+
+  geom_bar(color="white")
+
+# 3 bars
+
+
+ggplot(mpg, aes(drv, fill=hwy, group=hwy))+
+  geom_bar(color="white")
+
+# 3 bars with stakcs (unequal size)
+
+mpg2 = mpg %>% arrange(hwy) %>% mutate(id=seq_along(hwy))
+
+ggplot(mpg2, aes(drv, fill=hwy, group=id))+
+  geom_bar(color="white")
+
+# 3 bars with many stacks (equal size)
+
+```
+
+???????????????/
+5. Install the babynames package. It contains data about the popularity of babynames in the US. Run the following code and fix the resulting graph. Why does this graph make me unhappy?
+
+
+```{r}
+
+library(babynames)
+
+# Original Graph
+hadley=filter(babynames, name=="Hadley")
+
+ggplot(hadley, aes(year, n))+
+  geom_line()
+
+```
+
+The original graph is unclear what information it provides as ``geom_line()`` is not the appropriate geom for this case.
+
+```{r}
+
+# Modified Graph
+
+ggplot(hadley, aes(year, n, color=sex))+
+  geom_line()+
+  facet_wrap(~sex)
+
+```
 
 
 
@@ -638,23 +725,232 @@ ggplot(small, aes(eruptions, waiting))+
 
 
 
+## 3.7 Drawing Maps ##
+1. __Four Type of Map Data__: 
+
+a. Vector Boundaries
+
+b. Point Metadata
+
+c. Area Metadata
+
+d. Raster Images
+
+
+### 3.7.1 Vector Boundaries ###
+
+1. __Vector Boundaries__: defined by a data frame with one row for each "corner" of a geographical region like a country, state, or county. 
+
+a. Vector Boundaries requires __four variables__:
+
+(1) __lat__ and (2) __long__: giving the location of a point. 
+
+(2) __group__: a unique identifier for each contiguous region. 
+
+(3) __id__: the name of the region.
+
+b. Separate ``group`` and ``id`` variables are necessary because sometimes a geographical unit is NOT a contiguous polygon. 
+
+
+__Example__ (Michigan County Map)
+```{r}
+mi_counties=map_data("county", "michigan") %>%
+  select(lon=long, lat, group, id=subregion)
+
+head(mi_counties)
+
+```
+
+c. Visualize vector boundary data with ``geom_polygon()``:
+
+d. __coord_quickmap()__: a quick and dirty adjustment that ensures that the aspect ratio of the plot is set corretly. 
+
+```{r}
+
+ggplot(mi_counties, aes(lon, lat))+
+  geom_polygon(aes(group=group))+
+  coord_quickmap()
+
+ggplot(mi_counties, aes(lon, lat))+
+  geom_polygon(aes(group=group), fill=NA, color="grey50")+
+  coord_quickmap()
+
+
+```
+
+2. Useful Packages
+
+a. __USAboundaries__: contains state, county and zip code data for the US. 
+
+(1) Also contains current boundaries
+
+(2) Also contains state and county boundaries going back to the 1600s. 
+
+
+b. __tigris__: gives easy access to the US Census TIGRIS shapefiles. It contains state, county, zip-code, and census tract boundaries. 
+
+c. __rnaturalearth__: contains country borders, and borders for the top-level region within each country (e.g. states in the USA, regions in France, counties in the UK).
+
+d. __osmar__: wraps up the __OpenStreetMap API__ so you can access a wide range of vector data including individual streets and buildings. 
+
+e. You may have your own shape files (``.shp``). You can load them into R with ``maptools::readShapeSpatial()``.
+
+3. These sources all generate spatial data frames defined by the __sp__ package.
+
+4. You can convert shape file into a data frame with __fortify()__. 
+
+
+__Example__ (Use Package USAboundaries)
+```{r}
+library(USAboundaries)
+library(precrec)
+
+c18=us_boundaries(as.Date("1820-01-01"))
+ ###?????###
+c18df=fortify(c18)
+
+head(c18df)
+
+
+ggplot(c18df, aes(long, lat))+
+  geom_polygon(aes(group=group), color="grey50", fill=NA)+
+  coord_quickmap
+```
+
+
+
+### 3.7.2 Point Metadata ###
+
+1. __Point Metadata__: connects locations (defined by ``lat`` and ``lon``) with other variables. 
+
+```{r}
+mi_cities = maps::us.cities %>%
+  tbl_df() %>%
+  filter(country.etc == "MI") %>%
+  select(-country.etc, lon=long) %>%
+  arrange(desc(pop))
+
+mi_cities
+
+
+```
+
+2. You almost always combine point metadata with another layer to make it interpretable. 
+
+```{r}
+
+# Scatterplot of long v.s. lat is NOT very interpretable
+ggplot(mi_cities, aes(lon, lat))+
+  geom_point(aes(size=pop))+
+  scale_size_area()+
+  coord_quickmap()
+
+
+# Adding map layer helps for interpretation
+
+ggplot(mi_cities, aes(lon, lat))+
+  geom_polygon(aes(group=group), mi_counties, fill=NA, color="grey50")+
+  geom_point(aes(size=pop), color="red")+
+  scale_size_area()+
+  coord_quickmap()
+
+
+```
 
 
 
 
 
+### 3.7.3 Raster Images ###
+
+1. __Raster Image__: draws a traditional map underneath of a given area. 
+
+a. Use __ggmap__ Package: allows you to get data from a variety of online mapping sources including OpenStreetMap and Google Maps. 
+
+b. Downloading the raster data is often time consuming so it's a good idea to cache it in a rds file. 
+
+```{r, eval=FALSE}
+if(file.exists("mi_raster.rds")){
+  mi_raster=readRDS("mi_raster.rds")
+}else{
+  bbox=c(
+    min(min_counties$lon), min(mi_counties$lat),
+    max(mi_counties$lon), max(mi_counties$lat)
+  )
+  mi_raster=ggmap::get_openstreetap(bbox, scale=8735660)
+  saveRDS(mi_raster, "mi_raster.rds")
+  
+}
+
+
+```
+
+b. Finding the appropriate ``scale`` required a lot of manual tweaking. You can then plot it with:
+
+```{r, eval=FALSE}
+ggmap::ggmap(mi_raster)
+
+ggmap::ggmap(mi_raster)+
+  geom_point(aes(size=pop), mi_cities, color="red")+
+  scale_size_area()
+
+
+```
+
+
+c. To convert raster data you get from the raster package, use the following code:
+
+```{r, eval=FALSE}
+df=as.data.frame(raster::rasterToPoints(x))
+names(df)=c("lon","lat","x")
+
+ggplot(df,aes(lon, lat))+
+  geom_raster(aes(fill=x))
+```
 
 
 
 
+### 3.7.4 Area Metadata ###
+
+1. Sometimes metadata s associated NOT with a point, but with an __area__. 
+
+__Example__ (Medata Associated with an Area) 
+
+```{r}
+mi_census=midwest %>%
+  tbl_df() %>%
+  filter(state=="MI") %>%
+  mutate(county=tolower(county)) %>%
+  select(county, area, poptotal, percwhite, percblack)
+
+mi_census
+```
+
+a. We can NOT map this data directly as it has NO spatial component (i.e. no long and lat).
+
+(1) Instead, we must first join it to the vector boundaries data which is not very space efficient but makes it easy to see what data is being plotted. 
+
+(2) Use __dplyr::left_join()__ to combine the two datasets and create a __choropleth__ map. 
+
+```{r}
+census_counties=left_join(mi_census, mi_counties, by=c("county"="id"))
+
+census_counties
+
+ggplot(census_counties, aes(lon, lat, group=county))+
+  geom_polygon(aes(fill=poptotal))+
+  coord_quickmap()
+
+ggplot(census_counties, aes(lon, lat, group=county))+
+  geom_polygon(aes(fill=percwhite))+
+  coord_quickmap()
+
+```
 
 
 
-
-
-
-
-
+## 3.8 Revealing Uncertainty ##
 
 
 
@@ -742,3 +1038,61 @@ ggplot(data, aes(x,y))+
 Q7 Bar plots with categorical variables should be arranged by amount from __least to greatest__ or __vice versa__ if there is no order to the categorical variable.
 
 Q8 If one wanted to use a bar graph to understand __a count__, let's say by class year and total, we would use a: __stacked bar plot__.
+
+
+
+## Reading Quiz 4 ##
+
+Q2
+```{r}
+library(maps)
+ill=map_data("county", "illinois") %>%
+  select(long, lat, group, id=subregion)
+
+ggplot(ill, aes(x=long, y=lat))+
+  geom_polygon(aes(group=group), color="purple", fill="white")+
+  coord_quickmap()
+```
+
+
+
+Q3
+```{r}
+ill_meta=midwest %>%
+  tbl_df() %>%
+  filter(state=="IL") %>%
+  mutate(county=tolower(county)) %>%
+  select(county, area, poptotal, popdensity, percpovertyknown, percblack, percasian, percollege) %>%
+  left_join(ill, by=c("county"="id"))
+
+ggplot(ill_meta, aes(long, lat, group=county))+
+  geom_polygon(aes(fill=percollege))+
+  coord_quickmap()
+```
+
+
+
+Q4
+
+```{r}
+diamonds %>%
+  group_by(cut) %>%
+  summarise(mean_price=mean(price),
+            se_price=sd(price)/sqrt(length(price)),
+            se_carat=sd(carat)/sqrt(length(carat))) %>%ggplot(aes(cut, mean_price, ymin=mean_price-se_price, ymax=mean_price+se_price))+
+  geom_crossbar()
+
+
+```
+
+
+Q5
+
+```{r}
+
+ggplot(ill_meta, aes(percollege, percpovertyknown))+
+  geom_point(aes(size=popdensity))
+ 
+
+```
+
