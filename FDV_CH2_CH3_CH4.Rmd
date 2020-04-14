@@ -1,0 +1,337 @@
+---
+title: "FDV_CH2_CH3_CH4"
+author: "Jingyang(Judy) Zhang"
+date: "4/13/2020"
+output: html_document
+---
+
+# CH2 Visualizing Data: Mapping Data onto Aesthetics #
+
+1. Take data values and convert them in a systematic and logical way into the visual elements.
+
+2. All data visualizations map data values into quantifiable features of the resulting graphic. These features are referred as __aesthetics__.
+
+## 2.1 Aesthetics and Types of Data ##
+
+1. __Aesthetics__: describe every aspect of a given graphical element. 
+
+2. __Position__: a critical component of every graphical element. It describes where the element is located. 
+
+a. In standard 2d graphics, we decribe positions by an __x__ and __y__ value, but other coordinate systems and one- or three-dimentional visualizations are possible. 
+
+3. All graphical elements have a __shape__, a __size__, and a __color__. 
+
+4. All aesthetics fall into two groups:
+
+a. Can represent BOTH continuous and discrete data: __position__, __size__, __line__, __width__, __color__
+
+(1) __Continutous Data__: have values for which arbitrarily fine intermediates exist. 
+
+b. Can only represent discrete data: __shape__, __line type__
+
+
+
+4. Data Types
+
+a. Continuous
+
+(1) Numerical
+
+b. Discrete
+
+(1) Numerical 
+
+(2) Categorical
+
+(a) Variables holding qualitative data are __factors__.
+
+(b) The different categories are called __levels__.
+
+<1> The levels of a factor are most commonly without order: "dog", "cat", "fish", etc. 
+
+<2> The levels of a factor can be ordered when there is an intrinsic order among the levels of the factor: "good", "fair", "poor", etc.
+
+![](screenshots/FDV_table2_1.png)
+
+
+## 2.2 Scales Map Data Values onto Aesthetics ##
+
+1. To map data values onto aesthetics, need to specify which data values correspond to which specific aesthetics values. 
+
+a. If graphic has an __x axis__: specify which data values fall onto particular positions along this axis. 
+
+b. Need to specify which data values are represented by particular __shapes__ or __colors__. 
+
+2. __Scales__: the mapping between data values and aesthetics values is created via __scales__.
+
+a. A scale defines a __unique__ mapping between data and aesthetics. 
+
+b. A scale must be __one to one__, such taht for each specific data value there is exactly one aesthetics value and vice versa.
+
+c. If a scale is NOT one to one, then the data visualization becomes ambiguous. 
+
+d. For discrete position scales, generally place the different levels of the factor at an equal spacing along the axis. 
+
+(1) If the factor is __ordered__ (e.g. month of the year), then the levels need to be paced in the appropriate order.
+
+(2) If the factor is __unordered__ (e.g. location), then the order is arbitrary and we can choose any order we want (e.g. from coldest place to hottest place).
+
+
+3. Example 1 (using 3 scales)
+
+![](screenshots/FDV_figure2_4.png)
+
+There are three scales used in this plot:
+
+Two position scales:
+
+__x axis__: locations 
+
+__y axis__: months
+
+One color scale: temperature
+
+
+4. Example 2 (using 5 scales)
+
+![](screenshots/FDV_figure2_5.png)
+
+
+
+
+# CH3 Coordinate Systems and Axes #
+1. To make any sort of data visualization, we need to define __position scales__, which determine where in a graphic different data values are located. 
+
+a. Regular 2d Visualizations: two numbers are required to uniquely specify a point, therefore need two position scales. 
+
+(1) These scales are usually but not necessarily the x and y axis of the plot. 
+
+(2) Also need to specify the relative geometric arrangeent of these scales.
+
+(a) Conventionally, the x axis runs horizontally and the y axis vertically, but can choose other arrangements.
+
+<1> Could have y axis run at an acute angle relative to the x axis. 
+
+<2> Could have one axis run in a circle and the other run radially. 
+
+2. __Coordinate System__: the combination of a set of position scales and their relative geometric arrangement. 
+
+
+## 3.1 Cartesian Coordinates ##
+
+1. __Catesian Coordinate System__: the most widely used coordinate system for data visualization in 2d. Each location is uniquely specified by an __x__ and an __y__ value, 
+
+a. The x and y axes run __orthogonally__ to each other, and the data values are placed in an __even spacing__ along both axes. 
+
+b. The two axes are __continuous position scales__, and they can represent both __positive__ or __negative__ real numbers. 
+
+2. __Axis Limit__: to fully specify the coordinate system, we need to specify the __range of numbers__ each axis covers. 
+
+a. Any data values btw these axis limits are placed at the respective location in the plot. 
+
+b. Any data values outside the axis limits are discarded. 
+
+
+3. __Units__: data values usually come with units. 
+
+a. In a Cartesian coordinate system, the spacing between grid lines along an axis corresponds to discrete steps in these data units. 
+
+b. A Cartesian coordinate sysmte can have two axes representing two different units. 
+
+(1) Whenever the two axes are measured in different units, we can __stretch__ or __compress__ one relative to the other and maintain a valid visualization of the data. 
+
+(a) __Tall and Narrow Figure__: emphasizes change along the y axis.
+
+(b) __Short and Wide Figure__: emphaszies change along the x axis. 
+
+(c) Want to choose an __aspect ratio__ that ensures that any important differences in position are noticeable. 
+
+c. If the x and the y axes are measured in the SAME units, then the grid spackings for the two axes should be __equal__, such that the same distance along the x  or y axis correspond to the same number of data units. 
+
+d. __Change in Units__: a change in units is a __linear__ transformation, where we add or subtract a number to or from all data values and/or multiply all data values with another number. 
+
+(1) Cartesian coordinate systems are __invariant__ under such linear transformations. You can change the units of your data and the resulting figure will not change as long as you change the axes accordingly. 
+
+
+4. Example (change in units)
+
+![](screenshots/FDV_figure3_3.png)
+
+## 3.2 Nonlinear Axes ##
+
+1. __Linear Coordinate System__: the grid lines along an axis are spaced __evenly__ BOTH in data units and in the resulting visualization. 
+
+
+2. __Nonlinear Coordinate System__: in a nonlinear scale, even spacking in data units corresponds to uneven spacin gin the visualization, or coversely even spacing in the visualization corresponds to uneven spacing in data units. 
+
+a. __Logarithmic Scale (Log Scale)__: most commonly used nonlinear scale. 
+
+(1) Log scales are __linear in multilication__, such that a unit step on the scale corresponds to multiplication with a fixed value. Log scale compresses large numbers into a smaller range. 
+
+(2) Create Log Scale: need to log-transform the data values while exponentiating the numbers that are shown along the axis grid lines. 
+
+3. Example (Numbers on Linear Scale and on Log Scale)
+
+![](screenshots/FDV_figure3_4.png)
+
+(3) Mathematically, NO DIFFERENCE btw plotting the log-transformed data on a linear scale (2nd scale) or plotting the original data on a logarithmic scale (3rd plot). 
+
+(4) ONLY DIFFERENCE: labeling for the individual ticks and for the axis as a whole. 
+
+(a) In most cases, the labeling for a __logarithmic scale__ is preferable (i.e. original data and log scale) as it places less mental burden on the reader to interpret the numbers shown as the axis tick labels.
+
+(5) Always verify the base when working with log-transformed data. Always specify the base in the labeling of the axis. 
+
+(6) __Use of Log Scales__: log scales are the natural choice for any data that have been obtained by __multiplication or division__. 
+
+(a) __Ratios__: should generally be shown on a log scale. 
+
+(b) __Very Different Magnitudes__: log scales are frequently used when the data set contains numbers of very different magnitudes.
+
+(7) __Presence of 0__: log scale does not allow for the presence of $0$ as log-transformation of $0$ on any base will result in $-infty$. 
+
+b. __Square Root Scale__: uses a square root transformation. Square root scale compresses larger numbers into a smaller range.
+
+(1) __Presence of 0__: square root scale allows for the presence of $0$.
+
+4. Example (Numbers on Linear Scale and on Sqrt Scale)
+
+![](screenshots/FDV_figure3_7.png)
+
+(2) __Problem with Sqrt Scales__:
+
+(a) While on a linear scale one unit step corresponds to addition or substraction of a constant value and on a log scale it corresponds to multiplication with or division by a constant value, no such rule exists for a square-root scale. 
+
+<1> The meaning of a unit step on a square-root scale deps on the scale value at which we are starting. 
+
+(b) It is unclear how to best place axis ticks on a square-root scale. To obtain evenly spaced ticks, we would have to place them at squares which is highly unintuitive. If we palce ticks at lienar intervals (10,20,30, etc.), then we will either have too few ticks near the low end of the scale or too many near the high end.
+
+(3) __Use of Square-Root Scale__: the square-root scale is the natural scale for data that come in squares (e.g. areas of geographic regions). 
+
+
+
+## 3.3 Coordinate Systes with Curve Axes ##
+
+1. __Polar Coordinate System__: the axes in the polar coordinate system are themselves curved. Need to specify positions via an __angle__ and a __radial__ distance from the origin, and therefore the angle axis is circular. 
+
+2. Example (Cartesian Coodinates v.s. Polar Coordinates)
+![](screenshots/FDV_figure3_9.png)
+
+a. __Use of Polar Coordinates__: 
+
+(1) Useful for data of a __periodic nature__, such that data values at one end of the scale can be logically joined to data values at the other end. It emphasize the cyclical property of the data. 
+
+3. Example (Polar Coodinates of Temperatures)
+
+![](screenshots/FDV_figure3_10.png)
+
+The polar version highlights how similar the temperatures are in Death Valley, HUston, and San Diego from late fall to early spring. In the Cartesian coordinate system this fact is obscured as the tempature values in late December and in early Ja uary are plot very far away and therefore do not form a single visual unit. 
+
+
+(2) Useful for __geospatial data__ (i.e. maps). Earth is a sphere and thus drawing latitude and logitude as Cartesian axes is misleading and not recommended. 
+
+4. Example (Cartesian Coordinates v.s. Polar Coordinates of Geospatial Data)
+![](screenshots/FDV_figure3_11.png)
+
+
+__Interrupted Goode Homolosine Projection__: Projection perfectly represents true surface areas, at the cost of dividing some land masses into separate pieces. 
+
+__Robinson Projection__ and __Winkel Trip Projection__: both strike a balance btw angular and area distortions, and they are common used for maps of the entire globe. 
+
+
+
+
+# CH4 Color Scales #
+
+1. __Three Fundamental Use Cases for Color__:
+
+a. We can use color to distinguish groups of data from each other
+
+b. We can use color to represent data values
+
+c. We can use color to highlight
+
+The types of colors we use and the way in whcih we use them are quite different for these three cases. 
+
+## 4.1 Color As a Tool to Distinguish ##
+
+1. __Qualitative Color Scale__: use color as a means to distinguish discrete items or groups that do NOT have an intrinsic order (e.g. different countries on a map). 
+
+a. Qualitative color scale contains a finite set of specific colors that are chosen to look __clearly distinct__ from each other while also being __equivalent__ to each other. 
+
+(1) __Equivalent Condition__: 
+
+(a) Requires that __no one__ color should stand out relative to the others. 
+
+
+(b) Requires that the colors should __not create__ the impression of an order, as would be the case with a sequence of colors that get successively lighter. 
+
+
+(2) __ColorBrewer Project__: provides a nice selection of qualitative color scales, including both fairly light and fairly dar colors. 
+
+2. Example (Qualitative Color Scales Examples)
+![](screenshots/FDV_figure4_1.png)
+The ggplot2 __hue scale__ is the default qualitative color scale used. 
+
+3. Example (Highlight Similar Population Growths)
+
+![](screenshots/FDV_figure4_2.png)
+
+
+## 4.2 Color to Represent Data Values ##
+
+1. __Sequential Color Scale__: color can also be used to __represent data values__, such as income, temperature, or speed. A sequential color scale contains a sequence of colors that clearly indicate ALL of the following:
+
+a. Which values are larger or smaller than which other ones
+
+b. How distant two specific values are from each other. This implies that the color scale needs to be perceived to __vary uniformly__ across its entire range. 
+
+2. Squential scales can be based on:
+
+a. __Single Hue__: e.g. from dark blue to light blue
+
+OR
+
+b. __Multiple-Hue Scales__: e.g. from dark red to light yellow. Multiple-hue scales tend to follow color gradients that can be seen in the __natural world__, such as dark red, green, or blue to light yellow, or dark purple to light green. 
+
+(1) The reverse, e.g. dark yellow to light blue, does __NOT__ make a useful sequential scale. 
+
+3. Example (Single Hue v.s. Multiple Hue)
+
+![](screenshots/FDV_figure4_3.png)
+
+__ColorBrewer Blues Scale__: a monochromatic scale that varies from dark to light blue. 
+
+__Heat Scale__ and __Viridis Scale__: multi-hue scales that vary from dark red to light yellow and from dark blue via green to light yellow respectively. 
+
+ 
+3. __Use of Sequential Color Scale__:
+
+a. __Choropleths__: draws a map of the geographic regions and color them by the data values. It is useful if we want to show how the data values vary across geographic regions. 
+
+
+b. __Diverging Color Scale__: visualize the deviation of data values in one of two directions relative to a neutral midpoint. 
+
+(1) We can think of a diverging scale as two sequential scales stiched together at a common midpoint, which usually is represented by a light color. 
+
+(2) Diverging scales need to be __balanced__, so that the progression from light colors in the center to the dark colors on the outside is approximately the same in either direction. Otherwise, the perceived magnitude of a data value would depend on whether it fell above or below the midpoint value. 
+
+4. Example (Diverging Color Scales Examples)
+
+![](screenshots/FDV_figure4_5.png)
+
+5. Example (50% As Midpoint)
+
+![](screenshots/FDV_figure4_6.png)
+
+## 4.3 Color as A Tool to Highlight ##
+
+1. __Accent Color Scales__: use color to highlight specific elements in the data (e.g. specific categories, values, etc.). Accent color scales contain BOTH a set of subdued colors and a matching set of stronger, darker, and/or more saturated colors. 
+
+
+2. Example (Accent Color Scales Examples)
+
+![](screenshots/FDV_figure4_7.png)
+
+a. When working with accent colors, make sure the baseline colors do NOT compete for attention. 
+

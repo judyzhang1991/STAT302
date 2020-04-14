@@ -11,6 +11,7 @@ output: html_document
 library(tidyverse)
 library(reshape)
 library(ggpubr)
+library(nlme)
 ```
 
 1. In general, there are __three__ purposes for a layer:
@@ -228,6 +229,8 @@ ggplot(df, aes(x,y))+
 ggplot(df, aes(x,y))+
   geom_text(aes(label=text), vjust="inward", hjust="inward")
 
+# Note: hjust and vjust are aesthetics meaning they can be put in aes() function but they do not have to be in aes() function like the case above. 
+
 ```
 
 (4) ``size``: controls the font size. 
@@ -417,10 +420,89 @@ ggplot(diamonds, aes(log10(carat), log10(price)))+
 
 
 ## 3.5 Collective Geoms ##
+1. Geoms can be roughly divided into two types:
+
+a. __Individual Geom__: draws a distinct graphical object for EACH observation (row). 
+
+(1) For exaple, the point geom draws one point per row. 
+
+b. __Collective Geom__: displays ultiple observations with one geometric object. 
+
+(1) For example, this may be a result of a statistical summary, like a boxplot.
+
+(2) Or this may be fundamental to the display of the geom, like a polygon. 
+
+2. __Lines__ and __Paths__: fall somewhere in between individual geom and collective geom:
+
+a. Each line is composed of a set of straight segments, but each segment represents two points. 
 
 
+3. __Group__ Aesthetic: control the assignment of observations to graphical elements. 
+
+a. By default, the ``group`` aesthetic is mapped to the interaction of all discrete variables in the plot.
+
+(1) This often partitions the data correctly.
+
+(2) If it does NOT partition the data correctly or when NO discrete variable is used in a plot, need to explicitly definthe grouping structure by mapping ``group`` to a variable that has a different value for each group. 
+
+### 3.5.1. Multiple Groups, One Aesthetic ###
+
+1. Separate data into groups, but render them in the same way. That is, want to be able to distringuish individual subjects, but NOT identify them. 
+
+a. Commonly used in longitudinal studies with many subjects. 
+
+b. Plots are often called __Spaghetti Plots__.
+
+```{r}
+
+ggplot(Oxboys, aes(age, height, grou=Subject))+
+  geom_point()+
+  geom_line()
+```
 
 
+c. If a group is NOT defined by a single variable, but instead by a combination of multiple variables, use __interaction()__ to combine them, e.g. ``aes(group=interaction(school_id, student_id))``.
+
+
+### 3.5.2 Different Groups on Different Layers ###
+1. Plot summaries that use different levels of aggregation: one layer might display individuals, while another displays the overall summary. 
+
+a. Put Grouping in the Top Layer (i.e. ``ggplot()`` layer): grouping in the top layer controls BOTH the display of the geoms, and the operation of the stats: one statistical transformation if run for EACH group. Setting ``group`` in the top layer will aply to all subsequent layers. 
+
+```{r}
+ggplot(Oxboys, aes(age, height, group=Subject))+
+  geom_line()+
+  geom_smooth(method="lm", se=FALSE)+
+  ggtitle("Wrong Graph")
+```
+
+
+b. Put Grouping in a Specific Subsequent Layer: putting ``group`` to a specific subsequent layer then it will apply only to that layer. 
+
+```{r}
+ggplot(Oxboys, aes(age, height))+
+  geom_line(aes(group=Subject))+
+  geom_smooth(method="lm", size=2, se=FALSE)+
+  ggtitle("Correct Graph")
+
+# Note: there is no discrete variable in the plot (both weight and height are cts) so the default grouping variable will be a constant and we get one smooth. 
+```
+
+
+### 3.5.3 Overriding the Default Grouping ###
+
+1. Some plots have a discete ``x`` scale, but you still want to draw lines connecting __across__ groups. 
+
+a. This is the strategy used in __interaction plots__, __profile plots__, and __parallel coordinate plot__, among others. 
+
+
+b. For discrete ``x``, to overlay lines that connect each unique ``x`` value, we need to __override the grouping__. 
+
+```{r}
+ggplot(Oxboys, aes(Occasion, height))+
+  geom_boxplot()+
+  geom_line(aes(group=Subject), color="#3366FF", alpha=0.5)
+```
 
 
 
@@ -520,7 +602,7 @@ ggplot(small, aes(eruptions, waiting))+
 
 
 
-Reading Quiz 3
+## Reading Quiz 3 ##
 
 Q1
 ```{r}
@@ -561,3 +643,6 @@ ggplot(data, aes(x,y))+
 
 ```
 
+Q7 Bar plots with categorical variables should be arranged by amount from __least to greatest__ or __vice versa__ if there is no order to the categorical variable.
+
+Q8 If one wanted to use a bar graph to understand __a count__, let's say by class year and total, we would use a: __stacked bar plot__.

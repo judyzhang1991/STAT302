@@ -90,7 +90,8 @@ ba_dat <- BA_degrees %>%
 ```{r}
 ggplot(ba_dat, aes(year, perc))+
   geom_line()+
-  facet_wrap(~field)
+  facet_wrap(~field)+
+  labs(x="Year", y="Proportion of degrees")
   
 ```
 
@@ -108,8 +109,12 @@ ggplot(ba_dat, aes(year, perc))+
 ```{r}
 
 ggplot(ba_dat, aes(year, perc))+
-  geom_area(color="red", fill="red", alpha=0.5)+
-  facet_wrap(~field)
+  # the order of geoms matters
+  geom_area(fill="red", alpha=0.5)+
+  geom_line(color="red")+
+  facet_wrap(~field)+
+  labs(x="Year", y="Proportion of degrees")
+
 
 ```
 
@@ -121,7 +126,8 @@ ggplot(ba_dat, aes(year, perc))+
 ```{r}
 
 ggplot(ba_dat, aes(year, perc, color=field))+
-  geom_line()
+  geom_line()+
+  labs(x="Year", y="Proportion of degrees")
  
 
 ```
@@ -155,7 +161,9 @@ djia_date_range <- dow_jones_industrial %>%
 ```{r}
 ggplot(djia_date_range, aes(date, close))+
   geom_line(color="purple")+
-  geom_smooth(color="green", fill="red")
+  geom_smooth(color="green", fill="red")+
+  # Do not use x="" because it still allocates space on the plot
+  labs(x=NULL, y="Dow Jones Industrial Average")
 ```
 
 
@@ -170,7 +178,9 @@ ggplot(djia_date_range, aes(date, close))+
 ```{r}
 ggplot(djia_date_range, aes(date, close))+
   geom_line()+
-  geom_smooth(span=0.3, se=FALSE)
+  geom_smooth(span=0.3, se=FALSE)+
+  labs(x=NULL, y="Dow Jones Industrial Average")
+  
 ```
 
 
@@ -186,7 +196,8 @@ ggplot(djia_date_range, aes(date, close))+
 
 ggplot(djia_date_range, aes(date, close))+
   geom_line()+
-  geom_smooth(method="lm", formula=y~ns(x,6), se=FALSE)
+  geom_smooth(method="lm", formula=y~ns(x,6), se=FALSE)+
+  labs(x=NULL, y="Dow Jones Industrial Average")
 ```
 
 

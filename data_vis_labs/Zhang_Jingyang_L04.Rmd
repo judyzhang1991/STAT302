@@ -17,8 +17,15 @@ We'll be using data from the `blue_jays.rda`, `tech_stocks.rda`, `corruption.rda
 
 ```{r load-packages, eval=FALSE, warning=FALSE, message=FALSE}
 # Load package(s)
+library(tidyverse)
+
 
 # Load datasets
+load("data/blue_jays.rda")
+
+load("data/tech_stocks.rda")
+
+load("data/corruption.rda")
 
 # Read in the cdc dataset
 cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
@@ -45,6 +52,23 @@ Using `blue_jays.rda` dataset, recreate the following graphic as precisely as po
 - See pg 44 in *ggplot2*
 
 <br>
+
+```{r}
+
+xrng=range(blue_jays$Mass)
+yrng=range(blue_jays$Head)
+caption=paste(strwrap("Head length versus body mass for 123 blue jays"))
+
+ggplot(blue_jays, aes(Mass, Head, color=as.factor(Sex)))+
+  geom_point(alpha=0.6, size=2)+
+  geom_text(data=subset(blue_jays, (Mass>75 & Head>60)|(Head>56 & Head<57 & Mass>62 & Mass<63)), aes(label=KnownSex), nudge_x=0.5)+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4)+
+  labs(x="Body mass (g)", y="Head length (mm)")+
+  theme(legend.position="none")
+
+
+```
+
 
 ### Exercise 2
 
