@@ -417,7 +417,15 @@ ggplot(diamonds, aes(log10(carat), log10(price)))+
   facet_wrap(~cut, nrow=1)
 ```
 
+4. Left-Justify, Centered, Right-Justify:
 
+In the ``annotate()`` function, use ``hjust`` argument to control the horizontal justification:
+
+a. __Left-justified__: ``hjust=0``
+
+a. __Centered__: ``hjust=0.5``
+
+a. __Right-justified__: ``hjust=1``
 
 ## 3.5 Collective Geoms ##
 1. Geoms can be roughly divided into two types:
@@ -653,8 +661,12 @@ ggplot(mpg, aes(displ, cty, group=displ))+
 3. When illustrating the difference between mapping cts and discrete colors to a line, the discrete example needed ``aes(group=1)``. Why? What happens if that is ommitted? What is the difference between ``aes(group=1)`` and ``aes(group=2)``? Why?
 
 ```{r}
-ggplot(mpg, aes(cyl, hwy, color=cyl, group=1))+
+ggplot(mpg, aes(cyl, hwy, color=cyl))+
   geom_line()
+
+ggplot(mpg, aes(cyl, hwy, color=cyl))+
+  geom_line(aes(group=1))
+
 ```
 
 

@@ -7,6 +7,11 @@ output:
     toc_float: true
 ---
 
+# Set resolution
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi=300)
+```
+
 # Overview
 
 The goal of this lab is to continue the process of unlocking the power of `ggplot2` through constructing and experimenting with a few basic plots.
@@ -15,9 +20,11 @@ The goal of this lab is to continue the process of unlocking the power of `ggplo
 
 We'll be using data from the `blue_jays.rda`, `tech_stocks.rda`, `corruption.rda`, and `cdc.txt` datasets which are already in the `/data` subdirectory in our **data_vis_labs** project. 
 
-```{r load-packages, eval=FALSE, warning=FALSE, message=FALSE}
+```{r load-packages, eval=TRUE, warning=FALSE, message=FALSE}
 # Load package(s)
 library(tidyverse)
+
+library(ggrepel)
 
 
 # Load datasets
@@ -32,6 +39,8 @@ cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
   mutate(genhlth = factor(genhlth,
     levels = c("excellent", "very good", "good", "fair", "poor")
   ))
+
+
 ```
 
 # Exercises
@@ -82,6 +91,29 @@ Using `tech_stocks` dataset, recreate the following graphics as precisely as pos
 
 - serif font
 
+```{r}
+
+yrng=range(tech_stocks$price_indexed)
+
+xrng=range(tech_stocks$date)
+
+caption=paste(strwrap("Stock price over time for four major tech companies"))
+
+
+
+
+ggplot(tech_stocks, aes(date, price_indexed, color=company))+
+  geom_line()+
+  geom_text(data=subset(tech_stocks, date==xrng[2]), aes(label=company), family="serif", size=4, color="black", nudge_x = -0.5)+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
+  labs(x=NULL, y="Stock price, indexed")+
+  theme(legend.position="none")
+
+
+
+```
+
+
 <br>
 
 ##### Plot 2
@@ -93,6 +125,19 @@ Using `tech_stocks` dataset, recreate the following graphics as precisely as pos
 - Minimum segment length is 0 
 - Horizontal justification is to the right
 - seed of 9876
+
+
+```{r}
+
+ggplot(tech_stocks, aes(date, price_indexed, color=company))+
+  geom_line()+
+  geom_text_repel(aes(label=company), data=subset(tech_stocks, date==xrng[2]), hjust=1, box.padding=0.6, color="black", family="serif", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
+  labs(x=NULL, y="Stock price, indexed")+
+  theme(legend.position="none")
+
+```
+
 
 <br>
 
@@ -110,6 +155,27 @@ Using `corruption.rda` dataset, recreate the following graphic as precisely as p
 - `box.padding` is 0.6
 - Minimum segment length is 0 
 - seed is 9876
+
+```{r}
+
+corr_sub=corruption %>%
+  filter(year==2015) %>%
+  filter((cpi>50 & country %in% c("Chile", "Japan", "United States", "Singapore")) | (cpi<50 & country %in% c("Ghana", "Argentina", "Iraq", "Niger", "China")))
+
+xrng=range(corruption$cpi)
+yrng=range(corruption$hdi)
+  
+
+ggplot(subset(corruption, year==2015), aes(cpi, hdi,color=region))+
+  geom_point(alpha=0.6)+
+  geom_smooth(aes(group=1), method="lm", formula=y~log(x), se=FALSE, color="grey60")+
+  geom_text_repel(aes(label=country), data=corr_sub, box.padding = 0.6, color="black", family="serif", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
+  labs(x="Corruption Perceptions Index, 2015 (100=least corrupt)", y="Human Development Index, 2015 (1.0=most developed)")
+
+
+```
+
 
 <br>
 
@@ -129,10 +195,46 @@ Using Bilbo Baggins' responses below to the CDC BRSFF questions, add Bilbo's dat
 * `age` - in years: **45**
 * `gender` - m for males and f for females: **m**
 
+
+Add data
+```{r}
+
+bilbo=data.frame("fair", 1, 0,1,46,120,120,45,"m")
+names(bilbo)=c("genhlth", "exerany", "hlthplan", "smoke100", "height", "weight", "wtdesire", "age", "gender")
+
+cdc_new=rbind(cdc, bilbo)
+
+```
+
+
+Plot
+```{r}
+ggplot(cdc_new, aes(height, weight))+
+  geom_point(color="blue", alpha=0.1, size=2)+
+  geom_point(data=bilbo, color="red", size=4, alpha=0.5)+
+  annotate("text", x=46, y=120+10, label="Bilbo Baggins", hjust=0, size=4, color="red", angle=90)+
+  labs(x="Height (inches)", y="Weight (lbs)")
+
+
+```
+
 <br>
 
-*Hint:* Create a new dataset (maybe call it `bilbo` or `bilbo_baggins`) using either `data.frame()` (base R - example in book) or `tibble()` (tidyverse - see help documentation for the function). Make sure to use variable names that exactly match `cdc`'s variable names
+
+
+
+
+
+
+*Hint:* Create a new dataset (maybe call it `bilbo` or `bilbo_baggins`) using either `data.frame()` (base R - example in book) or `tibble()` (tidyverse - see help documentation for the function). Make sure to use variable names that exactly match `cdc`'s variable names.
+
+
 
 <br>
 
 
+# Class Notes #
+
+1. Each layer in ggplot can has its own data
+
+2. We can provide the text layer its own data
