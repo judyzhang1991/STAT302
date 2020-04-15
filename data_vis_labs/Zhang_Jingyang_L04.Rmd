@@ -1,6 +1,7 @@
 ---
 title: "L04 ggplot III"
-author: "Data Visualization (STAT 302)"
+subtitle: "Data Visualization (STAT 302)"
+author: Jingyang Zhang
 output:
   html_document:
     toc: true
@@ -23,6 +24,7 @@ We'll be using data from the `blue_jays.rda`, `tech_stocks.rda`, `corruption.rda
 ```{r load-packages, eval=TRUE, warning=FALSE, message=FALSE}
 # Load package(s)
 library(tidyverse)
+library(lubridate)
 
 library(ggrepel)
 
@@ -62,21 +64,48 @@ Using `blue_jays.rda` dataset, recreate the following graphic as precisely as po
 
 <br>
 
-```{r}
+```{r blue-jay-plot}
 
+# label data
+
+## c(): concatenate function
+label_info=blue_jays %>%
+  filter(BirdID %in% c('1142-05914', '702-90567'))
+
+# location info for annotation
 xrng=range(blue_jays$Mass)
 yrng=range(blue_jays$Head)
-caption=paste(strwrap("Head length versus body mass for 123 blue jays"))
+caption="Head length versus body mass for 123 blue jays"
 
-ggplot(blue_jays, aes(Mass, Head, color=as.factor(Sex)))+
-  geom_point(alpha=0.6, size=2)+
-  geom_text(data=subset(blue_jays, (Mass>75 & Head>60)|(Head>56 & Head<57 & Mass>62 & Mass<63)), aes(label=KnownSex), nudge_x=0.5)+
-  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4)+
-  labs(x="Body mass (g)", y="Head length (mm)")+
-  theme(legend.position="none")
+ggplot(blue_jays, aes(Mass, Head, color=KnownSex))+
+  geom_point(alpha=0.6, size=2, 
+             show.legend = FALSE)+
+  geom_text(data=label_info, 
+            aes(label=KnownSex), 
+            nudge_x=0.5, 
+            show.legend = FALSE)+
+  annotate("text", x=xrng[1], y=yrng[2], # placement of anchor point, the default is hjust=0.5, vjust=0.5
+           label=caption, 
+           hjust=0, vjust=1, # this reset the anchor point to the upper left corner, now the upper left corner is set to the (x,y)
+           size=4)+
+  labs(x="Body mass (g)", y="Head length (mm)")
 
 
 ```
+
+Notes
+1. As text and points share colors, thus the color aesthetic is shared -> indicating the color aesthetic should be at the top layer
+
+2. Legend (also called guide). It is often easier to label next to the points than having a legend. 
+
+3. Short chut for label: xlab("label for x")+ylab("label for y")
+
+4. Can also use theme() layer to turn off all the legends (theme() changes the overall theme)
+
+5. Anchor point of a text box: by default the anchor point is set at hjust=0.5 and vjust=0.5
+
+6. You can also change your anchor point to the 
+
 
 
 ### Exercise 2
@@ -97,14 +126,14 @@ yrng=range(tech_stocks$price_indexed)
 
 xrng=range(tech_stocks$date)
 
-caption=paste(strwrap("Stock price over time for four major tech companies"))
+caption="Stock price over time for four major tech companies"
 
 
 
 
 ggplot(tech_stocks, aes(date, price_indexed, color=company))+
   geom_line()+
-  geom_text(data=subset(tech_stocks, date==xrng[2]), aes(label=company), family="serif", size=4, color="black", nudge_x = -0.5)+
+  geom_text(data=subset(tech_stocks, date==xrng[2]), aes(label=company), size=4, color="black", nudge_x = -0.5)+
   annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
   labs(x=NULL, y="Stock price, indexed")+
   theme(legend.position="none")
@@ -131,7 +160,7 @@ ggplot(tech_stocks, aes(date, price_indexed, color=company))+
 
 ggplot(tech_stocks, aes(date, price_indexed, color=company))+
   geom_line()+
-  geom_text_repel(aes(label=company), data=subset(tech_stocks, date==xrng[2]), hjust=1, box.padding=0.6, color="black", family="serif", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
+  geom_text_repel(aes(label=company), data=subset(tech_stocks, date==xrng[2]), hjust=1, box.padding=0.6, color="black", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
   annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
   labs(x=NULL, y="Stock price, indexed")+
   theme(legend.position="none")
@@ -169,9 +198,10 @@ yrng=range(corruption$hdi)
 ggplot(subset(corruption, year==2015), aes(cpi, hdi,color=region))+
   geom_point(alpha=0.6)+
   geom_smooth(aes(group=1), method="lm", formula=y~log(x), se=FALSE, color="grey60")+
-  geom_text_repel(aes(label=country), data=corr_sub, box.padding = 0.6, color="black", family="serif", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
-  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4, family="serif")+
-  labs(x="Corruption Perceptions Index, 2015 (100=least corrupt)", y="Human Development Index, 2015 (1.0=most developed)")
+  geom_text_repel(aes(label=country), data=corr_sub, box.padding = 0.6, color="black", segment.colour = "black", min.segment.length=0, show.legend=NA, seed=9876)+
+  annotate("text", x=xrng[1], y=yrng[2], label=caption, hjust=0, vjust=1, size=4)+
+  labs(x="Corruption Perceptions Index, 2015 (100=least corrupt)", y="Human Development Index, 2015\n (1.0=most developed)")+
+  ggtitle("Corruption and human development (2015)")
 
 
 ```
@@ -212,8 +242,9 @@ Plot
 ggplot(cdc_new, aes(height, weight))+
   geom_point(color="blue", alpha=0.1, size=2)+
   geom_point(data=bilbo, color="red", size=4, alpha=0.5)+
-  annotate("text", x=46, y=120+10, label="Bilbo Baggins", hjust=0, size=4, color="red", angle=90)+
-  labs(x="Height (inches)", y="Weight (lbs)")
+  annotate("text", x=bilbo$height, y=bilbo$weight+10, label="Bilbo Baggins", hjust=0, size=4, color="red", angle=90)+
+  labs(x="Height (inches)", y="Weight (lbs)")+
+  ggtitle("Weight by Height Plot with Data for Bilbo Baggins Highlighted")
 
 
 ```
@@ -238,3 +269,5 @@ ggplot(cdc_new, aes(height, weight))+
 1. Each layer in ggplot can has its own data
 
 2. We can provide the text layer its own data
+
+3. Inheritance only comes from ``ggplot()`` layer
