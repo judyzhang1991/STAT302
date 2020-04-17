@@ -1,0 +1,98 @@
+---
+title: "FDV_CH9_CH9_CH15"
+author: "Jingyang(Judy) Zhang"
+date: "4/16/2020"
+output: html_document
+---
+
+# CH8 Visualizing Distributions: Empirical CDF and QQ Plots #
+
+1. Histograms or density plots share the limitation that the resulting figure depends to substantial degree on parameters the user has to choose, such as the bin width for histograms and the bandwidth for density plots. 
+
+a. As a result, both have to be considered as an __interpretation of the data__ rather than a __direct visualization of the data itself__. 
+
+
+2. __Point Cloud__: simply show all the data points individually. 
+
+a. This approach becomes unwieldy for very large datasets. 
+
+b. This approach does not highlight properties of the distribution. 
+
+3. __Empirical Cumulative Distribution Functions (ecdfs)__ and __Quantile-Quantile (q-q) Plots__: these types of visualizations require NO arbitrary parameter choices, and they show all of the data at once. 
+
+a. They are little less intuitive than a histogram or a density plot. 
+
+
+
+## 8.1 Empirical Cumulative Distribution Functions ##
+
+1. __Empirical Cumulative Distribution Function (ecdf)__ (or called Cumulative Distribution)
+
+__Example__ ecdf of students grades in ascending order
+![](screenshots/FDV_figure8_1.png)
+
+__Example__ ecdf of students grades in descending order
+![](screenshots/FDV_figure8_2.png)
+a. Ascending cumulative distribution function are more widely known and more commonly used than descending ones. 
+
+b. Descending cumulative distribution functions are critical when visualizing __highly skewed__ distributions. 
+
+
+2. __Normalized ecdf__: it is quite common to draw the ecdf without highlighting the individual points and normalize the ranks by the maximum rank, so that the y-axis represents the __cumulative frequency__. 
+
+
+__Example__ Normalized ecdf
+![](screenshots/FDV_figure8_3.png)
+
+
+## 8.2 Highly Skewed Distributions ##
+
+1. Many empirical datasets display highly skewed distributions, in particular with heavy tails to the right, and these distributions can be challenging to visualize. 
+
+a. Examples of Highly Skewed Distributions
+
+(1) Number of people living in different cities or counties
+
+(2) Number of contacts in a social network
+
+(3) Frequency with which individual words appear in a book
+
+(4) Number of academic papers written by different authors
+
+(5) Net worth of individuals
+
+(6) Number of interaction partners of individual proteins in protein-protein interaction networks
+
+b. All these distributions have in common that their right tail decays slower than an exponential function. 
+
+(1) Thi means that very large values are not that rare, even if the mean of the distribution is small. 
+
+c. __Power-law Distributions__ (also called Scale-free Distributions): one important class of such distributions where the likelihood to observe a value that is x times larger than some reference point declines as a power of x. 
+
+
+d. __Log-transformation__: for right skewed distributions, log-transform the data and visualize the distribution of the log-transformed values. 
+
+
+## 8.3 Quantile-quantile Plots ##
+
+1. __Quantile-quantile Plots__: for determining to what extent the observed data points do or do not follow a given distribution. 
+
+a. q-q plots are also based on ranking the data and visualizing the relationship between ranks and actual values. 
+
+b. In q-q plots we do not plot the ranks directly, we use them to predict where a given data point should fall if the data were distributed according to a specified reference distribution. 
+
+C. Most commonly, q-q plots are constructed using a normal distribution as the reference. 
+
+(1) Observed values (i.e. values in the dataset) against the theoretical values (i.e. values expected given each data point's rank and the assumed reference distribution)
+
+(2) A solid line in the q-q plot indicates the point where ``x`` (theoretical or observed values) equals ``y`` (observed or theoretical values).
+
+d. To the extent that points fall onto that line, the data follow the assumed distribution. 
+
+
+
+
+
+
+
+

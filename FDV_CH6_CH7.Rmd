@@ -49,3 +49,206 @@ b. Only rearrange bars when there is NO natural ordering to the categories the b
 
 
 __Example__ (Grouped Bar Plot with Different Emphasis)
+
+![](screenshots/FDV_figure6_7.png)
+
+Appropriate Use of Figure 6.7: if we are primarily interested in the differences in income levesl among racial groups, separately for specific age groups. 
+
+![](screenshots/FDV_figure6_8.png)
+Appropriate Use of Figure 6.8: if we are primarily interested in the overall pattern of income levels among racial groups, then show race along the x axis and show ages as distinct bars within each racial group. 
+
+__Primary Interest__: plot on x axis (encode by position along the x-axis).
+
+__Secondary Interest within Primary Interest__: use grouped bar plot to show how secondary interest is within primary interest (encode by bar color). As color requires more mental effort as we have to mentally match the colors of the bars against the colors in the legend. 
+
+
+2. __Stacking__: useful in the following two cases:
+
+a. useful when the sum of the amounts represented by the individual stacked bars is in itself a meaningful amount. 
+
+b. useful when the individual bars represent counts. 
+
+
+__Example__ (Stacked Bar Plot without Y-Axis)
+
+
+![](screenshots/FDV_figure6_10.png)
+
+__No Explict Y-Axis__: whenever a plot is meant to display ONLY a SMALL number of different values, it makes sense to add the actual numbers to the plot.
+
+
+3. __Limitation of Bar Plot__: all bar plots need to start at zero, so that the bar length is proportional to the amount shown. This can be impractical or may obscure key features for some datasets. 
+
+a. For example, for ploting life expectancy (y) by country (x), life expectancy is usually way greater than $0$ but the y-axis have to start at $0$ then all countries will have very long bars and makes it hard to highlight the smallest life expectancy country and the largest life expectancy country. 
+
+
+## 6.3 Dot Plots and Heatmaps ##
+
+1. Dot plots can show features that may be obscured in bar plot. 
+
+__Example__ (Dot Plot v.s. Bar Plot)
+![](screenshots/FDV_figure6_11.png)
+
+Plotting this way clearly show life expectancy in Canada is far larger than life expectancies in Bolivia and Haiti. 
+
+
+![](screenshots/FDV_figure6_12.png)
+
+
+
+2. Pay attention to the ordering of the data values. 
+
+__Example__ (Case When Order by Alphabes is Bad)
+
+![](screenshots/FDV_figure6_13.png)
+
+Order countries alphabetically makes it harder to find the largest life expectancy country and the smallest life expectancy country. 
+
+
+3. Both bar plot and dot pot show amounts by location along a position scale, either through the end point of a bar or the placement of a dot. 
+
+a. Showing amounts by location aong a position scale is BAD for very large datasets as it will make plots too busy. For example, a dataset with 20 groups of 20 data values will be very busy and crowded. 
+
+
+4. __Heatmap__: map data values onto colors. This is a good alternative to bar or dot plots when dataset is large. 
+
+a. Heatmaps are good for showing trends in the data but NOT so good at showing exact data values. 
+
+b. Ordering of the categorical data values when making heatmaps is very important. Different ordering gives different emphases. 
+
+
+__Example__ (Two Heatmaps with Different Emphases via Orderings)
+
+
+
+![](screenshots/FDV_figure6_14.png)
+__Emphasis__: internet usage in 2016
+
+![](screenshots/FDV_figure6_15.png)
+__Emphasis__: how early or late adoption of the internet relates to current-day usage. 
+
+Note: both plots are valid but with different emphases. 
+
+
+# CH7 Visualizing Distributions: Histograms and Density Plots #
+
+1. __Distribution of a Variable__: the relative proportions of different values of the variable among all values of the variable. 
+
+## 7.1 Visualizing a Single Distribution ##
+
+1. __Histogram__: drawing filled rectangles whose heights correspond to the count and whose width correspond to the width of the variable bins. 
+
+a. ALL bins must have the SAME width for the visualization to be a valid histogram. 
+
+
+b. Exact visual appearance of histograms depends on the choice of the __bin width__. 
+
+(1) __Bin Width Too Small__: histogram becomes overly peaky and visually busy and the main trends in the data may be obscured. 
+
+(2) __Bin Width Too Large__: small features in the distribution of the data may disappear. 
+
+(3) Always try different bin widths to verify that the resulting histogram reflects the underlying data accurately. 
+
+
+__Example__ (Histogram with Different Bin Width)
+![](screenshots/FDV_figure7_2.png)
+
+
+2. __Density Plot__: visualizing the underlying probability distribution of the data by drawing an appropriate continuous curve. 
+
+a. The density curve needs to be estimated from the data.
+
+(1) __Kernel Density Estimation__: draw a continuous curve (the kernel) with a small width (controlled by a parameter called __bandwidth__) at the location of each data point, then we add up all these curves to obtain the final density estimate. 
+
+
+(a). Kernel density estimation is the most commonly used method for the estimation procedure of the density curve. 
+
+(b). __Gussian Kernel (i.e. a Gaussian Bell Curve)__: the most widely used kernel. 
+
+
+b. The exact visual appearance of a density plot depends on the kernel and bandwidth choices. 
+
+(1) __Bandwidth Too Small__: the density estimate can become overly peaky and visually busy and the main trends in the data may be obscured. 
+
+(2) __Bandwidth Too Large__: small features in the distribution of the data may disappear. 
+
+(3) __Choice of the Kernel__: the choice of the kernel affects the shape of the density curve. 
+
+(a) A Gaussian kernel will have a tendency to produce density estimates that look Gaussian-like, with smooth feature and tails.
+
+(b) A reectangular kernel can generate the appearance of steps in the density curve. 
+
+c. The __more data points__ there are in the dataset, the __less__ the choice of the kernel matters. 
+
+(1) Density plots tend to be quite reliable and informative for __large data sets__ but can be misleading for data sets of only a few points.
+
+
+__Example__ (Density Plot with Different Bandwidth)
+![](screenshots/FDV_figure7_4.png)
+
+
+d. Density curves are usually scaled s.t. the area under the curve __equals one__. 
+
+(1) This convention can make y axis scale confusing as it depends on the units of x axis. 
+
+e. __Pitfall of Kernel Density Estimates__: kernel density estimates have a tendency to produce the appearance of data where none exists, in particular in the tails. 
+
+(1) Always verify that your density estimate does NOT predict the existence of nonsensical data values. 
+
+
+__Example__ (Density Estimate that Results in Nonsensical Data Values)
+
+![](screenshots/FDV_figure7_5.png)
+
+
+3. Density estimates have an inheret advantage over histograms as it allows visualizing __more than one distribution at a time__. 
+
+
+4. __Empirical Cumulative Density Functions (or q-q Plots)__: an alternative to histogram and density plot. 
+
+
+
+## 7.2 Visualizing Multiple Distribution at the Same Time ##
+
+1. Visualizing Multiple Distributions Using __Histogram__: 
+
+a. __Stacked Histogram__: bad way to visualize multiple distribution because:
+
+(1) Stacked histograms are easily confused with overlapping histograms
+
+(2) The height of the bars in stacked histograms of the group being stacked cannot easily be compared to each other. 
+
+
+__Example__ (Stacked Histogram)
+
+![](screenshots/FDV_figure7_6.png)
+
+b. __Overlapping Histogram__: bad way to visualize multiple distribution because:
+
+(1) Overlapping histograms are easily confused with stacked histograms
+
+(2) A semi-transparent bar drawn on top of another tends to not look like a semi-transparent bar but instead like a bar drawn in a different color. 
+
+
+__Example__ (Overlapping Histogram)
+
+![](screenshots/FDV_figure7_7.png)
+
+
+c. __Pyramid__: for visualize EXACTLY TWO distributions. Make two separate histograms, rotate them by 90 degrees, and have the bars in one histogram point into the oppsite direction of the other. 
+
+
+
+2. Visualizing Multiple Distributions Using __Density Plot__: 
+
+a. __Overlapping Density Plot__: does NOT typically have the problem that overlapping histograms have as the cts density lines help the eye keep the distribution separate. 
+
+__Example__ (Overlapping Density Plot)
+
+![](screenshots/FDV_figure7_11.png)
+
+b.When the overlapping two distributions are __very similar__, then show the distribution of each group as proportion to the total distribution. 
+
+__Example__ (Visualize Very Similar Distributions)
+
+![](screenshots/FDV_figure7_9.png)

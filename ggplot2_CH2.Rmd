@@ -156,9 +156,11 @@ ggplot(mpg, aes(cty, hwy))+geom_point()+
 
 The relationship between ``cty`` and ``hwy`` should be strongly positively correlated which means the higher fuel economy when driving in the city correspond to higher fuel economy when driving on highway. 
 
-Concerns about drawing conclusions from just a scatter plot are:
 
 ??????????
+Concerns about drawing conclusions from just a scatter plot are:
+
+
 
 
 2. What does ``ggplot(mpg, aes(model, manufacturer))+geom_point()`` show? Is it useful? How could you modify the data to make it more informative?
@@ -175,7 +177,7 @@ ggplot(mpg, aes(model, manufacturer))+
 
 The plot shows a scatter plot with model mapped to x position and manufacturer mapped to y position. It shows model and its corresponding manufacturer. It is not very useful as the information can be obtained by looking at the data itself. 
 
-To make it more useful, we can modify the data by grouping ???
+To make it more useful, we can modify the data by grouping ??????
 
 3. Describe the data, aesthetic mappings and layers used for each of the following plots. You will need to guess a little because you have not seen all the datasets and functions yet, but use your common sense. See if you can predict what the plot will look like before running the code. 
 a. ``ggplot(mpg, aes(cty, hwy))+geom_points()``:
@@ -253,15 +255,14 @@ a. ``color=class``: gives each point a unique color corresponding to its class.
 
 b. The group of cars with unusually high fuel economy for their engine size are: two seaters (cars with big engines but light weight bodies).
 
-?????????????
+
 4. If want to set an aesthetic to a fixed value, without scaling it, do so in the individual layer outside of ``aes()``:
 
 ```{r}
 ggplot(mpg, aes(displ, hwy))+
   geom_point(aes(color="blue"))
 ```
-????????
-The value "blue" is scaled to a pinkish color, and a legend is added. 
+The value "blue" is scaled to a pinkish color, and a legend is added. When inside ``aes()`` function, it's treated as a variable.  
 
 
 ```{r}
@@ -714,10 +715,12 @@ We can see that unemployment rate and length of unemployment are highly correlat
 
 ### 2.6.6. Exercises ###
 
-1. What is the problem with the plot create by ``ggplot(mpg, aes(cty, hwy))+geom_point()``? Which of the geoms described above is most effective at remedying the problem?
+1. What is the problem with the plot created by ``ggplot(mpg, aes(cty, hwy))+geom_point()``? Which of the geoms described above is most effective at remedying the problem?
 
 ```{r}
 ggplot(mpg, aes(cty, hwy))+geom_point()
+
+ggplot(mpg, aes(cty, hwy))+geom_line()
 
 ```
 
@@ -845,7 +848,7 @@ The ``weight`` aesthetic can be used to create weighted histogra and barcharts w
 
 ## 2.7 Modifying the Axes ##
 
-1. ```` and `````: modify the x- and y-axis labels:
+1. ``xlab()`` and ``ylab()``: modify the x- and y-axis labels:
 ```{r}
 
 # Without specify, use variable name as label
