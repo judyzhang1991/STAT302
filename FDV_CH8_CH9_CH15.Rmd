@@ -95,5 +95,23 @@ d. To the extent that points fall onto that line, the data follow the assumed di
 
 # CH9 Visualizing Many Distributions at Once #
 
+1. Whenever we are dealing with many distributions, it is helpful to think in terms of the __response variable__ and __one or more grouping variables__. 
+
+a. __Response Variable__: the variable whose distribution we want to show.
+
+b. __Grouping Variable__: define subsets of the data with distinct distributions of the response variable. 
+
+2. We draw the response variable along one axis and the grouping variables along the other. 
 
 
+## 9.1 Visualizing Distributions along the Vertical Axis ##
+
+
+1. Approach 1: showing many distributions at once by showing their mean or median as points, with some indication of the variation around the mean or median shown by error bars. 
+
+![](screenshots/FDV_figure9_1.png)
+a. Problems:
+
+(1) By representing each distribution by only one point and two error bars, we are losing a lot of information about the data. 
+
+(2)
