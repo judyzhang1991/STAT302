@@ -93,6 +93,7 @@ d. To the extent that points fall onto that line, the data follow the assumed di
 
 
 
+# CH9 Visualizing Many Distributions at Once #
 
 
 

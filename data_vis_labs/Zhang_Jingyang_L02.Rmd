@@ -152,3 +152,11 @@ ggarrange(p1,p2,p3,p4,p5, labels=c("Plot1", "Plo2", "Plot3", "Plot4", "Plot5"), 
 
 ```
 
+
+
+# Grade Comments#
+1. Need spaces on both sides of any operators (+,-,=, etc.)
+
+2. `Head` by `Mass` means to plot `Head` at the y-axis and `Mass` at the x-axis
+
+3. Highligh answers

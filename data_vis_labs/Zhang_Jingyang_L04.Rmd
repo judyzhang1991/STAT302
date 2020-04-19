@@ -271,3 +271,8 @@ ggplot(cdc_new, aes(height, weight))+
 2. We can provide the text layer its own data
 
 3. Inheritance only comes from ``ggplot()`` layer
+
+
+
+
+
