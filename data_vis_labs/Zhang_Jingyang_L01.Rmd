@@ -366,4 +366,6 @@ __We are able to take the above basic graphics and add additional aesthetics (i.
 
 4. Use <- operator instead of = to name dataframes
 
+<strong> `<-` evaluates the the expression on its right side and assign the evaluated value to the symbol (variable) on the left side (x) in the current environment. `=` evaluates the expression on its right side and set the evaluated value to the parameter of the name specified on the left side (formula) for a certain function.</strong>
+
 5. Use tidyverse instead of base R and the $ operator as much as possible
