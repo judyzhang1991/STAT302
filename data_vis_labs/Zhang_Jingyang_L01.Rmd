@@ -356,3 +356,14 @@ b. bivariate
 __We are able to take the above basic graphics and add additional aesthetics (i.e. information) and turn them to more than bivariate graphics (e.g. multivariate, showing relationships among more than 2 variables)__
 
 
+
+# Grade Comments#
+1. Need spaces on both sides of any operators (+,-,=, etc.)
+
+2. Highlight answers
+
+3. Start new line after each pipe operator %>% and after each + operator including the theme() layers
+
+4. Use <- operator instead of = to name dataframes
+
+5. Use tidyverse instead of base R and the $ operator as much as possible
