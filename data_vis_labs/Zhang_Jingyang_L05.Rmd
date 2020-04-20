@@ -73,11 +73,11 @@ Using `blue_jays.rda` dataset, recreate the following graphic as precisely as po
 
 ```{r exer1}
 
-ggplot(blue_jays, aes(Mass, Head))+
-  geom_point(alpha = 1/3, size = 1.5)+
-  geom_density_2d(size = 0.4, color = "black", binwidth = 0.004)+
-  xlim(57, 82)+
-  labs(x = "Body mass (g)", y = "Head length (mm)")+
+ggplot(blue_jays, aes(Mass, Head)) +
+  geom_point(alpha = 1/3, size = 1.5) +
+  geom_density_2d(size = 0.4, color = "black", binwidth = 0.004) +
+  xlim(57, 82) +
+  labs(x = "Body mass (g)", y = "Head length (mm)") +
   theme_minimal()
 
 ```
@@ -99,9 +99,9 @@ Using `cdc` dataset, recreate the following graphics as precisely as possible.
 
 ```{r exer2-p1}
 
-ggplot(cdc, aes(height, weight))+
-  geom_hex(bins = 35)+
-  labs(x = "Height (in)", y = "Weight (lbs)")+
+ggplot(cdc, aes(height, weight)) +
+  geom_hex(bins = 35) +
+  labs(x = "Height (in)", y = "Weight (lbs)") +
   theme_minimal()
 
 # use geom_hex(color="white") to add a white border
@@ -120,10 +120,10 @@ ggplot(cdc, aes(height, weight))+
 
 ```{r exer2-p2}
 
-ggplot(cdc, aes(height, weight))+
-  stat_density_2d(aes(fill=..level..), geom="polygon", show.legend = FALSE)+
-  labs(x = "Height (in)", y = "Weight (lbs)")+
-  facet_wrap(~gender)+
+ggplot(cdc, aes(height, weight)) +
+  stat_density_2d(aes(fill=..level..), geom="polygon", show.legend = FALSE) +
+  labs(x = "Height (in)", y = "Weight (lbs)") +
+  facet_wrap(~gender) +
   theme_minimal()
 
 # ..level.. is the same as after_stat(level) which will do things after the statistical transformation
@@ -203,9 +203,9 @@ US_income <- mutate(
 
 # geometry in the US_income dataset contains all the geo information needed to draws states
 
-ggplot(US_income)+
-  geom_sf(aes(geometry = geometry, fill = income_bins), color = "grey80", size = 0.2)+
-  scale_fill_viridis(discrete = TRUE, name = "Median\nIncome")+
+ggplot(US_income) +
+  geom_sf(aes(geometry = geometry, fill = income_bins), color = "grey80", size = 0.2) +
+  scale_fill_viridis(discrete = TRUE, name = "Median\nIncome") +
   theme_void()
 
 ```
@@ -231,7 +231,7 @@ ggplot(US_income, aes(state = name, fill = income_bins)) +
   scale_fill_viridis(
     discrete = TRUE,
     name = "Median\nIncome"
-  )+
+  ) +
   theme_statebins()
 
 # discrete = TRUE: generates discrete color palette
