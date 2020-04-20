@@ -1,11 +1,20 @@
 ---
 title: "L05 Toolbox"
-author: "Data Visualization (STAT 302)"
+subtitle: "Data Visualization (STAT 302)"
+author: Jingyang Zhang
 output:
   html_document:
     toc: true
     toc_float: true
 ---
+
+
+## Set resolution
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dpi = 300)
+```
+
+
 
 ## Overview
 
@@ -13,14 +22,26 @@ The goal of this lab is to explore more useful plots in `ggplot2`. Specifically 
 
 Challenges are not mandatory for students to complete. We highly recommend students attempt them though. *We would expect graduate students to attempt the challenges.*
 
+
+
 ## Datasets
 
 We'll be using data from the `blue_jays.rda`, `cdc.txt`, and the `US_income.rda` datasets which are already in the `/data` subdirectory in our **data_vis_labs** project. 
 
-```{r load-packages, eval=FALSE, warning=FALSE, message=FALSE}
+```{r load-packages, warning=FALSE, message=FALSE}
 # Load package(s)
+library(tidyverse)
+library(viridis)
+library(sf)
+library(statebins)
+library(tidycensus)
+library(mapview)
+options(tigris_use_cache = TRUE)
 
 # Load datasets
+load("data/blue_jays.rda")
+
+load("data/US_income.rda")
 
 # Read in the cdc dataset
 cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
@@ -50,6 +71,19 @@ Using `blue_jays.rda` dataset, recreate the following graphic as precisely as po
 - `binwidth` set to 0.004
 - Minimal theme
 
+```{r exer1}
+
+ggplot(blue_jays, aes(Mass, Head))+
+  geom_point(alpha = 1/3, size = 1.5)+
+  geom_density_2d(size = 0.4, color = "black", binwidth = 0.004)+
+  xlim(57, 82)+
+  labs(x = "Body mass (g)", y = "Head length (mm)")+
+  theme_minimal()
+
+```
+
+
+
 <br>
 
 ### Exercise 2
@@ -63,6 +97,18 @@ Using `cdc` dataset, recreate the following graphics as precisely as possible.
 - `bins` set to 35
 - Minimal theme
 
+```{r exer2-p1}
+
+ggplot(cdc, aes(height, weight))+
+  geom_hex(bins = 35)+
+  labs(x = "Height (in)", y = "Weight (lbs)")+
+  theme_minimal()
+
+# use geom_hex(color="white") to add a white border
+  
+```
+
+
 <br>
 
 ##### Plot 2
@@ -71,6 +117,19 @@ Using `cdc` dataset, recreate the following graphics as precisely as possible.
 
 - `polygon`
 - Minimal theme
+
+```{r exer2-p2}
+
+ggplot(cdc, aes(height, weight))+
+  stat_density_2d(aes(fill=..level..), geom="polygon", show.legend = FALSE)+
+  labs(x = "Height (in)", y = "Weight (lbs)")+
+  facet_wrap(~gender)+
+  theme_minimal()
+
+# ..level.. is the same as after_stat(level) which will do things after the statistical transformation
+
+```
+
 
 <br>
 
@@ -83,6 +142,30 @@ Make a county map of a US state. Maybe use your home state (mine is below) or a 
 - See section 3.7.1 in *ggplot2*
 - Void theme
 
+```{r get-map-data}
+
+sd_counties <- map_data("county", "South Dakota") %>%
+  select(lon = long, lat, group, id = subregion)
+
+head(sd_counties)
+
+```
+
+
+
+```{r vis-sd}
+
+
+ggplot(sd_counties, aes(lon, lat)) +
+  geom_polygon(aes(group = group), fill = NA, color = "grey50") +
+  coord_quickmap() +
+  ggtitle("South Dakota") +
+  theme_void()
+  
+  
+
+```
+
 <br>
 
 ### Exercise 4
@@ -91,7 +174,7 @@ Using `US_income` dataset, recreate the following graphics as precisely as possi
 
 <br>
 
-```{r, eval=FALSE}
+```{r}
 # Setting income levels
 US_income <- mutate(
   US_income,
@@ -102,6 +185,7 @@ US_income <- mutate(
     right = FALSE
   )
 )
+
 ```
 
 <br>
@@ -115,6 +199,18 @@ US_income <- mutate(
 - `viridis` package (`discrete = TRUE` in `scale_*` function)
 - Void theme
 
+```{r get-state-geo}
+
+# geometry in the US_income dataset contains all the geo information needed to draws states
+
+ggplot(US_income)+
+  geom_sf(aes(geometry = geometry, fill = income_bins), color = "grey80", size = 0.2)+
+  scale_fill_viridis(discrete = TRUE, name = "Median\nIncome")+
+  theme_void()
+
+```
+
+
 <br>
 
 ##### Plot 2
@@ -126,11 +222,52 @@ US_income <- mutate(
 - `viridis` package (`discrete = TRUE` in `scale_*` function)
 - Statebins theme
 
+Use shift+click to open the link
+
+```{r}
+
+ggplot(US_income, aes(state = name, fill = income_bins)) +
+  geom_statebins() +
+  scale_fill_viridis(
+    discrete = TRUE,
+    name = "Median\nIncome"
+  )+
+  theme_statebins()
+
+# discrete = TRUE: generates discrete color palette
+
+# scale function is set to be scale_[argument you are working with, i.e. fill, color, etc.]+[pkg name]
+
+# scale_fill_viridis can have the argument: option="magma" or sth else
+
+# labs() function sets all the labels at once. 
+
+
+```
+
+
 <br>
 
 ## Challenge(s)
 
 Using the `tidycensus` package and few others, try to create a map like below using [these directions](https://walkerke.github.io/tidycensus/articles/spatial-data.html). Try using a different geographical area and a different variable from the ACS.
+
+```{r}
+
+
+#census_api_key("faab61c2f4527d72cdcc4197c970bc831da4b50e", install=TRUE)
+
+ny <- get_acs(geography = "tract", 
+              variables = "B19013_001", 
+              state = "NY", 
+              county = "New York", 
+              geometry = TRUE)
+
+mapview(ny, zcol = "estimate", legend = TRUE)
+
+```
+
+
 
 <br>
 
