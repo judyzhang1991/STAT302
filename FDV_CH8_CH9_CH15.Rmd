@@ -114,4 +114,379 @@ a. Problems:
 
 (1) By representing each distribution by only one point and two error bars, we are losing a lot of information about the data. 
 
-(2)
+(2) It is NOT immediately obvious what the points represent, even though most readers would likely guess that they represent either mean or median. 
+
+(3) It is definitely NOT obvious what the error bars represent. Do they represent the standard deviation of the data, the standard error of the mean, a 95\% confidence interval, or something else?
+
+(a) __Standard Error__: quantifies how accurate our estimate of the mean is.
+
+(b) __Standard Deviation__: estimates how much spread there is in the data around the mean. 
+
+Note: It is possible for a dataset to have BOTH a very small standard error of the mean and a very large standard deviation. 
+
+(4) Symmetric error bars are misleading if there is any skew in the data, which is the case for most real-world datasets. 
+
+
+2. Approach 2: __Boxplot__
+
+a. __Boxplot__: divides the data into quartiles and visualize them in a standardized manner. 
+
+![](screenshots/FDV_figure9_3.png)
+
+
+3. Approach 3: __Violin Plot__
+
+a. __Violin Plot__: are equivalent to the density estimates but rotated by 90 degrees and then mirrored. 
+
+(1) Violins can be used whenever one would otherwise use a boxplot. 
+
+(2) Violins provide a much more nuanced picture of the data: accurately represent bimodal data whereas a boxplot will not. 
+(3) Before using violins to visualize distributions, verify that you have __sufficiently many data points in each group__ to justify showing the point densities as smooth lines.
+
+
+![](screenshots/FDV_figure9_5.png)
+
+(4) __Shortcomings__: as violins are derived from density estimates, they have similar shortcomings. 
+
+(a) Violins can generate the appearance that there is data where none exists.
+
+(b) Violins can generate the appearance that the data set is very dense when actually it is quite sparse. 
+
+(5) __Fixes for Shortcomings__: simply plotting all the individual data points as dots. 
+
+
+4. Approach 4: __Strip Chart__
+
+a. __Strip Chart__: plotting all the individual data points as dots. 
+
+(1) Whenever the dataset is too sparse to justify the violin visualization, use strip chart. 
+
+(2) Strip charts are fine in principle as long as we do NOT plot too many points on top of each other (i.e. overplotting). 
+
+
+(3) __Jittering__: a solution to overplotting that spread out the points somewhat along the x axis, by adding some random noise in the x dimension. 
+
+![](screenshots/FDV_figure9_6.png)
+
+
+![](screenshots/FDV_figure9_7.png)
+
+
+5. Approach 5: __Sina Plot__
+
+a. __Sina Plot__: a hybrid between a violin plot and jittered points. 
+
+(1) It shows each individual points while also visualizing the distributions. 
+
+
+![](screenshots/FDV_figure9_8.png)
+
+
+
+## 9.2 Visualizing Distributions Along the Horizontal Axis ##
+
+
+1. __Ridgeline Plot__: staggering the distribution plots in the vertical direction. 
+
+a. Ridgeline plots tend to work particularly well if want to __show trends in distributions over time__. 
+
+b. The standard ridgeline plot __uses density estimates__. It is quite closely related to the violin plot, but frequently evokes a more intuitve understanding of the data. 
+
+
+![](screenshots/FDV_figure9_9.png)
+
+
+c. As the x axis shows the response variable and the y axis shows the grouping variable, there is NO separate axis for the density estimates in a ridge plot. 
+
+(1) Density estimates are shown alongside the grouping variable. 
+
+(2) This is no different from the violin plot, where densities are also shown alongside the grouping variable, without a separate, explict scale. 
+
+(3) In both cases, the purpose of the plot is NOT to show specific density values but instead to allow for easy comparison of density shapes and relative heights across groups. 
+
+d. Ridge plots scale to very large numbers of distributions. 
+
+![](screenshots/FDV_figure9_11.png)
+
+e. Ridgeline plots also work well if we want to compare two trends over time. 
+
+![](screenshots/FDV_figure9_12.png)
+
+
+# CH15 Visualizing Geospatial Data #
+
+1. We need to think about concepts such as __map projections__ and whether four our specific application the __accurate representation of angles or areas is more critical__. 
+
+
+2. __Choropleth Map__: consists of representing data values as differently colored spatial areas. 
+
+a. Choropleth maps can at times be very useful and other times highly misleading. 
+
+3. __Cartograms__: an alternative to choropleth map. It is a map-lie diagram which may purposefully distort map areas or represent them in stylized form, for example as equal sized squares. 
+
+
+## 15.1 Projections ##
+
+1. __Poles (North Pole and South Pole)__: the two locations where the axis of rotation intersects with the spheroid are called the poles. 
+
+2. __Northern and Southern Hemisphere__: separate the spheroid into two hemispheres, the northern and the sourthern hemisphere, by drawing a line equidistant to both pole around the spheroid. 
+
+3. __Equator__: the line that is equidistant to both poles around the spheroid 
+
+4. __Three Pieces of Info for Uniquely Specify a Location__: 
+
+a. Where we are located along the direction of the equator: __the longitude__
+
+b. How close we are to either pole when moving perpendicular to the equator: __the latitude__
+
+c. How far we are from the earth's center: __the altitude__
+
+
+4. __Datum__: a ference system, the datum specifies properties such as the shape and size of the earth, as well as the location of zero longitude, latitude, and altitude. 
+
+
+a. Longitude, latitude, and altitude are specified relative to the datum. 
+
+b. __World Geodetic System (WGS) 84__: one widely used datum.
+
+(1) WGS 84 is used by the Global Positioning System (GPS)
+
+
+5. __Two Primarily Concerned Dimensions__: when visualizing geospatial data in the form of maps we are primarily concerned with the other two dimensions: longitude and latitude. 
+
+a. Both longitude and latitude are angles, expressed in degrees. 
+
+(1) __Degrees Longitude__: measure how far __east__ or __west__ a location lies. 
+
+(a) __Meridians__:  lines of equal longitude are referred to as meridians. 
+
+<1> All meridians terminate at the two poles
+
+<2> All meridians have the same length, corresponding to half of a great circle around the globe
+
+<3> __Prime Meridian__: crresponding to __0 degree longitude__, runs through the village of Greenwhich in the UK. 
+
+<4> The meridians opposite to the prime meridian lies at 180 degree longitude (also referred to as 180 degree E), which is equivalent to -180 degree longitude (also referred to as 180 degree W), near the international date line. 
+
+
+
+(2) __Degrees Latitude__: measure how far __north__ or __south__ a location lies. 
+
+(a) __Parallels__: lines running orthogonal to the meridians are called parallels. Parallels are of equal latitude.  
+
+<1> Parallels become shorter the closer we get to either pole. 
+
+<2> __Equator__: corresponding to __0 degree latitude__. It is also the longest parallel. 
+
+<3> Parallels run parallel to the equator. 
+
+(b) The north pole corresponds to 90 degree latitude (also referred to as 90 degree N). It is also the shortest parallel with length 0. 
+
+(c) The south pole corresponds to -90 degree latitude (also referred to as 90 degree S). It is also the shortest parallel with length 0. 
+
+
+![](screenshots/FDV_figure15_1=.png)
+
+
+6. __Map-making Challenge__: need to take the spherical surface of the earth and flatten it out so we can display it on a map. 
+
+a. __Projection__: the process of taking the spherical surface of the earth and flatten it out. 
+
+(1) Projection necessarily introduces distortions, because a curved surface cannot be projected exactly onto a flat surface. 
+
+(2) The projection can preserve __either angles or areas__ but NOT both. 
+
+(a) __Conformal__: the projection that preserves angles
+
+(b) __Equal-area__: the projection that preserves areas
+
+(3) Other projections may preserve neither angles nor areas but instead preserve other quantities of interest, such as distance to some reference point or line. 
+
+(4) To systematize and keep track of different ways of projecting parts or all of the earth for specific maps, various standards bodies and organizations matain registries of projections:
+
+(a) European Petroleum Survey Group (EPSG)
+
+(b) Envrionmental Systems Research Institute (ESRI)
+
+7. __Mercator Projection__: maps the globe onto a cylinder and then unrolls the cylinder to arrive at a rectangular map.
+
+a. One of the earliest map projections in use
+
+b. It is a conformal projection that accurately represents shapes but introduces serve area distortions near the poles
+
+
+c. Meridians in this projection are eveny spaced vertical lines
+
+d. Paralles in this projection are horizontal lines whose spacing increases the further we move away from the equator.
+
+(1) The spacing between parallels increases in proportion to the extent to which they have to be stretched closer to the poles to keep meridians perfectly vertical. 
+
+
+![](screenshots/FDV_figure15_2.png)
+
+e. __Variants of Mercator Projection__:
+
+(1) Trasverse Mercator Projection: routinely used for alrge-scale maps that show moderately small areas (spanning less than a few degrees in logitude) at large magnification. 
+
+(2) Web Mercator Projection: introduced by Googel for Google Maps and is used by serveral online mapping applications. 
+
+
+8. __Goode Homolosine__: a whole-world projection that is perfectly area-preserving. It is useful for mapping applications that require accurate reproduction of areas on a global scale. 
+
+a. Good homolosine is usually shown in its interrupted form, which has one cut in the northern hemisphere and three cuts in the sourthern hemisphere, carefully chosen so they do not interrupt major land masses. 
+
+(1) The cuts allow the projection to both preserve areas and approximately preserve angles, at the cost of non-contiguous oceans, a cut through the middle of Greenland, and several cuts through Antarctica. 
+
+![](screenshots/FDV_figure15_3.png)
+
+
+9. Shape or area distortions due to map projections are particularly prominent when we are attempting to make a map of the whole world, but they can cause trouble even at the scale of individual continents or countries. 
+
+__Example__ (Projecting all 50 states of US onto one map)
+
+a. __Equal-area Albers Projection__: this projection provides a reasonable representation of the relative shapes, areas, and locations of the 50 states, but there are some issues:
+
+(1) Alaska seems weirdly stretched out compared to how it looks
+
+(2) The map is dominated by ocean/empty space. It would be preferable if we could zoom in further, so that the lower 48 states take up a larger proportion of the map area. 
+
+__Solutions__:
+
+(1) Project Alaska and Hawaii separately (to minimize shape distortions) and then move them so they are shown underneath the lower 48 states. 
+
+Move and scale Alaska
+![](screenshots/FDV_figure15_6.png)
+
+<a> New problem: Alaska has not only been moved but it also has been scaled misleadingly. 
+
+(2) Instead of both moving and scaling Alsaka, we could just move it without changing its scale.
+
+Move and NOT scale Alaska
+![](screenshots/FDV_figure15_7.png)
+
+
+
+
+
+## 15.2 Layers ##
+
+1. To visualize geospatial data in the proper context, we usually create maps consisting of multiple layers showing different types of information. 
+
+__Example__ (Wind turbines in the San Francisco Bay Area)
+
+![](screenshots/FDV_figure15_8.png)
+
+
+a. __Terrain Layer__: shows hills, valleys, and water
+
+
+b. __Road Layer__: shows road network
+
+c. A layer indicating the location of individual wind turbines
+
+d. A top layer that adds the locations and names of cities. 
+
+
+2. For any given map we want to make, we may want to add or remove some of these layers. 
+
+
+3. Regardless of which layers we decide to keep or remove, it is generally recommended to add a __scale bar__ and a __north arrow__.
+
+a. __Scale Bar__: helps readers understand the size of the spatial features shown in the map. 
+
+b. __North Arrow__: clarifies the map's orientation
+
+
+![](screenshots/FDV_figure15_10.png)
+
+
+
+## 15.3 Choropleth Mapping ##
+
+1. We frequently want to show how some quantity varies across locations. We can do so by coloring individual regions in a map according to the data dimension we want to display. 
+
+a. __Choropleth Maps__: maps that color individual regions according to the data dimension we want to display. 
+
+
+(1) We tend to associate darker colors with higher intensities when the background of the figure is light. 
+
+(2) We can also pick a color scale where high values light up on a dark background. As long as the lighter colors fall into the red-yellow spectrum, so that they appear to be glowing, they can be perceived as representing higher intensities. 
+
+(3) As a general principle, when figures are meant to be printed on white paper then light-colored background areas will typically work better. 
+
+
+
+__Example__ (Population Density in US Counties)
+
+
+Use darker color for higher intensity: good if printing in darker bacground paper. 
+![](screenshots/FDV_figure15_11.png)
+
+
+
+Use lighter color for higher intensity: good if printing in lighter bacground paper. 
+
+![](screenshots/FDV_figure15_12.png)
+
+(4) Choropleths work best when the coloring represents a density (i.e. some quantity divded by surface area)
+
+(a) We preceive larger areas as corresponding to larger amounts than saller areas, and shading by density corrects for this effect. 
+
+(b) In practice, we often see choropleths colored according to some quantity that is not a density. 
+
+(5) __Two Conditions To Color-Map Quantities that are Not Densities__: 
+
+(a) If all the individual areas we color have approximately the same size and shape, then we do not have to worry about some areas drawing disproportionate attention solely due to their size. 
+
+(b) If the individual areas we color are relatively small compared to the overall size of the map and if the quantity that color represents changes on a scale larger than the individual colored areas, then agian we do not have to worry about some areas drawing disproportionate attention solely due to their size. 
+
+
+
+2. __Effect of Continuous v.s. Discrete Color Scales in Choropleth Mapping__:
+
+a. __Continuous Color Scales__: tend to look visually appealing, but can be difficult to read as we are NOT very good at recognizing a specific color value and matching it against a continuous scale. 
+
+(1) Solution: __bin the data values into discrete groups that are represented with distinct colors__.
+
+(a) On the order of __four__ to __six__ bins is a good choice. 
+
+(b) The binning sacrifices some info, but on the flip side the binned colors can be uniquely recognized. 
+
+
+
+
+## 15.4 Cargograms ##
+
+1. Not every map-like visualization has to be geographically accurate to be useful. 
+
+2. __Cartogram__: a modified map
+
+__Example__ (Median income of US states)
+
+Cartogram deforms the states so their size was proportional to their number of inhabitants. 
+
+
+![](screenshots/FDV_figure15_15.png)
+
+
+3. __Cartogram Heatmap__: an alternative to a cargogram with distorted shapes. 
+
+__Example__ (Median income of US states)
+
+Cartogram heatmap represent each state as a colored square. 
+
+![](screenshots/FDV_figure15_16.png)
+
+a. While this representation does not correct for the population number for each state, and thus underrepresents more populous states and overrepresents less populous states, at least it treats all states equally and does NOT weight them arbitrarily by their shape or size. 
+
+4. A more complex cartogram: placing individual plots at the location of ech state. 
+
+
+__Example__ (Unemployment rate in US states)
+
+
+![](screenshots/FDV_figure15_17.png)
+
+
+a. If we want to visualize the evolution of the unemployment rate over time for each state, it can help to daw an individual graph for each state and then arrange the graphs based on the approximate relative position of the states to each other. 
+

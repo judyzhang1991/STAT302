@@ -1532,3 +1532,29 @@ ggplot(ill_meta, aes(percollege, percpovertyknown))+
 
 ```
 
+
+## Reading Quiz 5 ##
+
+Q3 Which transformation comes first, scale or statistics? __Scale__
+
+
+
+Q6 
+
+```{r eval=FALSE}
+
+# Problem with this code: the data is NOT explicitly identify in the geom_line layer
+ggplot(mpg, aes(displ, hwy)) +
+
+  geom_point() +
+
+  geom_line(grid, color = "blue", size = 1.5) + 
+
+  geom_text(outlier, aes(label = model))
+
+
+```
+
+
+
+Q7 Mapping a variable to an aesthetic happens inside of ``aes()`` but if you set a constant like "blue" inside aes it: __maps blue as a new variable__. 
