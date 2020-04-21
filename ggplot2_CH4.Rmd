@@ -1,0 +1,313 @@
+---
+title: "ggplot2_CH4"
+author: "Jingyang(Judy) Zhang"
+date: "4/20/2020"
+output: html_document
+---
+# CH4 Matering the Grammar #
+
+## 4.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+```
+
+1. __Theoretical Basis of ggplo2__:  the layered grammar of graphics. 
+
+a. The grammar makes it easier for you to iteratively update a plot, changing a single feature at a time. 
+
+b. The grammar is also useful as it suggests the high-level aspects of a plot that can be changed.
+
+c. The grammar encourages the use of graphics customized to a particular problem, rather than relying on specific chart types. 
+
+
+
+## 4.2 Building a Scatterplot ##
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color = factor(cyl))) + 
+  geom_point()
+```
+
+
+### 4.2.1 Mapping Aesthetics to Data ###
+
+1. __Scatterplot__: represents each observation as a point, positioned according to the value of two ariables. As well as a horizontal and vertical position, each point also has a size, color and a shape. 
+
+
+2. __Aesthetics__: attributes such as size, color, shape of a geom (i.e. point, line) are called aesthetics. They are the properties that can be perceived on the graphics. 
+
+a. Each aesthetic can be mapped to __a variable__ OR set to __a constant value__.
+
+
+3. __Geometric Objects (geoms)__: points, lines and bars are examples of geometric objects (or geoms). Geoms determine the "type" of the plot. 
+
+a. Plots that use a single geom are often given a special name:
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-cly1{text-align:left;vertical-align:middle}
+.tg .tg-yla0{font-weight:bold;text-align:left;vertical-align:middle}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-yla0">Named Plot</th>
+    <th class="tg-yla0">Geom</th>
+    <th class="tg-yla0">Other Features</th>
+  </tr>
+  <tr>
+    <td class="tg-cly1">Scatterplot</td>
+    <td class="tg-cly1">Point</td>
+    <td class="tg-cly1"></td>
+  </tr>
+  <tr>
+    <td class="tg-cly1">Bubblechart</td>
+    <td class="tg-cly1">Point</td>
+    <td class="tg-cly1">Size mapped to a variable</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Barchart</td>
+    <td class="tg-0lax">Bar</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Box-and-whisker Plot</td>
+    <td class="tg-0lax">Boxplot</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Line Chart</td>
+    <td class="tg-0lax">Line</td>
+    <td class="tg-0lax"></td>
+  </tr>
+</table>
+
+
+b. More complex plots with combinations of multiple geoms do NOT have a special name and have to be described by words. 
+
+__Example__ (Plot overlays a per group regression line on top of a scatterplot)
+
+```{r}
+
+ggplot(mpg, aes(displ, hwy, color=factor(cyl)))+
+  geom_point()+
+  geom_smooth(method="lm")
+
+```
+
+
+### 4.2.2 Scaling ###
+
+1. __Scaling__: the conversion process that converts __data units__ (e.g. liters, miles per gallon, and number of cylinders) to __graphical units__ (e.g. pixels and colors) that computer can display. 
+
+a. Scaling is performed by __scales__ function. 
+
+b. __Aesthetic Specifications__: described in ``vignette ("ggplot2-specs")``:
+
+(1) Colors are represented by a six-letter hexadecimal string. 
+
+(2) Sizes are represented by a number.
+
+(3) Shapes are represented by a integer. 
+
+2. __Grid__: the drawying system that ggplot2 uses, it conducts a linear mapping from the range of the data to $[0,1]$. 
+
+3. __Coord__: the coordinate system that determines how the two positions (x and y) are combined to form the final location on the plot. 
+
+a. Cartesian coordinates (most commonly used)
+
+b. Polar coordinates
+
+c. Spherical projection (used for a map)
+
+
+4. Colors can be though of as having three components, crresponding to the three types of color-detecting cells in the human eye. 
+
+a. These three cell types give rise to a three-dimensional color space. 
+
+b. Scaling then involves mapping the data values to points in this three-dimensional color space. 
+
+(1) For discrete variables, the default scale maps the values of these discrete variables to evenly spaced hues on the color wheel. 
+
+![](screenshots/ggplot2_figure4_1.png)
+
+5. To create a complete plot, we need to combine graphical objects from three sources:
+
+a. __Data__: represented by geom
+
+b. __Scales__ and __Coordinate System__: generates axes and legends so that we can read values from the graph
+
+c. __Plot Annotations__: such as the background and plot title
+
+
+## 4.3 Adding Complexity ##
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() + 
+  geom_smooth() +
+  facet_wrap(~year)
+  
+  
+```
+
+
+1. The __facets__ and __layers__ expand the data structure: each facet panel in each layer has its own dataset. 
+
+a. Think of this as a 3d array: the panels of the facets form a 2d grid, and the layers extend upwards in the 3rd dimension. 
+
+b. In this case the data in the layers is the same, but in general we can plot different datasets on different layers. 
+
+
+2. The __smooth layer__ is different to the __point layer__ as it does NOT really display the raw data, but instead displays a __statistical transformation__ of the data. 
+
+a. The smooth layer fits a smooth line through the middle of the data. 
+
+(1) This requires an additional step in the process: after mapping the data to aesthetics, the data is passed to a statistical transformation, or __stat__, which manipulates the data in some useful way. 
+
+(2) In the example above, the stat fits the data to a __loess smoother__, and then returns predictions from evenly spaced points within the range of the data. 
+
+(3) Other useful stats include 1d and 2d binning, group means, quantile regression and contouring. 
+
+
+3. Scaling occurs in 3 parts:
+
+a. __Transforming__: scale transformation occurs before statistical transformation so that statistics are computed on the scale-transformed data. 
+
+(1) There are many different transformations that can be used, including taking square roots, logarithms and reciprocals. 
+
+
+
+b. __Training__: after the statistics are computed, each scale is trained on every dataset from all the layers and facets. 
+
+(1) The training operation combines the ranges of the individual datasets to get the range of the complete data. 
+
+(2) Without training, scales could only make sense locally and we would NOT be able to overlay different layers because their positions would NOT line up. 
+
+(3) In some cases we may want to vary position scales across facets but we never want vary positions scales across layers. 
+
+
+c. __Mapping__: the scales map the data values into aesthetics values.
+
+(1) This is a local operation: the variables in each dataset are mapped to their aesthetic values, producing a new dataset that can then be rendered by the geoms. 
+
+
+__Schematic Description of the Plot Generation Process __
+
+![](screenshots/ggplot2_figure4_1.png)
+
+
+
+## 4.4 Components of the Layered Grammar ##
+
+
+1. Components that make up a plot:
+
+a. Data
+
+b. Aesthetic mappings
+
+c. Geometric objects (geoms)
+
+d. Statistical transformations (stats)
+
+e. Scales
+
+f. Facetting
+
+g. Coordinate system
+
+h. Position adjustment
+
+
+2. __Position Adjustment__: deals with overlapping graphic objects. 
+
+3. Together, the data, mappings, stat, geom and position adjustment form a __layer__. 
+
+a. A plot may have multiple layers. 
+
+b. The layered grammar defines a plot as the combination of:
+
+(1) A default dataset and set of mappings from variables to aesthetics
+
+(2) One or more layers, each composed of a geometric object, a statistical transformation, a position adjustment, and optionally, a dataset and aesthetic mappings. 
+
+(3) One scale for each aesthetic mapping.
+
+(4) A coordinate system.
+
+(5) The facetting specification.
+
+
+### 4.4.1 Layers ###
+
+1. __Layers__: responsible for creating the objects that we perceive on the plot. 
+
+a. A layer is composed of five parts:
+
+(1) Data
+
+(2) Aesthetic mappings
+
+(3) A statistical transformation (stat)
+
+(4) A geometric obejct (geom)
+
+(5) A position adjustment
+
+
+### 4.4.2 Scales ###
+
+1. __Scale__: controls the ampping from data to aesthetic attributes, and we need a scale for every aesthetic used on a plot. 
+
+a. Each scale operates across ALL the data in the plot, ensuring a consistent mapping from data to aesthetics. 
+
+b. A scale is a function and its inverse (i.e. scale$=f+f^{-1}+$params), along with a set of parameters.
+
+(1) The __parameters__ of the function define whether the path is linear or curved, which color space to use (e.g. LUV or RGB), and the colors at the start and end. 
+
+(2) The __inverse function__ is used to draw a __guide__ so that you can read values from the graph. 
+
+(a) Guides are either axes (for position scales) or legends (for everything else such as color, shape, etc.). 
+
+(b) Most mappings have a unique inverse (i.e. the mapping function is one-to-one), but many do not. 
+
+(c) A unique inverse makes it possible to recover the original data, but this is not alays desriable if we want to focus attention on a single aspect. 
+
+
+c. Scaling is performed __before__statistical transformation.
+
+### 4.4.3 Coordinate System ###
+
+1. __Coordinate System (or coord)__: maps the position of objects onto the plane of the plot. 
+
+a. Position is often specified by two coordinates (x,y), but potentially could be three or more (although this is not implemented in ggplo2). 
+
+b. The Cartesia coordinate system is the most common coordinate system for two dimensions, while polar cooridnates and various map projections are used less frequently. 
+
+c. Coordinate systems affect all position variables simultaneously and differ from scales in that they also change the appearance of the geometric objects. 
+
+(1) For example, in polar coordinates, bar geoms look like segments of a circle. 
+
+d. Coordinate transformations occured __after__ statistical transformation. 
+
+e. Coordinate systems control how the axes and grid lines are drawn. 
+
+
+### 4.4.4 Facetting ###
+
+1. __Facetting__: a general case of conditioned or trellised plots. The facetting specification describes which varibales should be used to split up the data, and whether position scales should be free or constrained. 
+
+a. Facetting makes it easy to create small multiples, each showing a different subset of the whole dataset. 
+
+b. Facetting is a powerful tool when investigating whether patterns hold across all conditions. 
+
+
+
+
+

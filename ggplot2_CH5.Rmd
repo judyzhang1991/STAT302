@@ -1,0 +1,18 @@
+---
+title: "ggplot2_CH5"
+author: "Jingyang(Judy) Zhang"
+date: "4/20/2020"
+output: html_document
+---
+# CH5 Build a Plot Layer by Layer #
+
+## 5.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+```
+
+
+## 5.2 Building a Plot ##

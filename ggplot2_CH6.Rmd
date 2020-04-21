@@ -1,0 +1,51 @@
+---
+title: "ggplot2_CH6"
+author: "Jingyang(Judy) Zhang"
+date: "4/21/2020"
+output: html_document
+---
+# CH6 Scales, Axes and Legends #
+
+## 6.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+```
+
+
+## 6.2 Modifying Scales ##
+
+
+
+## Reading Quiz 6 ##
+
+Q4
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() + 
+  scale_x_continuous(labels=NULL)
+  
+```
+
+
+
+
+Q5
+
+```{r}
+df=data.frame(x = 1:3, y = 1:3, z = c("a","b","c"))
+
+ggplot(df, aes(x,y)) + 
+  geom_point(aes(color = z)) +
+  theme(legend.position = "top")
+  
+```
+
+
+Q7 By default, any data outside the limits is coverted to ``NA``. This means that setting the limits is NOT the SAME as visually zooming in to a region of the plot.
+
+
+Q8
+

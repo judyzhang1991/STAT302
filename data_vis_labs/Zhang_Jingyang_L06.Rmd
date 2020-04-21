@@ -17,10 +17,14 @@ We'll be using the `cows.rda`, `cdc.txt`, and `tech_stocks.rda` datasets which a
 
 <br>
 
-```{r load-packages-data-seed, eval=FALSE, warning=FALSE, message=FALSE}
+```{r load-packages-data-seed, warning=FALSE, message=FALSE}
 # Load package(s)
+library(tidyverse)
 
 # Load datasets
+load("data/cows.rda")
+
+load("data/tech_stocks.rda")
 
 # Read in the cdc dataset
 cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
@@ -63,6 +67,22 @@ class_dat <- mpg %>%
   )
 ```
 
+
+```{r exer1-p1}
+
+ggplot(mpg, aes(class, hwy)) +
+  geom_jitter(width = 0.1) +
+  geom_point(aes(class, hwy), data = class_dat, color = "red", alpha = 0.6, size = 5) +
+  annotate("text", x=class_dat$class, y=10, label=class_dat$label) +
+  ylim(9, 46) +
+  labs(x = "Vehicle class", y = "Highway miles per gallon") +
+  theme_minimal()
+  
+
+
+```
+
+
 <br>
 
 
@@ -95,6 +115,19 @@ cow_means <- cows %>%
 
 <br>
 
+```{r exer2-p1}
+
+ggplot(cow_means, aes(breed, mean)) +
+  geom_bar(stat = "identity", fill = "#56B4E9", width=0.7) +
+  geom_errorbar(aes(ymin = mean - qnorm(0.975) * se, ymax = mean + qnorm(0.975) * se), data=cow_means, width=0.1) + 
+  labs(x = "Cattle breed", y = "Mean percent butterfat\ncontent in milk") +
+  theme_minimal()
+
+```
+
+
+
+
 
 
 <br>
@@ -126,6 +159,19 @@ perc_increase <- tech_stocks %>%
 
 <br>
 
+?????? size 5????????
+
+```{r exer3-p1}
+
+ggplot(perc_increase, aes(perc, company)) +
+  geom_bar(stat = "identity", fill = "#56B4E9") +
+  annotate("text", x = perc_increase$perc, y = perc_increase$company, label = perc_increase$label, hjust=1.1, color="white") +
+  labs(x = NULL, y = NULL) +
+  theme_minimal()
+
+```
+
+
 
 
 <br>
@@ -150,4 +196,17 @@ cdc_weight_95ci <- cdc %>%
 ```
 
 <br>
+
+```{r exer4-p1}
+
+ggplot(cdc_weight_95ci, aes(x = mean_wt, y = gender, group = genhlth, color = genhlth)) + 
+  geom_point(position = position_dodge(width = 0.5)) + 
+  geom_errorbar(aes(xmin = mean_wt - moe, xmax = mean_wt + moe, y = gender, x = mean_wt, group = genhlth, color = genhlth), position = position_dodge(width = 0.5), width = 0.1) + 
+labs(x = "Weight (lbs)", y = "Gender") +
+  theme_minimal()
+
+ 
+  
+```
+
 
