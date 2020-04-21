@@ -1558,3 +1558,11 @@ ggplot(mpg, aes(displ, hwy)) +
 
 
 Q7 Mapping a variable to an aesthetic happens inside of ``aes()`` but if you set a constant like "blue" inside aes it: __maps blue as a new variable__. 
+
+
+Q8 The solid line in a QQ plot is a regression line of Y~X: __FALSE__ (A solid line in the q-q plot indicates the point where ``x`` (theoretical or observed values) equals ``y`` (observed or theoretical values)).
+
+
+Q9 A violin plot is a __density__plot mirrored over its axis. 
+
+Q12 The choice of using a cartogram map is good at treating states equally through visuals but they can __underrepresent__ populus state and __overrepresent__ less populus states. 
