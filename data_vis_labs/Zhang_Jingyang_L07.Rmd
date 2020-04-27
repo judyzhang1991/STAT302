@@ -1,7 +1,7 @@
 ---
 title: "L07 Scales, Axes & Legends"
 subtitle: "Data Visualization (STAT 302)"
-author: "YOUR NAME"
+author: "Jingyang Zhang"
 output:
   html_document:
     toc: true
@@ -24,10 +24,12 @@ We'll be using the `tech_stocks.rda`, `cdc.txt`, and a few toy datasets.
 
 <br>
 
-```{r load-packages-data-seed, eval=FALSE, warning=FALSE, message=FALSE}
+```{r load-packages-data-seed, warning=FALSE, message=FALSE}
 # Load package(s)
 library(tidyverse)
 library(scales)
+library(RColorBrewer)
+library(lubridate)
 # Load datasets
 load("data/tech_stocks.rda")
 
@@ -72,18 +74,59 @@ Using the `tech_stocks` dataset, recreate the following graphic as precisely as 
 
 <br>
 
+
+
+Method 1
 ```{r}
-
-
-ggplot(tech_stocks, aes(date, price_indexed, color = company)) +
-  geom_line() + 
-  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"))
+ggplot(tech_stocks, aes(date, price_indexed)) +
+  geom_line(aes(color = company)) + 
+  scale_color_discrete(limits = c("Facebook", "Alphabet", "Microsoft", "Apple")) + 
+  scale_x_date(expand = c(0,0), name = NULL) + 
+  scale_y_continuous(breaks = seq(0, 500, 100), position = "right", labels = scales::dollar_format(prefix = "$"), name = NULL) + 
+  guides(color = guide_legend(override.aes = list(size = 1.3))) + 
+  ggtitle("Stock price, indexed") + 
   theme_minimal() + 
   theme(legend.background=element_blank(), legend.position = c(0.75, 0.85), legend.title = element_blank()) 
   
 
+# Remove legend titles:
+#1. theme(legend.title = element_blank())
+#2. scale_color_discrete(name = NULL)
+
+# Remove the padding of the graph, meanning that the graph starts and ends at where there is data
+#1. scale_x_date(expand = c(0, 0))
+
+# Change the order of colors of the group and legend
+#1. scale_color_discrete(limits = c("", "","","",...))
 
 ```
+
+
+
+
+Method 2: 
+```{r, eval = FALSE}
+
+# Reorder the factor levels
+tech_stocks$company <- factor(tech_stocks$company, levels = c("Facebook", "Alphabet", "Microsoft", "Apple"))
+
+# Find color
+show_col(hue_pal()(4))
+
+
+ggplot(tech_stocks, aes(date, price_indexed)) +
+  geom_line(aes(color = company)) + 
+  scale_color_manual(values = c("Alphabet" = "#7CAE00", "Apple" = "#C77CFF", "Facebook" = "#F8766D", "Microsoft" = "#00BFC4")) + 
+  scale_x_date(expand = c(0,0)) + 
+  scale_y_continuous(breaks = seq(0, 500, 100), position = "right", labels = scales::dollar_format(prefix = "$")) + 
+  xlab(NULL) +
+  ylab(NULL) + 
+  guides(color = guide_legend(override.aes = list(size = 1.3))) + 
+  ggtitle("Stock price, indexed") + 
+  theme_minimal() + 
+  theme(legend.background=element_blank(), legend.position = c(0.75, 0.85), legend.title = element_blank()) 
+``` 
+
 
 
 
@@ -101,6 +144,19 @@ Use the toy datasets `dat1` and `dat2` to recreate the following graphic as prec
 - Colors: `#56B4E9`, `darkgreen`, & `red`
 
 <br>
+
+```{r}
+
+ggplot(dat2, aes(theta, obs)) + 
+  geom_point(aes(color = larger_than), alpha = 0.8, size = 2, show.legend = FALSE) + 
+  xlim(dat1$theta) + 
+  stat_function(fun = sin, color = "#56B4E9", size = 1.3) + 
+  scale_color_manual(values = c("darkgreen", "red")) + 
+  labs(x = quote(theta), y = quote(sin(theta))) + 
+  theme_minimal()
+  
+```
+
 
 
 
@@ -127,3 +183,26 @@ Using `cdc_small`construct a scatterplot of `weight` by `height` with the follow
 
 <br>
 
+
+```{r}
+
+ggplot(cdc_small, aes(height, weight)) + 
+  geom_point(aes(color = genhlth, shape = genhlth), 
+             size = 3)  + 
+  scale_color_brewer(palette = "Set1", labels = c("Excellent", "Very good", "Good", "Fair", "Poor")) +
+  labs(color = "General\nHealth?", shape = "General\nHealth?", x = NULL, y = NULL, title = "CDC BRFSS: Weight by Height") + 
+  scale_x_continuous(limits = c(55, 80), breaks = seq(55, 80, 5), labels = scales::unit_format(accuracy = 1, unit = "in")) + 
+  scale_y_log10(limits = c(100, 300), breaks = seq(100, 300, 25), labels = scales::unit_format(unit = "lbs"))  + 
+  scale_shape_manual(labels = c("Excellent", "Very good", "Good", "Fair", "Poor"), values = c(17, 19, 15, 9, 4)) +
+  theme_minimal() + 
+  theme(legend.position = c(1, 0), legend.justification = c(1, 0))
+ 
+
+
+```
+
+
+
+## Class Notes ##
+
+1. Each scale_x_x function is built the same
