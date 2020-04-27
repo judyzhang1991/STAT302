@@ -1573,6 +1573,7 @@ dat2 &lt;- tibble(
   scale_color_discrete(limits = c(&quot;Facebook&quot;, &quot;Alphabet&quot;, &quot;Microsoft&quot;, &quot;Apple&quot;)) + 
   scale_x_date(expand = c(0,0), name = NULL) + 
   scale_y_continuous(breaks = seq(0, 500, 100), position = &quot;right&quot;, labels = scales::dollar_format(prefix = &quot;$&quot;), name = NULL) + 
+  # Want to override the size of the legend keys
   guides(color = guide_legend(override.aes = list(size = 1.3))) + 
   ggtitle(&quot;Stock price, indexed&quot;) + 
   theme_minimal() + 
@@ -1583,7 +1584,10 @@ dat2 &lt;- tibble(
 #2. scale_color_discrete(name = NULL)
 
 # Remove the padding of the graph, meanning that the graph starts and ends at where there is data
-#1. scale_x_date(expand = c(0, 0))</code></pre>
+#1. scale_x_date(expand = c(0, 0))
+
+# Change the order of colors of the group and legend
+#1. scale_color_discrete(limits = c(&quot;&quot;, &quot;&quot;,&quot;&quot;,&quot;&quot;,...))</code></pre>
 <p>Method 2:</p>
 <pre class="r"><code># Reorder the factor levels
 tech_stocks$company &lt;- factor(tech_stocks$company, levels = c(&quot;Facebook&quot;, &quot;Alphabet&quot;, &quot;Microsoft&quot;, &quot;Apple&quot;))

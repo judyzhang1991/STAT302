@@ -83,6 +83,7 @@ ggplot(tech_stocks, aes(date, price_indexed)) +
   scale_color_discrete(limits = c("Facebook", "Alphabet", "Microsoft", "Apple")) + 
   scale_x_date(expand = c(0,0), name = NULL) + 
   scale_y_continuous(breaks = seq(0, 500, 100), position = "right", labels = scales::dollar_format(prefix = "$"), name = NULL) + 
+  # Want to override the size of the legend keys
   guides(color = guide_legend(override.aes = list(size = 1.3))) + 
   ggtitle("Stock price, indexed") + 
   theme_minimal() + 
