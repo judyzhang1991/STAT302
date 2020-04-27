@@ -129,7 +129,9 @@ ggplot(cdc, aes(height, weight)) +
 # ..level.. is the same as after_stat(level) which will do things after the statistical transformation
 
 ```
+This is a 2d density plot. The color is the third dimension. 
 
+``geom_polygon()`` simply connects the dots instead of create a density. 
 
 <br>
 

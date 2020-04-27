@@ -16,3 +16,552 @@ library(nlme)
 
 
 ## 5.2 Building a Plot ##
+
+1. Whenever we've created a plot with ``ggplot()``, we have immediately added on a layer with a geom function. 
+
+a. There are two distinct steps:
+
+(1) First, create a plot with default dataset and aesthetic mappings:
+
+```{r}
+p <- ggplot(mpg, aes(displ, hwy))
+p
+
+```
+
+(2) Second, add a layer
+
+```{r}
+p + geom_point()
+```
+
+
+(a) ``geom_point()`` is a shortcut:
+
+``geom_point()`` is equivalent to:
+
+```{r}
+p + layer(
+  mapping = NULL,
+  data = NULL,
+  geom = "point",
+  stat = "identity",
+  position = "identity"
+)
+```
+
+2. This call specifies the five components to the layer:
+
+a. __Mapping__: a set of aesthetic mappings, specified using the ``aes()`` function and combined with the plot defaults. 
+
+(1) If ``NULL``, uses the default mapping set in ``ggplot()``. 
+
+b. __Data__: a dataset which overrides the default plot dataset. It is usually omitted (set to ``NULL``), in which case the layer will use the default data specified in ``ggplot()``.
+
+
+c. __Geom__: the name of the geometric obejct to use to draw each observation.
+
+(1) Geoms can have additional arguments. All geoms take aesthetics as parameters. 
+
+(a) If you supply an aesthetic (e.g. color) as a parameter, it will NOT be scaled, allowing you to control the appearance of the plot. 
+
+(b) YOu can pass params in ...(in which case stat and geom parameters are automatically teased apart), or in a list passed to ``geom_params``. 
+
+
+d. __Stat__: the name of the statistical transformation to use. A statistical transformation performs some useful statistical summary, and is key to histograms and smoothers. 
+
+(1) To keep the data as is, use the "identity" stat. 
+
+(2) Most stats take additional parameters to specify the details of statistical transformation. You can supply params either in ... (in which case stat and geom parameters are automatically teased apart), or in a list called ``stat_params``.
+
+3. __Position__: the method used to adjust overlapping objects, like jittering, stacking or dodging. 
+
+
+3. Only need to set one of ``stat`` and ``geom``: every ``geom`` has a default ``stat``, and every ``stat`` has a default ``geom``.
+
+
+
+
+## 5.3 Data ##
+
+1. Every layer must have soe data asscoiated with it, and that data must be in a __tidy data frame__. 
+
+a. __Tidy Data Frame__: has variables in the columns and observations in the rows. This is a strong restriction, but there are good reasons for it:
+
+(1) Data is important, so it's best to be explicit about it. 
+
+(2) A single data frame is also easier to save than a multitude of vectors, which means it's easier to reproduce your results or send your data to someone else. 
+
+
+(3) It enforces a clean separation of concerns: ggplot2 turns data frames into visualizations. 
+
+
+2. The data on each layer does NOT need to be the same, and it's often useful to combine multiple datasets in a single plot. 
+
+
+__Example__ (Different datasets for different layers)
+
+
+Step1: Fit a loess model and generate predictions from it (this is what ``geom_smooth()`` does behind the scenes).
+```{r}
+mod <- loess(hwy ~ displ, data=mpg)
+
+grid <- data_frame(displ = seq(min(mpg$displ), max(mpg$displ), length = 50))
+
+grid$hwy <- predict(mod, newdata = grid)
+
+grid
+```
+
+
+Step2: Isolate observations that are particularly far away from their prediction values.
+
+```{r}
+std_resid <- resid(mod) / mod$s
+
+outlier <- filter(mpg, abs(std_resid) > 2)
+
+outlier
+```
+
+
+Step3: Overlaying a smoothed line and labelling the outlying points.
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_line(data = grid, color = "blue", size = 1.5) +
+  geom_text(data = outlier, aes(label = model))
+```
+
+
+__Note:__ 
+
+1. Need the explicit ``data=`` in the layers, but NOT in the call to ``ggplot()``. This is because the argument order is different.
+
+2. In this example, every layer uses a different dataset. 
+
+
+## 5.4 Aesthetic Mappings ##
+
+1. __Aesthetics__: the aesthetic mappings, defined with ``aes()``, describe how variables are mapped to visual properties or aesthetics. 
+
+a. ``aes()`` takes a sequence of aesthetic-variable pairs like:
+
+``aes(x = displ, y = hwy, color = class)``
+
+Maps x-position to ``displ``, y-position to ``hwy``, and color to ``class``.
+
+b. While you can do data manipulation in ``aes()`` (e.g. ``aes(log(carat), log(price))``), it is best only do SIMPLE calculations. Better to move complex transformations outside the ``aes()`` call and into an explicit ``dplyr::mutate()`` call. 
+
+c. Never refer to a variable with $ (e.g. ``diamonds\$carat``) in ``aes()``. This breaks containment, so that the plot no longer contains everything it needs, and causes prolems if ggplot2 changes the order of the rows, as it does when facetting. 
+
+
+### 5.4.1 Specifying the Aesthetics in the Plot v.s. in the Layers ###
+
+
+1. Aesthetic mappings can be aupplied in the initial ``ggplot()`` call, in individual layers, or in some combination of both. 
+
+__Example__ (Equivalent calls of aesthetic mappings)
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color = class)) + 
+  geom_point()
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class))
+
+ggplot(mpg, aes(displ)) + 
+  geom_point(aes(y = hwy, color = class))
+
+ggplot(mpg) + 
+  geom_point(aes(displ, hwy, color = class))
+```
+
+
+2. Within each layer, we can __add__, __override__, or __remove__ mappings:
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-lboi{border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-g7sd{font-weight:bold;border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-g7sd">Operation</th>
+    <th class="tg-g7sd">Layer Aesthetics</th>
+    <th class="tg-g7sd">Result</th>
+  </tr>
+  <tr>
+    <td class="tg-lboi">Add</td>
+    <td class="tg-lboi">``aes(color = cyl)``</td>
+    <td class="tg-lboi">``aes(mpg, wt, color = cyl)``</td>
+  </tr>
+  <tr>
+    <td class="tg-lboi">Override</td>
+    <td class="tg-lboi">``aes(y&nbsp;&nbsp;= disp)``</td>
+    <td class="tg-lboi">``aes(mpg, disp)``</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Remove</td>
+    <td class="tg-0pky">``aes(y = NULL)``</td>
+    <td class="tg-0pky">``aes(mpg)``</td>
+  </tr>
+</table>
+
+
+3. Generally want to setup the mappings to illuminate the structure underkying the graphic and minimise typing. 
+
+
+### 5.4.2 Setting v.s. Mapping ###
+
+1. __Map__: we map an aesthetic to a __variable__ (e.g. ``aes(color = cut)``)
+
+2. __Set__: we set an aesthetic to a __constant__ (e.g. ``color = "red"``)
+
+3. If you want to appearance to be governed by a variable, put the specification inside ``aes()``
+
+4. If you want override the default size or color, put the value outside ``aes()``. 
+
+
+This plot sets the color to darkblue
+```{r}
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point(color = "darkblue")
+```
+
+
+This plot maps the color to the value "darkblue". This effectively creates a new variable containing only the value "darkblue" and then it scales it with a color scale. 
+
+Because this value is discrete, the default color scale uses evenly spaced colors on the color wheel, and since there is only one value this color is pinkish. 
+```{r}
+ggplot(mpg, aes(cty, hwy)) +
+  geom_point(aes(color = "darkblue"))
+```
+
+
+
+
+This plot maps the color to the value "darkblue" but __overrides__ the default scale use ``scale_color_identityt()``. 
+
+```{r}
+ggplot(mpg, aes(cty, hwy)) + 
+  geom_point(aes(color = "darkblue")) + 
+  scale_color_identity()
+```
+
+
+
+5. If you want to display multiple layers with varying parameters, you can "name" each layer.
+
+This plot labels the two ``geom_smooth`` layers by the methods that they use. 
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_smooth(aes(color = "loess"), method = "loess", se = FALSE) + 
+  geom_smooth(aes(color = "lm"), method = "lm", se = FALSE) +
+  labs(color = "Method")
+```
+
+
+
+
+## 5.5 Geoms ##
+
+1. __Geometric Objects (or geoms)__: perform the actual rendering of the layer, controlling the type of plot that you create. 
+
+a. __Graphical Primitives__:
+
+(1) ``geom_blank()``: display nothing. Most useful for adjusting axes limits using data. 
+
+(2) ``geom_point()``: points.
+
+(3) ``geom_path()``: paths.
+
+(4) ``geom_ribbon()``: ribbons, a path with vetical thickness.
+
+(5) ``geom_segment()``: a line segment, specificed by start and end position. 
+
+(6) ``geom_rect()``: rectangles.
+
+(7) ``geom_polygon()``: filled polygons.
+
+(8) ``geom_text()``: text.
+
+
+
+
+b. __One Variable__:
+
+(1) Discrete:
+
+(a) ``geom_bar()``: display distribution of discrete variable.
+
+(2) Continuous:
+
+(a) ``geom_histogram()``: bin and count continuous variable, display with bars. 
+
+(b) ``geom_density()``: smoothed density estimate. 
+
+
+(c) ``geom_dotplot()``: stack individual points into a dot plot. 
+
+(d) ``geom_freqpoly()``: bin and count continuous variable, display with lines. 
+
+
+c. __Two Variables__:
+
+(1) Both Continuous
+
+(a) ``geom_point()``: scatterplot.
+
+(b) ``geom_quantile()``: smoothed quantile regression.
+
+(c) ``geom_rug()``: marginal rug plots.
+
+(d) ``geom_smooth()``: smoothed line of best fit. 
+
+(e) ``geom_text()``: text labels.
+
+(2) Show Distribution
+
+(a) ``geom_bin2d()``: bin into rectangles and count. 
+
+(b) ``geom_density2d()``: smoothed 2d density estimate. 
+
+(c) ``geom_hex()``: bin into hexagons and count. 
+
+(3) At Least One Discrete
+
+(a) ``geom_count()``: count number of point at distinct locations. 
+
+(b) ``geom_jitter()``: randomly jitter overlapping points.
+
+(4) One Continuous One Discrete
+
+(a) ``geom_bar(stat = "identity")``: a bar chart of precomputed summaries. 
+
+(b) ``geom_boxplot()``: boxplots.
+
+(c) ``geom_violin()``: show density of values in each group. 
+
+(5) One time One Continuous
+
+(a) ``geom_area()``: area plot.
+
+(b) ``geom_line()``: line plot. 
+
+(c) ``geom_step()``: step plot.
+
+
+(6) Display Uncertainty
+
+(a) ``geom_crossbar()``: vertical bar with center. 
+
+(b) ``geom_errorbar()``: error bars. 
+
+(c) ``geom_linearange()`` vertical line. 
+
+(d) ``geom_pointrange()``: vertical line with center. 
+
+(7) Spatial
+
+(a) ``geom_map()``: fast version of ``geom_polygon()`` for map data. 
+
+
+d. __Three Variables__:
+
+(1) ``geom_contour()``: contours.
+
+(2) ``geom_tile()``: tile the plane with rectangles.
+
+(3) ``geom_raster()``: fast version of ``geom_tile()`` for equal sized tiles. 
+
+
+2. Each geom has a set of aesthetics that it understands, some of which must be provided. 
+
+a. Point Geoms
+
+(1) Requires: x and y position
+
+(2) Understands: color, size, and shape aesthetics. 
+
+
+b. Bar Geoms
+
+(1) Requires: height (ymax)
+
+(2) Understands width, border color, and fill color.
+
+
+3. Each geoms differ primarily in the way that they are parameterized. 
+
+a. ``geom_tile()``: parameterized by location (x and y) and dimension (width and height).
+
+
+b. ``geom_rect()``: parameterized by top (ymax), bottom (ymin), left (xmin), and right (xmax).
+
+c. ``geom_polygon()``: parameterized by a four row data frame with the x and y positions of each corner.
+
+
+
+## 5.6 Stats ##
+
+1. __Statistical Transformation (or stat)__: transforms the data, typically by summarising it in some manner. 
+
+a. __Smoother__: a useful stat that calculates the smoothed mean of y, conditional on x. 
+
+2. Stats that can be created with a ``geom_`` function:
+
+a. __stat_bin()__: ``geom_bar()``, ``geom_freqpoly()``, ``geom_histogram()``
+
+b. __stat_bin2d()__: ``geom_bin2d``
+
+c. __stat_bindot()__: ``geom_dotplot()``
+
+d. __stat_binhex()__: ``geom_hex()``
+
+e. __stat_boxplot()__: ``geom_boxplot()``
+
+f. __stat_contour()__: ``geom_contour()``
+
+g. __stat_quantile()__: ``geom_quantile()``
+
+h. __stat_smooth()__: ``geom_smooth()``
+
+i. __stat_sum()__: ``geom_count()``
+
+
+
+3. Stats that can NOT be created by a ``geom_`` function:
+
+a. __stat_ecdf__: compute a epirical cumulative distribution plot.
+
+b. __stat_function__: compute y values from a function of x values. 
+
+c. __stat_sumary()__: summarise y values at distinct x values.
+
+d. __stat_summary2d()__, __stat_summary_hex()__: summarise binned values. 
+
+e. __stat_qq()__: perform calculations for a quantile-quantile plot. 
+
+f. __stat_spoke()__: covert angle and radius to position. 
+
+g. __stat_unique()__: remove duplicated rows. 
+
+
+
+4. Two way of using the above functions:
+
+a. Either add a ``stat_()`` function and override the default geom. 
+
+```{r}
+ggplot(mpg, aes(trans, cty)) + 
+  geom_point() + 
+  stat_summary(geom = "point", fun.y = "mean", color = "red", size = 4)
+```
+
+
+b. Or add a ``geom_()`` function and override the default stat. 
+
+```{r}
+ggplot(mpg, aes(trans, cty)) + 
+  geom_point() + 
+  geom_point(stat = "summary", fun.y = "mean", color = "red", size = 4)
+```
+
+
+
+### 5.6.1 Generated Variables ###
+
+1. A stat takes a data frame as input and returns a data fra e as output, and so a stat can add new variables to the original dataset. 
+
+a. It is possible to map aesthetic to these new variables. 
+
+b. __Example__: ``stat_bin``
+
+``stat_bin()`` used to make histograms, produces the following variables:
+
+(1) ``count``: the number of observations in each bin.
+
+(2) ``density``: the density of observations in each bin (percentage of tota/bar width)
+
+(3) ``x``: the center of the bin
+
+These generated variables can be used instead of the variables present in the original data. 
+
+
+2. To refer to a generated variable like density, ".." must surround the name. This prevents confusion in case the original daaset includes a variable with the same name as a generated variable, and it makes it clear to any later reader of the code that this variable was generated by a stat. 
+
+
+y-axis is count
+```{r}
+ggplot(diamonds, aes(price)) + 
+  geom_histogram(binwidth = 500)
+```
+
+
+
+y-axis is density
+```{r}
+ggplot(diamonds, aes(price)) + 
+  geom_histogram(aes(y = ..density..), binwidth = 500)
+```
+
+a. Convert count to density is particularly useful when you want to compare the distribution of multiple groups that have very different sizes. 
+
+
+## 5.7 Position Adjustments ##
+
+1. __Position Adjustments__: apply minor tweaks to the position of elements within a layer. 
+
+a. Three adjustments apply primarily to bars:
+
+(1) __position_stack()__: stack overlapping bars or areas on top of each other. 
+
+(2) __position_fill()__: stack overlapping bars, scaling so the top is always at 1. 
+
+(3) __position_dodge()__: place overlapping bars or boxplots side-by-side. 
+
+```{r}
+dplot + geom_bar(position = "identity", alpha = 1 / 2, color = "grey50")
+
+ggplot(diamonds, aes(color, color = cut)) +
+  geom_line(aes(group = cut), stat = "count") +
+  xlab(NULL) + ylab(NULL) + 
+  theme(legend.position = "none")
+```
+
+
+
+b. Three adjustments apply primarily to points:
+
+(1) __position_nudge()__: move points by a fixed offset. 
+
+(2) __position_jitter()__: add a little random noise to every position. 
+
+(3) __position_jitterdodge()__: dodge points within groups, then add a little random noise. 
+
+
+2. The way you pass parameters to position adjustments differs to stat and geoms. 
+
+a. Instead of including additionalarguments in ..., you construct a position adjustment object, supplying additional arguments in the call:
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) + 
+  geom_point(position = "jitter")
+
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(position = position_jitter(width = 0.05, height = 0.5))
+
+# shortcut for the previous ones
+ggplot(mpg, aes(displ, hwy)) +
+  geom_jitter(width = 0.05, height =0.5)
+```
+
+
+
+3. Continuous data typically does NOT overlap exactly, and when it does (because of high data density) minor adjustments, like jittering, are often insufficient to fix the problem. For this reason, position adjustments are generally most useful for __discrete data__.

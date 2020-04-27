@@ -1,0 +1,98 @@
+---
+title: "ggplot2_CH7"
+author: "Jingyang(Judy) Zhang"
+date: "4/27/2020"
+output: html_document
+---
+# CH7 Positioning #
+
+## 7.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+
+cdc <- read_delim(file = "data_vis_labs/data/cdc.txt", delim = "|") %>%
+  mutate(genhlth = factor(genhlth,
+    levels = c("excellent", "very good", "good", "fair", "poor")
+  ))
+```
+
+
+
+## Reading Quiz 7 ##
+
+Q1
+```{r}
+ggplot(cdc, aes(height, weight)) +
+  geom_point() +
+  facet_wrap(~genhlth, ncol = 2, dir = "v")
+  
+```
+
+
+
+Q2
+```{r}
+# Option 1
+ggplot(cdc, aes(height, weight)) +
+  geom_point() +
+  facet_grid(genhlth ~ smoke100)
+
+
+# Option 2
+ggplot(cdc, aes(height, weight)) +
+  geom_point() +
+  facet_grid(smoke100 ~ genhlth)
+
+
+# Option 3
+ggplot(cdc, aes(height, weight)) +
+  geom_point() +
+  facet_grid(genhlth ~ smoke100, scale = "free")
+
+
+# Option 2
+ggplot(cdc, aes(height, weight)) +
+  geom_point() +
+  facet_grid(smoke100 ~ genhlth, scale = "free")
+
+  
+```
+
+
+Q4
+
+```{r}
+cdc2 <- dplyr::select(cdc, -gender)
+
+ggplot(cdc, aes(height, weight)) +
+  geom_point(data = cdc2, color = "grey70") +
+  geom_point(aes(color = gender)) + 
+  facet_wrap(~gender)
+```
+
+
+
+
+Q5
+```{r}
+ggplot(cdc, aes(weight, wtdesire)) + 
+  geom_point() +
+  geom_smooth()
+
+
+# Option 1: x and y aesthetic switched
+ggplot(cdc, aes(wtdesire, weight)) + 
+  geom_point() +
+  geom_smooth()
+
+
+# Option 2: Coord flipped
+ggplot(cdc, aes(weight, wtdesire)) + 
+  geom_point() +
+  geom_smooth() + 
+  coord_flip()
+```
+

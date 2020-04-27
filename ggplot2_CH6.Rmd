@@ -15,7 +15,1133 @@ library(nlme)
 ```
 
 
+1. __Scale__: each scale is a function from a region in data space (the domain of the scale) to a region in aesthetic space (the  range of the scale). The axis or legend is the __inverse function__: it allows you to convert visual properties back to data. 
+
+a. Scales control the mapping from data to aesthetics. They took data and turn it into size, color, position or shape. 
+
+
+
 ## 6.2 Modifying Scales ##
+
+1. A scale is required for every aesthetic used on the plot. 
+
+
+__Example__: (Background scaling)
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class))
+```
+
+is equivalent to 
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  scale_x_continuous() +
+  scale_y_continuous() +
+  scale_color_discrete()
+```
+
+
+2. Default scales are named according to the aesthetic and the variable type: ``scale_y_continuous()``, ``scale_color_discrete()``, etc. 
+
+a. Need to add the scale when want to override the defaults. 
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  scale_x_continuous("A really awesome x axis ") +
+  scale_y_continuous("An amazingly great axis ")
+```
+
+b. The use of ``+`` to "add" scales is to override the existing scale. 
+
+__Example__: (Equivalent expression)
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  scale_x_continuous("Label 1") +
+  scale_x_continuous("Label 2")
+
+# Scale for 'x' is already present. Adding another scale for 'x' will replace the previous existing scale.
+```
+
+
+is equivalent to
+
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  scale_x_continuous("Label 2")
+```
+
+
+c. You can use a different scale altogether
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(aes(color = class)) +
+  scale_x_sqrt() + 
+  scale_color_brewer()
+```
+
+
+3. Scale functio is made up of three pieces separated by "_":
+
+a. ``scale``
+
+b. The name of the aesthetic (e.g. color, shape or x)
+
+c. The name of the scale (e.g. continuous, discrete, brewer)
+
+
+## 6.3 Guides: Legends and Axes ##
+
+1. __Guide__: the axis or legend associated with the scale. 
+
+a. Guides allow you to read observations from the plot and map them back to their original values. 
+
+
+b. In ggplo2, guides are produced automatically based on the layers in your plot. 
+
+(1) In base R graphics, whereyou are responsible for drawing the legends by hand. 
+
+(2) In ggplot2, you do NOT directly control the legend; instead you setup the data so that there is a clear mapping between data and aesthetics, and a lgend is generated for you automatically. 
+
+
+2. __Axes__ and __Legends__:
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-lboi{border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-g7sd{font-weight:bold;border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-g7sd">Axis</th>
+    <th class="tg-g7sd">Legend</th>
+    <th class="tg-g7sd">Argument Name</th>
+  </tr>
+  <tr>
+    <td class="tg-lboi">Label</td>
+    <td class="tg-lboi">Title</td>
+    <td class="tg-lboi">``name``</td>
+  </tr>
+  <tr>
+    <td class="tg-lboi">Tick &amp; Grid Line</td>
+    <td class="tg-lboi">Key</td>
+    <td class="tg-lboi">``break``</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">Tick Label</td>
+    <td class="tg-0pky">Key Label</td>
+    <td class="tg-0pky">``labels``</td>
+  </tr>
+</table>
+
+![](screenshots/ggplot2_figure6_1.png)
+
+
+
+
+### 6.3.1 Scale Title ###
+
+1. __name__: the first argument to the scale function. ``name`` is the axes/legend title. 
+
+a. You can supply text strings (using ``\n`` for line breaks) or mathematical expressions in ``quote()``. 
+
+__Example__ (``name`` argument in scale function)
+
+```{r}
+df <- data.frame(x = 1:2, y = 1, z = "a")
+
+p <- ggplot(df, aes(x, y)) + geom_point()
+
+p + scale_x_continuous(name = "X axis")
+
+p + scale_x_continuous(name = quote(a + mathematical ^ expression))
+```
+
+
+
+2. There are three helpers for tweaking labels:
+
+a. ``xlab``
+
+b. ``ylab``
+
+c. ``labs``
+
+
+__Example__: (Tweaking labels)
+
+```{r}
+p <- ggplot(df, aes(x, y)) + geom_point(aes(color = z))
+
+p + 
+  xlab("X axis") +
+  ylab("Y axis")
+
+
+p + labs(x = "X axis", y = "Y axis", color = "Color/nlegend")
+```
+
+
+
+
+3. There are two ways to remove the axis labels:
+
+a. Setting axis label to "" omits the label, but still allocates space.
+
+b. Setting axis label to NULL removes the label and its space. 
+
+
+
+### 6.3.2 Breaks and Labels ###
+
+1. __breaks__: the ``breaks`` argument controls which values appear as tick marks on axes and keys on legends. 
+
+a. Each break has an associated label, controlled by the ``labels`` argument. 
+
+b. If you set ``labels``, you must also set ``breaks``; otherwise, if data changes, the breaks will no longer align with the labels. 
+
+__Example__: (Breaks and labels)
+
+```{r}
+
+df <- data.frame(x = c(1, 3, 5) * 1000, y = 1)
+
+axs <- ggplot(df, aes(x, y)) + 
+  geom_point() +
+  labs(x = NULL, y = NULL)
+
+axs
+
+axs + scale_x_continuous(breaks = c(2000, 4000))
+
+axs + scale_x_continuous(breaks = c(2000, 4000), labels = c("2k", "4k"))
+
+
+```
+
+
+__Example__: (Breaks and labels)
+
+```{r}
+leg <- ggplot(df, aes(y, x, fill = x)) +
+  geom_tile() +
+  labs(x = NULL, y = NULL)
+
+leg
+
+leg + scale_fill_continuous(breaks = c(2000, 4000))
+
+leg + scale_fill_continuous(breaks = c(2000, 4000), labels = c("2k", "4k"))
+
+```
+
+
+
+c. If you want to relabel the breaks in a categorical scale, you can use a named labels vector
+
+__Example__: (Relabel the breaks in a categorical scale)
+
+```{r}
+df2 <- data.frame(x = 1:3, y = c("a", "b", "c"))
+
+ggplot(df2, aes(x, y)) + 
+  geom_point()
+
+ggplot(df2, aes(x, y)) + 
+  geom_point() + 
+  scale_y_discrete(labels = c(a = "apple", b = "banna", c = "carrot"))
+```
+
+
+
+d. To suppress breaks (and for axes, grid lines) or labels, set them to NULL:
+
+```{r}
+
+axs + scale_x_continuous(breaks = NULL)
+
+axs + scale_x_continuous(labels = NULL)
+
+```
+
+
+
+e. You can supply a function to ``breaks`` or ``labels``. 
+
+(1) The ``breaks`` function should have one argument, the limits (a numeric vector of length two), and should return a numeric vector of breaks. 
+
+(2) The ``labels`` function should accept a numeric vector of breaks and return a character vector of labels (the same length as the input). 
+
+
+2. The scales package provides a number of useful labelling functions:
+
+a. ``scales::comma_format()``: adds commas to make it easier to read large numbers
+
+
+b. ``scales::unit_format(unit, scale)``: adds a unit suffix, optionally scaling.
+
+c. ``scales::dollar_format(prefix, suffix)``: displays currency values, rounding to two decimal places and adding a prefix or suffix. 
+
+d. ``scales::wrap_format()``: wraps long labels into multiple lines. 
+
+
+__Example__: (Lalbelling functions)
+
+
+????????????????????????????????
+```{r}
+
+axs + scale_y_continuous(labels = scales::percent_format())
+
+axs + scale_y_continuous(labels = scales::dollar_format(prefix = "\u00A5"))
+
+leg + scale_fill_continuous(labels = scales::unit_format(accuracy = 1e-3, suffix = "k"))
+
+
+```
+
+
+
+3. You can adjust the minor breaks (the faint grid lines that appear between the major grid lines) by supplying a numeric vector of positions to the ``minor_breaks`` argument. 
+
+a. This is particularly useful for log scales
+
+__Example__: (Adjust the minor breaks)
+
+```{r}
+df <- data.frame(x = c(2, 3, 5, 10, 200, 3000), y =1)
+
+ggplot(df, aes(x, y)) +
+  geom_point() +
+  scale_x_log10()
+
+
+mb <- as.numeric(1:10 %o% 10 ^ (0:4))
+
+# The use of %o% to quickly generate the multiplication table
+
+# The minor breaks must be supplied on the transformed scale
+
+
+ggplot(df, aes(x, y)) +
+  geom_point() +
+  scale_x_log10(minor_breaks = log10(mb))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 6.4 Legends ##
+
+1. While the most important parameters are shared between axes and legends, there are some extra options that only apply to legends. 
+
+a. The legends are more complicated than axes because
+
+(1) A legend can display multiple aesthetics (e.g. color and shape), from multiple layers, and the symbol displayed in a legend varies based on the geom used in the layer. 
+
+(2) Axes always appear in the same place. Legends can appear in different places. 
+
+(3) Legends have considerably more details that can be tweaked: 
+(a) Vertical/horizontal display
+
+(b) Number of columns
+
+(c) Size of the ekys
+
+
+### 6.4.1 Layers and Legends ###
+
+
+1. A legend may need to draw symbols from multiple layers. 
+
+a. By default, a layer will only appear if the corresponding aesthetic is mapped to a variable with ``aes()``. 
+
+b. You can override whether or not a layer appears in the legend with ``show.legend = FALSE`` to prevent a layer from ever appearing in the legend. 
+
+c. ``show.legend = TRUE`` forces the legend to appear when it otherwise would not. Using ``TRUE`` can be useful in conjunction with the following trick to make points stand out:
+
+__Example__: (Use ``show.legend = TRUE`` to make points stand out)
+
+
+Without ``show.legend = TRUE``
+```{r}
+df <- data.frame(x = c(0, 0, 0), y = 1:3, z = c("a", "b", "c"))
+
+ggplot(df, aes(y, y)) +
+  geom_point(size = 4, color = "grey20") +
+  geom_point(aes(color = z), size = 2)
+```
+
+
+
+With ``show.legend = TRUE``
+```{r}
+ggplot(df, aes(y, y)) +
+  geom_point(size = 4, color = "grey20", show.legend = TRUE) +
+  geom_point(aes(color = z), size = 2)
+```
+
+
+d. Display geoms in the legend differently to the geoms in the plot: use the ``override.aes`` parameter of ``guide_legend()`` function. 
+
+```{r}
+norm <- data.frame(x = rnorm(1000), y = rnorm(1000))
+
+norm$z <- cut(norm$x, 3, labels = c("a", "b", "c"))
+
+ggplot(norm, aes(x, y)) +
+  geom_point(aes(color = z), alpha = 0.1)
+
+ggplot(norm, aes(x, y)) +
+  geom_point(aes(color = z), alpha = 0.1) +
+  guides(color = guide_legend(override.aes = list(alpha = 1)))
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+2. ggplot2 tries to use the fewest number of legends to accurately convey the aesthetics used in the plot. 
+
+a. ggplot2 combines legends where the same variable is mapped to different aesthetics.
+
+
+Both color and shape are mapped to the same variable, then only a single legend is necessary (i.e. combine the color legend with the shape legend).
+
+```{r}
+ggplot(df, aes(x, y)) + geom_point(aes(color = z))
+
+ggplot(df, aes(x, y)) + geom_point(aes(shape = z))
+
+ggplot(df, aes(x, y)) + geom_point(aes(shape = z, color = z))
+
+```
+
+b. In order for legends to be merged, they must have the same ``name``. So if you change the name of one of the scales, you will need to change it for all of them. 
+
+
+
+
+### 6.4.2 Legend Layout ###
+
+1. Modify theme settings with the ``theme()`` function. 
+
+a. The position and justification of legends are controlled by the theme setting ``legend.position``, which takes values "right", "left", "top", "bottom", or "none" (no legend). 
+
+
+```{r}
+df <- data.frame(x = 1:3, y = 1:3, z = c("a", "b", "c"))
+
+base <- ggplot(df, aes(x, y)) + 
+  geom_point(aes(color = z), size =3) +
+  xlab(NULL) +
+  ylab(NULL)
+
+
+base + theme(legend.position = "right") # the default
+
+base + theme(legend.position = "bottom")
+
+base + theme(legend.position = "none")
+```
+
+b. Switching betwee left/right and top/bottom modifies how the keys in each legend are laid out (horizontal or vertically), and how multiple legends are stacked (horizontal or vertically). If needed, you can adjust those options independently:
+
+(1) __legend.direction__: layout of items in legends ("horizontal" or "vertical")
+
+
+(2) __legend.box__: arrangement of multiple legends ("horizontal" or "vertical")
+
+
+(3) __legend.box.just__: justification of each legend within the overall bounding box, when ehre are multiple legends ("top", "bottom", "left", "right")
+
+
+c. __legend.position__: can be used to place the legend inside the plot. Setting ``legend.position`` to a numeric vector of length two. 
+
+(1) The numbers represent a relative location in the panel area: 
+
+(a) ``c(0, 1)``: top-left corner
+
+(b) ``c(1, 0)``: bottom right corner. 
+
+
+(2) You control which corner of the lgend the ``legend.position`` refers to with ``legend.justification``.
+
+
+```{r}
+base <- ggplot(df, aes(x, y)) +
+  geom_point(aes(color = z), size = 3)
+
+base + theme(legend.position = c(0, 1), legend.justification = c(0, 1))
+
+
+base + theme(legend.position = c(0.5, 0.5), legend.justification = c(0.5, 0.5))
+
+
+base + theme(legend.position = c(1, 0), legend.justification = c(1, 0))
+```
+
+
+
+d. __legend.margin = unit(0, "mm")__: can suppress the margin around the legends. 
+
+
+
+### 6.4.3 Guide Functions ###
+
+1. __Guide Functions__: ``guide_colorbar()`` and ``guide_legend`` offer additional control over the fine details of the legend.
+
+a. Legend guides can be used for any aesthetic (discrete or continuous) while the color bar guide can only be used with continuous color scales. 
+
+b. Override the default guide using the ``guide`` argument of the corresponding scale function, or the ``guides()`` helper function. 
+
+(1) ``guides()`` works like ``labs()``: you can override the default guide associated with each aesthetic. 
+
+```{r}
+df <- data.frame(x = 1, y = 1:3, z = 1:3)
+
+base <- ggplot(df, aes(x, y)) + geom_raster(aes(fill = z))
+
+base
+
+
+base + scale_fill_continuous(guide = guide_legend())
+
+base + guides(fill = guide_legend())
+
+```
+
+
+2. Most of the arguments to the guide function control the fine level details of the text color, size, font, etc. 
+
+
+
+
+
+#### 6.4.3.1 guide_legend() ####
+
+1. The legend guide displays individual keys in a table. THe most useful options are:
+
+a. ``nrow`` or ``ncol``: specify the dimensions of the table. 
+(1) ``byrow``: controls how the table is filled: FALSE fills it by column (the default), TRUE fills it by row. 
+
+
+```{r}
+df <- data.frame(x = 1, y = 1:4, z = letters[1:4])
+
+
+p <- ggplot(df, aes(x, y)) + geom_raster(aes(fill = z))
+
+p + guides(fill = guide_legend(ncol = 2))
+
+
+p + guides(fill = guide_legend(ncol = 2, byrow = TRUE))
+```
+
+
+
+b. ``reverse``: reverses the order of the keys. This is particularly useful when you have stacked bars because the default stacking and legend orders are different. 
+
+```{r}
+p <- ggplot(df, aes(1, y)) + geom_bar(stat = "identity", aes(fill = z))
+
+p
+
+p + guides(fill = guide_legend(reverse = TRUE))
+```
+
+
+c. ``override.aes``: override some of the aesthetic settings derived from each layer. This is useful if you want to make the lements in the leend more visually prominent. 
+
+d. ``keywidth`` and ``keyheight`` (along with ``default.unit``): allow you to specify the size of the keys. These are grid units, e.g. ``unit(1, "cm")``. 
+
+
+#### 6.4.3.2 guide_colorbar ####
+
+
+1. The color bar guide is designed for continuous ranges of colors. It outputs a rectangle over which the color gradient varies. The most important arguments are:
+
+a. ``barwidth`` and ``barheight`` (along with ``default.unit``): allow you to specify the size of the bar. These are grid units, e.g. ``unit(1, "cm")``. 
+
+b. ``nbin``: controls the number of slices. You may want to increase this from the default value of 20 if you draw a very long bar. 
+
+c. ``reverse``: flips the color bar to put the lowest value at the top. 
+
+
+
+```{r}
+df <- data.frame(x = 1, y = 1:4, z = 4:1)
+
+p <- ggplot(df, aes(x, y)) + geom_tile(aes(fill = z))
+
+p
+
+p + guides(fill = guide_colorbar(reverse = TRUE))
+
+p + guides(fill = guide_colorbar(barheight = unit(4, "cm")))
+```
+
+
+
+## 6.5 Limits ##
+
+1. __Limits (or Domain)__: the limits or domain of a scale are usually derived from the range of the data. 
+
+a. Two reasons to specify limits rather than relying on the data:
+
+
+(1) Want to make the limits smaller than the range of the data to focus on an interesting area of the plot. 
+
+(2) Want to make the limits larger than the range of the data to match up multiple plots. 
+
+
+b. The limits of position scales: they map directly to the ranges of the axes. But limits also apply to scales that have legends, like color, size, and shape. 
+
+
+c. Modify the limits using the ``limits`` parameter of the scale: 
+
+(1) For __continuous scales__: this should be a numeric vector of length two. If you only want to set the upper or lower limit, you can set the other value to ``NA``. 
+
+
+(2) For __discrete scales__: this is a character vector which enumerates all possible values. 
+
+
+```{r}
+df <- data.frame(x = 1:3, y = 1:3)
+
+base <- ggplot(df, aes(x, y)) + geom_point()
+
+base
+
+base + scale_x_continuous(limits = c(1.5, 2.5))
+
+base + scale_x_continuous(limits = c(0, 4))
+
+```
+
+
+
+2. Helper functions for modifying the limits: for $a<b$ and $a, b\in\mathbb{N}$
+
+a. ``xlim(a, b)``: a continuous scale from a to b
+
+b. ``ylim(b, a)``: a reversed continuous scale from b to a
+
+c. ``xlim("a", "b", "c")``: a discrete scale
+
+d. ``xlim(as.Date(c("2008-05-01", "2008-08-01")))``: a date scale from May 1 to August 1 2008. 
+
+
+```{r}
+base + xlim(0, 4)
+
+base + xlim(4, 0)
+
+base + lims(x = c(0, 4))
+```
+
+
+3. The range of the axes actually extends a little bit past the limits specified to ensure that the data does NOT overlap the axes. 
+
+a. To eliminate this space, set ``expland = c(0,0)``. This is useful in conjunction with ``geom_raster()``.
+
+```{r}
+ggplot(faithfuld, aes(waiting, eruptions)) + 
+  geom_raster(aes(fill = density)) +
+  theme(legend.position = "none")
+
+ggplot(faithfuld, aes(waiting, eruptions)) +
+  geom_raster(aes(fill = density)) + 
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  theme(legend.position = "none")
+```
+
+
+4. By default, any data outside the limits is converted to ``NA``. This means that setting the limits is NOT THE SAME as visually zooming in to a region of the plot. 
+
+a. To purely visual zooming and not affect the underlying data: use ``xlim``, ``ylim`` arguments to ``coord_cartesian()`` function. 
+
+b. You can override the limits setting outside limits data to ``NA`` with ``oob`` (out of bounds) argument to the scale. 
+
+(1) ``scales::censor()``: the default which replaces any value outside the limits with ``NA``. 
+
+(2) ``scales::squish()``: squishes all values into the range.
+
+
+```{r}
+df <- data.frame(x = 1:5)
+
+p <- ggplot(df, aes(x, 1)) + geom_tile(aes(fill = x), color = "white")
+
+p
+
+p + scale_fill_gradient(limits = c(2, 4))
+
+p + scale_fill_gradient(limits = c(2,4), oob = scales::squish)
+
+
+
+```
+
+
+## 6.6 Scale Toolbox ##
+
+1. As well as tweaking the options of the default scales, you can also override them completely with new scales. 
+
+a. Scales can be divided rougly into 4 families:
+
+(1) __Continuous Position Scales__: used to map integer, numeric, and date/time data to x and y position. 
+
+
+(2) __Color Scales__: used to map continuous and discrete data to colors. 
+
+
+(3) __Manual Scales__: used to map discrete variables to your choice of size, line type, shape or color. 
+
+
+(4) __Identity Scale__: paradoxically used to plot variables WITHOUT scaling them. This is useful if your data is already a vector of color names. 
+
+
+### 6.6.1 Continuous Position Scales ###
+
+1. Every plot has two position scales, x and y. 
+
+a. __scale_x_continuous()__ and __scale_y_continuous()__: the most common continuous position scales. They map data to the x and y axis. 
+
+(1) ``trans`` Argument: allowing the use of a variety of transformations. 
+
+Convert from fuel economy to fuel consumption
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  scale_y_continuous(trans = "reciprocal")
+```
+
+
+Log transform x and y axes
+```{r}
+ggplot(diamonds, aes(price, carat)) +
+  geom_bin2d() +
+  scale_x_continuous(trans = "log10") +
+  scale_y_continuous(trans = "log10")
+
+```
+
+
+(a) The transformation is carried out by a "transformer", which describes the transformation, its inverse, and how to draw the labels. 
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-lboi{border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-g7sd{font-weight:bold;border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-g7sd">Name</th>
+    <th class="tg-g7sd">Function $f(x)$</th>
+    <th class="tg-g7sd">Inverse $f^{-1}(y)$</th>
+    <th class="tg-0lax"><span style="font-weight:bold">Shortcut</span></th>
+  </tr>
+  <tr>
+    <td class="tg-lboi">asn</td>
+    <td class="tg-lboi">$tanh^{-1}(x)$</td>
+    <td class="tg-lboi">tanh(y)</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-lboi">exp</td>
+    <td class="tg-lboi">$e^{x}$</td>
+    <td class="tg-lboi">$\log(y)$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">identity</td>
+    <td class="tg-0pky">$x$</td>
+    <td class="tg-0pky">$y$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">log</td>
+    <td class="tg-0lax">$\log(x)$</td>
+    <td class="tg-0lax">$e^{y}$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">log10</td>
+    <td class="tg-0lax">$\log_{10}(x)$</td>
+    <td class="tg-0lax">$10^{y}$</td>
+    <td class="tg-0lax">``scale_x_log10()``</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">log2</td>
+    <td class="tg-0lax">$\log_{2}(x)$</td>
+    <td class="tg-0lax">$2^{y}$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">logit</td>
+    <td class="tg-0lax">$\log(\frac{x}{1-x})$</td>
+    <td class="tg-0lax">$\frac{1}{1+e(y)}$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">pow10</td>
+    <td class="tg-0lax">$10^{x}$</td>
+    <td class="tg-0lax">$\log_{10}(y)$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">probit</td>
+    <td class="tg-0lax">$\Phi(x)$</td>
+    <td class="tg-0lax">$\Phi^{-1}(y)$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">reciprocal</td>
+    <td class="tg-0lax">$x^{-1}$</td>
+    <td class="tg-0lax">$y^{-1}$</td>
+    <td class="tg-0lax"></td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">reverse</td>
+    <td class="tg-0lax">$-x$</td>
+    <td class="tg-0lax">$-y$</td>
+    <td class="tg-0lax">``scale_x_reverse()``</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">sqrt</td>
+    <td class="tg-0lax">$x^{1/2}$</td>
+    <td class="tg-0lax">$y^{2}$</td>
+    <td class="tg-0lax">``scale_x_sqrt()``</td>
+  </tr>
+</table>
+
+
+(b) Transformation can also be done manually. 
+
+Using ``scale_x_log10()`` (transformed scale) produces the same geom as ``log10(x)`` (transformed data), but the tick labels will be different. 
+
+<1> Use Transformed Scale: the axes will be labelled in the original data space.
+
+<2> Use Transformed Data: the axes will be labelled in the transformed data space. 
+
+In either case, the transformation occurs __before__ any statistical summaries. 
+
+(c) To transform __after__statistical computation, use ``coord_trans()``. 
+
+
+
+2. Date and date/time data are continuous variables with special labels. 
+
+a. ggplot2 works with ``Date`` (for dates) and ``POSIXct`` (for date/times) classes: if your dates are in a different format you will need to convert them with ``as.Date()`` or ``as.POSIXct()``. 
+
+b. ``scale_x_date()`` and ``scale_x_datetime``: work similarly to ``scale_x_continuous()`` but have special ``date_breaks`` and ``date_labels`` arguments that work in date-friendly units:
+
+(1) ``date_breaks`` and ``date_minor_breaks()``: allows you to position breaks by date units (years, months, weeks, days, hours, minutes, and seconds). 
+
+(a) __Example__: ``date_breaks = "2 weeks"`` will place a major tick mark every two weeks. 
+
+
+(2) ``date_labels``: controls the display of the labels using the same formatting strings as in ``strptime()`` and ``format()``. 
+
+
+
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-lboi{border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-g7sd{font-weight:bold;border-color:inherit;text-align:left;vertical-align:middle}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-g7sd">String</th>
+    <th class="tg-g7sd">Meaning</th>
+  </tr>
+  <tr>
+    <td class="tg-lboi">%S</td>
+    <td class="tg-lboi">Second (00-59)</td>
+  </tr>
+  <tr>
+    <td class="tg-lboi">%M</td>
+    <td class="tg-lboi">Minute (00-59)</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">%l</td>
+    <td class="tg-0pky">Hour, in 12-hour clock (1-12)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%I</td>
+    <td class="tg-0lax">Hour, in 12-hour clock (01-12)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%p</td>
+    <td class="tg-0lax">am/pm</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%H</td>
+    <td class="tg-0lax">Hour, in 24-hour clock (00-23)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%a</td>
+    <td class="tg-0lax">Day of week, abbreviated (Mon-Sun)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%A</td>
+    <td class="tg-0lax">Day of week, full (Monday-Sunday)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%e</td>
+    <td class="tg-0lax">Day of month (1-31)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%d</td>
+    <td class="tg-0lax">Day of month (01-31)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%m</td>
+    <td class="tg-0lax">Month, numeric (01-12)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%b</td>
+    <td class="tg-0lax">Month, abbreviated (Jan-Dec)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%B</td>
+    <td class="tg-0lax">Month, full (January-December)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%y</td>
+    <td class="tg-0lax">Year, without century (00-99)</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">%Y</td>
+    <td class="tg-0lax">Year, with century (0000-9999)</td>
+  </tr>
+</table>
+
+
+
+```{r}
+base <- ggplot(economics, aes(date, psavert)) +
+  geom_line(na.rm = TRUE) +
+  labs(x = NULL, y = NULL)
+
+
+base
+
+
+base + scale_x_date(date_labels = "%y", date_breaks = "5 years")
+
+
+
+base + scale_x_date(
+  limits = as.Date(c("2004-01-01", "2005-01-01")),
+  date_labels = "%b %y",
+  date_minor_breaks = "1 month"
+)
+
+
+base + scale_x_date(
+  limits = as.Date(c("2004-01-01", "2004-06-01")),
+  date_labels = "%m/%d",
+  date_minor_breaks = "2 weeks"
+)
+```
+
+
+
+
+### 6.6.2 Color ###
+
+1. __HCL Color Space__: has three components of hue, chroma, and luminance:
+
+a. __Hue__: a number between 0 and 360 (an angle) which gives the "color" of the color: like blue, red, orange, etc. 
+(1) Hues are not perceived as being ordered: e.g. green does NOT see "larger" than red.
+
+
+b. __Chroma__: the purity of a color. A chroma of 0 is grey, and the maximum alue of chroma varies with luminance. 
+
+(1) Perception of chroma is ordered. 
+
+c. __Luminance__: the lighteness of the color. A luminance of 0 produces black, and a luminance of 1 produces white.
+
+(1) Perception of luminance is ordered. 
+
+
+2. __Problem with Color-Blindness__:
+
+a. Avoid red-gree contrasts
+
+b. dichromat Package: provides tools for simulating color blindness, and a set of color schemes known to work well for color-blind people. 
+
+c. Provide redundant mappings to other aesthetics like size, line type or shape. 
+
+
+
+
+#### 6.6.2.1 Continuous ####
+
+1. Color gradients are often used to show the height of a 2d surface. 
+
+2. There are four continuous color scales:
+
+a. ``scale_color_gradient()`` and ``scale_fill_gradient()``: a two-color gradient, low-high (light blue-dark blue). This is the default scale for continuous color, and is the same as ``scale_color_continuous()``. 
+
+(1) Arguments ``low`` and ``high``: control the colors at either end of the gradient. 
+
+
+
+(2) For continuous color scales: keep hue constant, and vary chroma and luminance. 
+
+
+b. ``scale_color_gradient2()`` and ``scale_fill_gradient2()``: a three-color gradient, low-med-high (red-white-blue). As well as ``low`` and ``high`` colors, these scales also have a ``mid`` color for the color of the midpoint. 
+
+(1) The midpoint defaults to 0, but can be set to any value with the ``midpoint`` argument. 
+
+
+c. ``scale_color_gradientn()`` and ``scale_fill_gradientn()``: a custom n-color gradient. This is useful if you have colors that are meaningful for your data (e.g. black body colors or standard terrain colors), or you'd like to use a palette produced by another package. 
+
+
+d. ``scale_color_distiller()`` and ``scale_fill_gradient()``: apply the Color-Brewer color scales to continuous data.
+
+
+
+3. All continuous color scales have an ``na.value`` parameter that controls what color is used for missing values (including values outside the range of the scale limits). 
+
+a. By default it is set to grey, which will stand out when you use a colorful scale. 
+
+
+
+#### 6.6.2.2 Discrete ####
+
+1. There are four color scales for discrete data. 
+
+
+a. ``scale_color_hue()``: the default color scheme. It picks evenly spaced hues around the HCL color wheel. This works well for up to about eight colors, but after that it becomes hard to tell the different colors apart. 
+
+(1) Control the default chroma and luminance, and the range of hues, with ``h``, ``c``, and ``l`` arguments. 
+
+
+```{r}
+df <- data.frame(x = c("a", "b", "c", "d"), y = c(3, 4, 1, 2))
+
+
+bars <- ggplot(df, aes(x, y, fill = x)) +
+  geom_bar(stat = "identity") +
+  labs(x= NULL, y = NULL) +
+  theme(legend.position = "none")
+
+bars
+```
+
+
+Change luminance
+```{r}
+
+bars + scale_fill_hue(c = 40)
+
+```
+
+
+Change chroma
+```{r}
+bars + scale_fill_hue(h = c(180, 300))
+
+```
+
+
+b. ``scale_color_brewer()``: uses handpicked "ColorBrewer" colors. These colors have been designed to work well ina wide variety of situations, although the focus is on maps and so the colors tend to work better when displayed in large areas. 
+
+
+c. ``scale_color_grey()``: maps discrete data to grays, from light to dark. 
+
+
+
+d. ``scale_color_manual()``: useful if you have your own discrete color palette. 
+
+
+2. One set of colors is NOT uniformly good for all purposes:
+
+a. Bright Colors: work well for points, but are overwhelming on bars. 
+
+b. Subtle Colors: work well for bars, but are hard to see on points. 
+
+
+
+### 6.6.3 The Manual Discrete Scale ###
+
+1. The __discrete scales__, ``scale_linetype()``, ``scale_shape()``, and ``scale_size_discrete()`` basically have not options. These scales are just a list of valid values that are mapped to the unique discrete values. 
+
+2. If you want to customize these scales, you need to create your own new scale with the manual scale: ``scale_shape_manual()``, ``scale_linetype_manual()``, ``scale_color_manual()``. 
+
+a. The manual scale has on eimportant argument, ``values``, where you specify the values that the scale should produce. 
+
+
+
+### 6.6.4 The Indentity Scale ###
+
+1. __Identity Scale__: the identity scales is used when your data is already scaled, when the data and aesthetic spaces are the same. 
+
+a. A legend is unnecessary because the point color represents itself: the data and aesthetic spaces are the same. 
+
+
+```{r}
+head(luv_colours)
+
+ggplot(luv_colours, aes(u, v)) +
+  geom_point(aes(color = col), size = 3) +
+  scale_color_identity() +
+  coord_equal()
+```
+
 
 
 
@@ -47,5 +1173,17 @@ ggplot(df, aes(x,y)) +
 Q7 By default, any data outside the limits is coverted to ``NA``. This means that setting the limits is NOT the SAME as visually zooming in to a region of the plot.
 
 
-Q8
+Q10
+
+```{r}
+d <- tibble(x = 1:100, a = rnorm(100, 1000, 100), b = rnorm(100, 1000, 100))
+
+ggplot(d, aes(x)) +
+  geom_line(aes(y = a, color = "First")) + 
+  geom_line(aes(y = b, color = "Second")) +
+  scale_colour_manual("Week", values = c("First" = "yellow", "Second" = "pink")) +
+  labs(x = "Concert Time", y = "Volume") +
+  ggtitle(" Beyonce's Drowd Volume from Coachella")
+```
+
 
