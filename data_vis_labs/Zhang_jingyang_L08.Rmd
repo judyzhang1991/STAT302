@@ -132,8 +132,6 @@ athletes_dat <- Aus_athletes %>%
 
 <br>
 
-????? white borders of p2?????
-????legend????
 ```{r}
 
 
@@ -156,10 +154,17 @@ exer2_p3 <- ggplot(athletes_dat, aes(sport, pcBfat)) +
   geom_boxplot(aes(fill = sex, 
                    color = sex), width = 0.5) +
   scale_color_manual(values = c("#D55E00", "#0072B2"), 
-                     labels = c("female", "male")) +
+                     labels = c("female", "male"), 
+                     # guide = FALSE is NOT necessary,
+                     # it is used to turn off one of the legend
+                     guide = FALSE ) +
+  # the 40 at the end of #D55E00 adds the transparency
   scale_fill_manual(values = c("#D55E0040", "#0072B240"),   
                     labels = c("female", "male")) + 
-  guides(fill = guide_legend(override.aes = list(fill = c("#D55E00D0", "#0072B2D0"))), color = guide_legend(override.aes = list(color = c("#D55E00D0", "#0072B2D0")))) +
+  guides(color = guide_legend(override.aes = list(
+    color = NA, # remove the outline of boxplot
+    fill = c("#D55E00D0", "#0072B2D0")
+    ))) +
   labs(fill = NULL,  color = NULL, 
        y = "% body fat", x = NULL) +
 theme_minimal() + 
@@ -175,6 +180,25 @@ plot_grid(exer2_row1, exer2_p3, ncol = 1)
 
 ```
 
+
+Method 2 of making exer2_p3
+```{r, eval = FALSE}
+exer2_p3 <- ggplot(athletes_dat, aes(sport, pcBfat)) + 
+  geom_boxplot(aes(fill = sex, 
+                   color = sex), width = 0.5) +
+  scale_color_manual(values = c("#D55E00", "#0072B2"), 
+                     labels = c("female", "male")) +
+  # the 40 at the end of #D55E00 adds the transparency
+  scale_fill_manual(values = c("#D55E0040", "#0072B240"),   
+                    labels = c("female", "male")) + 
+  guides(fill = guide_legend(override.aes = list(fill = c("#D55E00D0", "#0072B2D0"))), color = guide_legend(override.aes = list(color = c("transparent", "transparent")))) +
+  labs(fill = NULL,  color = NULL, 
+       y = "% body fat", x = NULL) +
+theme_minimal() + 
+  theme(legend.position = c(1, 1), 
+        legend.justification = c(1, 1), 
+        legend.direction = "horizontal")
+```
 
 
 

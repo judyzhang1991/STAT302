@@ -160,6 +160,17 @@ ggplot(dat2, aes(theta, obs)) +
 
 
 
+```{r}
+ggplot(dat2, aes(theta, obs)) + 
+  geom_point(aes(color = larger_than), alpha = 0.8, size = 2, show.legend = FALSE) + 
+  xlim(dat1$theta) + 
+  stat_function(fun = sin, color = "#56B4E9", size = 1.3) + 
+  scale_color_manual(values = c("darkgreen", "red")) + 
+  labs(x = quote(theta), y = quote(sin(theta))) + 
+  theme_minimal()
+```
+
+
 
 <br>
 
