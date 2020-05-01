@@ -1,0 +1,73 @@
+---
+title: "ggplot2_CH8"
+author: "Jingyang(Judy) Zhang"
+date: "4/30/2020"
+output: html_document
+---
+# CH8 Theme #
+
+## 8.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+
+cdc <- read_delim(file = "data_vis_labs/data/cdc.txt", delim = "|") %>%
+  mutate(genhlth = factor(genhlth,
+    levels = c("excellent", "very good", "good", "fair", "poor")
+  ))
+```
+
+
+
+## Reading Quiz 8 ##
+
+Q1
+```{r}
+ggplot(cdc, aes(weight, wtdesire)) + 
+  geom_point() +
+  theme_classic()
+
+
+```
+
+
+Q2
+```{r}
+mpgbase <- ggplot(mpg, aes(manufacturer, hwy)) + 
+  geom_point()
+
+mpgbase + labs(title = "Highway MPG by Manufacturer") +
+  theme(plot.title = element_text(size =16, color = "darkgreen"), 
+        panel.grid.major = element_line(size = 2), 
+        panel.grid.minor.y = element_line(color = "lightblue", size = 2), 
+        plot.background = element_rect(fill = "grey90"))
+```
+
+
+
+Q3
+```{r}
+mpgbase <- ggplot(mpg, aes(manufacturer, hwy)) + 
+  geom_point() +
+  labs(title = "Highway MPG by Manufacturer")
+
+mpgbase + 
+  theme(axis.text.x = element_text(angle = -35, vjust = 1, hjust = 0), 
+        axis.ticks.length = unit(0.5, "cm"))
+
+```
+
+
+Q5
+```{r}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point(color = "plum") + 
+  facet_wrap(~manufacturer) + 
+  theme(strip.background = element_rect(fill = "plum2", color = "grey30"), 
+        strip.text = element_text(color = "white"), 
+        axis.title = element_text(color = "plum3", size = 20), 
+        axis.text = element_text(color = "plum4"))
+
+```

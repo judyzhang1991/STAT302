@@ -12,6 +12,7 @@ library(tidyverse)
 library(reshape)
 library(ggpubr)
 library(nlme)
+library(plyr)
 
 cdc <- read_delim(file = "data_vis_labs/data/cdc.txt", delim = "|") %>%
   mutate(genhlth = factor(genhlth,
@@ -165,7 +166,238 @@ ggplot(mpg, aes(cty, model)) +
 ```
 
 
+
+
+### 7.2.4 Missing Facetting Variables ###
+
+1. One of datasets with missing the facetting variables:
+ggplot will display the map in every facet: missing facetting variables are treated like they have all values. 
+
+__Example__: (Missing Facetting Variables)
+
+```{r}
+df1 <- data.frame(x = 1:3, y = 1:3, gender = c("f", "f", "m"))
+
+df2 <-data.frame(x = 2, y = 2)
+
+ggplot(df1, aes(x, y)) +
+  geom_point(data = df2, color = "red", size =2) +
+  geom_point() +
+  facet_wrap(~gender)
+```
+
+a. This technique is particularly useful when you add annotations to make it easier to compare between facets. 
+
+
+### 7.2.5. Grouping vs. Facetting ###
+
+1. __Facetting__ is an alternative to using __aesthetics__ (like color, shape or size) to different groups.
+
+a. With facetting: each group is quite far apart in its own panel, and there is no overlap between the groups. 
+
+(1) This if group if the groups overlap a lot, but it does make smale differences harder to see. 
+
+b. With using aesthetics to different groups: the groups are close together and may overlap, but small differences are easier to see. 
+
+2. Comparison between facets often benefit from:
+
+a. Some thoughtful annotation. 
+
+__Example__: (Show the mean of each group in every panel)
+
+```{r, eval = FALSE}
+df <- data.frame(
+  x = rnorm(120, c(0, 2, 4)), 
+  y = rnorm(120, c(1, 2, 1)), 
+  z = letters[1:3]
+)
+
+df_sum <- df %>%
+  group_by(z) %>%
+  summarise(x = mean(x), y = mean(y)) %>%
+  rename(z2 = z)
+
+
+ggplot(df, aes(x, y)) +
+  geom_point() +
+  geom_point(data = df_sum, aes(color = z2), size = 4) +
+  facet_wrap(~z)
+
+```
+
+
+b. Put all the data in the background of each panel:
+
+```{r}
+df2 <- select(df, -z)
+
+ggplot(df, aes(x, y)) +
+  geom_point(data = df2, color = "grey70") +
+  geom_point(aes(color = z)) + 
+  facet_wrap(~z)
+```
+
+
+### 7.2.6 Continuous Variables ###
+
+1. To facet continuous variables, you must first discretise them. 
+
+a. There are three helper functions to do:
+
+(1) __cut_interval(x, n)__: divide the data into ``n`` bins each of the same length. 
+
+(2) __cut_wdith(x, width)__: divide the data into bins of width ``width``. 
+
+(3) __cut_number(x, n = 10): divide the data into ``n`` bins each containing (approximately) the same number of points. 
+
+__Example__: (Bins of width 1; six bins of equal length, six bins containing equal numbers of bins)
+```{r}
+mpg$disp_w <- cut_width(mpg$displ, 1)
+
+mpg$disp_i <- cut_interval(mpg$displ, 6)
+
+mpg$disp_n <- cut_number(mpg$displ, 6)
+
+
+plot <- ggplot(mpg, aes(cty, hwy)) + 
+  geom_point() +
+  labs(x = NULL, y = NULL)
+
+plot + facet_wrap(~disp_w, nrow = 1)
+
+plot + facet_wrap(~disp_i, nrow = 1)
+
+plot + facet_wrap(~disp_n, nrow = 1)
+
+
+
+
+```
+
+
+b. Note that the facetting formula does NOT evaluate functions, so you must first create a new variable containing the discretised data. 
+
+###
+
+
+
+## 7.3 Coordinate Systems ##
+
+1. Coordinates systems have two main jobs: 
+
+a. Combine the two position aesthetics to produce a 2d position on the plot. 
+
+(1) The position aesthetics are called ``x`` and ``y``, but they might be better called position 1 and 2 because their meaning depends on the corrdinate system used. 
+
+(a) Polar Coordinate System: angle and radius. 
+
+(b) Map Coordinate System: latitude and longitude. 
+
+b. In coordination with the faceter, coordinate systems draw axes and panel backgrouns. 
+
+(1) While the scales control the values that appear on the axes, and how they map from data to position, it is the coordinate system which actually draws them. 
+
+(2) This is because their appearance depends on the coordinate system: an angle axis looks quite different than an x axis. 
+
+
+2. There are two types of coordinate system:
+
+a. __Linear Coordinate Systems__: preserve the shape of geoms:
+
+(1) __coord_cartesian()__: the default Cartesian coordinate system, where the 2d position of an element is given by the combination of the ``x`` and ``y`` positions. 
+
+(2) __coord_flip()__: Cartesian coordinate system with ``x`` and ``y`` axes flipped. 
+
+(3) __coord_fixed()__: Cartesian coordinate system with a fixed aspect ratio. 
+
+
+b. __Non-linear Coordinate Systems__: can change the shapes: a straight line may no longer be straight. The closest distance between two points may no longer be a straight line. 
+
+(1) __coord_map()/coord_quickmap()___: map projections. 
+
+(2) __coord_polar()__: polar coordinates. 
+
+(3) __coord_trans()__: apply arbitrary transformations to ``x`` and ``y`` positions, after the data has been processed by the stat. 
+
+
+
+
+## 7.4 Linear Coordinate Systems ##
+
+
+1. There are three linear coordiante systems: ``coord_cartesian()``, ``coord_flip()``, ``coord_fixed()``. 
+
+### 7.4.1 Zoooming into a Plot with coord_cartesain() ###
+
+1. __coord_cartesian()__: has arguments ``xlim`` and ``ylim``. 
+
+a. Compare with the limits argument of the scales:
+
+(1) When setting scale limits, any data outside the limits is thrown away
+
+(2) Setting coordinate system limits we still use all the data, but we only display a small region of the plot. Setting coordinate system limits is like looking at the plot under a magnifying glass. 
+
+
+__Example__: (Compare setting limits with scales and with coordinates)
+
+```{r}
+base <- ggplot(mpg, aes(displ, hwy)) + 
+  geom_point()+
+  geom_smooth()
+
+
+
+# Full data
+base
+
+
+# Scaling to 5 -- 7 throws away data outside that range
+base + scale_x_continuous(limits = c(5, 7))
+
+# Zooming to 5 -- 7 keeps all the data but only shows some of it
+
+base + coord_cartesian(xlim = c(5, 7))
+
+
+```
+
+
+### 7.4.2 Flipping the Axes with coord_flip() ###
+
+1. Most statistics and geoms assume you are interested in ``y`` values conditional on ``x`` values (e.g., smooth, summary, boxplot, line): in most statistical models, the ``x`` values are assumed to be measured without error. 
+
+2. If interested in ``x`` conditional on ``y`` (or you just want to rotate the plot 90 degrees), you can __coord_flip()__ to exchange the ``x`` and ``y`` axes. 
+
+
+__Example__: (Compare flip coordinates with exchange variables mapped to ``x`` and ``y``)
+
+```{r}
+ggplot(mpg, aes(displ, cty)) +
+  geom_point() +
+  geom_smooth()
+
+# Exchanging cty and displ rotates the plot 90 degrees, but the smooth is fit to the rotate data
+
+ggplot(mpg, aes(cty, displ)) +
+  geom_point() +
+  geom_smooth()
+
+# coord_flip() fits the smooth to the original data, and then rotates the output
+
+ggplot(mpg, aes(displ, cty)) +
+  geom_point() +
+  geom_smooth() +
+  coord_flip()
+```
+
+
+
+
+
+
+
 ## Reading Quiz 7 ##
+
 
 Q1
 ```{r}
@@ -239,4 +471,49 @@ ggplot(cdc, aes(weight, wtdesire)) +
   geom_smooth() + 
   coord_flip()
 ```
+
+
+
+### 7.4.3 Equal Scales with coord_fixed() ###
+
+1. __coord_fixed()__: fixes the ratio of length on the ``x`` and ``y`` axes. The default ``ratio`` ensures that the ``x`` and ``y`` axes have equal scales: i.e. 1 cm along the ``x`` axis represents the same range of data as 1cm along the ``y`` axis. 
+
+a. The aspect ratio will also be set to ensure that the mapping is maintained regardless of the shape of the output device. 
+
+
+## 7.5. Non-linear Coordinate Systems ##
+
+1. __Non-linear Coordinates__: can change the shape of geoms. 
+
+a. __Polar Coordinate__: a rectangles becomes an arc. 
+
+b. __Map Projection__: the shortest path between two points is NOT necessarily a straight line. 
+
+__Example__: (Rectangle rendered in a few different coordinate sysmtes)
+
+```{r}
+rect <- data.frame(x = 50, y = 50)
+
+line <- data.frame(x = c(1, 200), y = c(100, 1))
+
+base <- ggplot(mapping = aes(x, y)) + 
+  geom_tile(data = rect, aes(width = 50, hegith = 50)) +
+  geom_line(data = line) +
+  xlab(NULL) + ylab(NULL)
+
+
+base
+
+base + coord_polar("x")
+
+base + coord_polar("y")
+
+base + coord_flip
+
+base + coord_trans(y = "log10")
+
+base + coord_fixed()
+
+```
+
 
