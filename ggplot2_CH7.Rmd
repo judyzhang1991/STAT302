@@ -516,4 +516,211 @@ base + coord_fixed()
 
 ```
 
+2. __Transformation__: the transformation takes part in two steps.
+
+a. The parameterization of each geom is changed to be purely location-based, rather than location- and dimention-based. This effectively converts all geoms to a combination of points, lines and polygons. 
+
+b. Once all geoms have a location-based representation, the next step is to transform each location into the new coordinate system. 
+
+(1) Easier to transform points as a point is still a point no matter what coordinate system you are in. 
+
+(2) Lines and polygons are harder as a straight line may no longer be straight in the new coordinate system. 
+
+Have to assume that all coordinate transformations are smooth, in the sense that all very short lines will still be very short straight lines in the new coordinate system. 
+
+__Munching__: With the assumption, munching is the process of transforming lines and polygons by breaking them up into many small line segments and transforming each segment. 
+
+
+__Example__: (Munching Process)
+
+1. Start with a line parameterized by its two endpoints:
+```{r}
+df <- data.frame(r = c(0, 1), theta = c(0, 3 / 2 * pi))
+
+ggplot(df, aes(r, theta)) +
+  geom_line() +
+  geom_point(size = 2, color = "red")
+```
+
+
+
+2. We break it into multiple line segents, each with two endpoints:
+
+```{r}
+interp <- function(rng, n){
+  seq(rng[1], rng[2], length = n)
+}
+
+munched <- data.frame(
+  r = interp(df$r, 15),
+  theta = interp(df$theta, 15)
+)
+
+ggplot(munched, aes(r, theta)) +
+  geom_line() +
+  geom_point(size = 2, color = "red")
+```
+
+
+
+3. We transform the locations of each piece:
+
+```{r}
+transformed <- transform(munched, 
+                         x = r * sin(theta), 
+                         y = r * cos(theta))
+
+ggplot(transformed, aes(x, y)) + 
+  geom_path() + 
+  geom_point(size = 2, color = "red") +
+  coord_fixed()
+```
+
+
+
+
+### 7.5.1 Transformations with coord_trans() ###
+
+1. We can transform the data in two places:
+
+a. At the scale level
+
+b. At the coordinate system level
+
+2. __coord_trans()__: has arguments ``x`` and ``y`` which should be strings naming the transformer or transformer objects. 
+
+a. Transforming at the __scale level__ occurs __before__ statistics are computed and does NOT cahnge the shape of the geom. 
+
+b. Transforming at the __coordinate system level__ occurs __after__ the statistics have been computed, and does NOT affect the shape of the geom. 
+
+Using both together allows us to model the data on a transformed scale and them backtransform it for interpretation: a common pattern in analysis.
+
+
+__Example__: (Transformations with ``coord_trans()``)
+
+Linear model on original scale is poor fit
+```{r}
+
+
+
+base <- ggplot(diamonds, aes(carat, price)) +
+  stat_bin2d() +
+  geom_smooth(method = "lm") +
+  xlab(NULL) +
+  ylab(NULL) + 
+  theme(legend.position = "none")
+
+base
+
+```
+
+
+Better fit on log scale, but harder to interpret
+
+```{r}
+base + 
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+
+Fit on log scale, then backtransform to original. 
+Hilights lack of expensive dimaonds with large carats
+
+```{r}
+pow10 <- scales::exp_trans(10)
+
+base + 
+  scale_x_log10() +
+  scale_y_log10() +
+  coord_trans(x = pow10, y = pow10)
+```
+
+
+
+### 7.5.2 Polar Coordinates with coord_polar() ###
+
+1. __Polar Coordinates__: using polar coordinates gives rise to pie charts and wind roses (from bar geoms), and radar charts (from line geoms). 
+
+a. Polar coordinates are often used for circular data, particularly time or direction, but the perceptual properties are not good because the angle is harder to perceive for small radii than it is for large radii. 
+
+b. The ``theta`` argument determines which position variable is mapped to angle (by default, ``x``) and which to radius. 
+
+__Example__: (Turn a bar into a pir chart or a bullseye chart by changing the coordinate system)
+
+```{r}
+
+base <- ggplot(mtcars, aes(factor(1), fill = factor(cyl))) +
+  geom_bar(width = 1) +
+  theme(legend.position = "none") +
+  scale_x_discrete(NULL, expand = c(0, 0)) +
+  scale_y_continuous(NULL, expand = c(0, 0))
+
+# Stacked barchart
+base
+
+
+# Pie chart
+
+base + coord_polar(theta = "y")
+
+
+# The bullseye chart
+
+base + coord_polar()
+
+
+
+```
+
+
+
+### 7.5.3 Map Projections with coord_map() ###
+
+1. __Maps__: maps are intrinsically of spherical data. 
+
+a. Simply plotting raw longitudes and latitudes is misleading, so we mush __project__ the data. 
+
+b. There are two ways to do projections:
+
+(1) __coord_quickmap()__: a quick and dirty approximation that sets the aspect ratio to ensure than 1m of latitutde and 1m of longitude are the same distance in the middle of the plot. These is a reaonable place to start for smaller regions and is very fast. 
+
+__Example__: (Approximate projection)
+
+```{r}
+nzmap <- ggplot(map_data("nz"), aes(long, lat, group = group)) +
+  geom_polygon(fill = "white", color = "black") +
+  xlab(NULL) + ylab(NULL)
+
+# Plot it in cartesian coordinates
+nzmap
+
+# With the aspect ratio approximation
+nzmap + coord_quickmap()
+```
+
+
+
+(2) __coord_map()__: uses the mapproj package to do a formal map projection. It takes the same arguments as ``mapproj::mapproject()`` for controlling the projection. It is much slower than ``coord_quickmap()`` as it must munch the data and transform each piece. 
+
+
+__Example__: (Formal projection)
+
+```{r}
+world <- map_data("world")
+
+worldmap <- ggplot(world, aes(long, lat, group = group)) + 
+  geom_path() +
+  scale_y_continuous(NULL, breaks = (-2:3) * 30, labs = NULL) +
+  scale_x_continuous(NULL, breaks = (-4:4) * 45, labels = NULL)
+
+worldmap + coord_map()
+
+
+# Some other projections
+
+worldmap + coord_map("ortho")
+
+worldmap + coord_map("stereographic")
+```
 
