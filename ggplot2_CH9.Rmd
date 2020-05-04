@@ -1,0 +1,35 @@
+---
+title: "ggplot2_CH9"
+author: "Jingyang(Judy) Zhang"
+date: "5/3/2020"
+output: html_document
+---
+# CH9 Data Analysis #
+
+## 9.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+library(nlme)
+
+cdc <- read_delim(file = "data_vis_labs/data/cdc.txt", delim = "|") %>%
+  mutate(genhlth = factor(genhlth,
+    levels = c("excellent", "very good", "good", "fair", "poor")
+  ))
+```
+
+
+
+## Reading Quiz  9##
+
+Q4
+Using ``subset()`` selects both observations and variables but ``filter`` works with only observations. 
+What funtion works with only variables?
+__select()__
+
+Q5
+When NOT using the pipe another way to write z %>% g(x, y) %>% h(w) %>% q() is:
+
+__q(h(g(z,x,y),w))__ ORDER MATTERS
+

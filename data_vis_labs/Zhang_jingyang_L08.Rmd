@@ -34,8 +34,11 @@ load("data/Aus_athletes.rda")
 
 # Read in the cdc dataset
 cdc <- read_delim(file = "data/cdc.txt", delim = "|") %>%
+  
   mutate(genhlth = factor(genhlth,
+                          
     levels = c("excellent", "very good", "good", "fair", "poor"),
+    
     labels = c("Excellent", "Very Good", "Good", "Fair", "Poor")
   ))
 
@@ -68,12 +71,18 @@ Using the `titanic.rda` dataset, recreate the following graphic as precisely as 
 
 # New facet label names for dose variable
 survival.labs <- c("died", "survived")
+
 names(survival.labs) <- c("0", "1")
 
 ggplot(titanic, aes(sex)) + 
+  
   geom_bar(aes(fill = sex), show.legend = FALSE) + 
-  facet_grid(survived ~ class, labeller = labeller(survived = survival.labs)) +
+  
+  facet_grid(survived ~ class, 
+             labeller = labeller(survived = survival.labs))+
+  
   scale_fill_manual(values = c("#D55E00D0", "#0072B2D0")) + 
+  
   theme_minimal() 
   
 
@@ -98,16 +107,24 @@ Use the `athletes_dat` dataset --- extracted from `Aus_althetes.rd` --- to recre
 ```{r}
 # Get list of sports played by BOTH sexes
 both_sports <- Aus_athletes %>%
+  
   distinct(sex, sport) %>%
+  
   count(sport) %>%
+  
   filter(n == 2) %>%
+  
   pull(sport)
 
 # Process data
 athletes_dat <- Aus_athletes %>%
+  
   filter(sport %in% both_sports) %>%
+  
   mutate(sport = case_when(
+    
     sport == "track (400m)" ~ "track",
+    
     sport == "track (sprint)" ~ "track",
     TRUE ~ sport
     )
@@ -134,45 +151,69 @@ athletes_dat <- Aus_athletes %>%
 
 ```{r}
 
-
+## PLOT 1 ##
 exer2_p1 <- ggplot(athletes_dat, aes(sex)) +
+  
   geom_bar(aes(fill = sex), show.legend = FALSE) + 
-  scale_x_discrete(labels = c("female", "male"), name = NULL) +
-  scale_y_continuous(limits = c(0, 95), breaks = seq(0, 95, 25), name = "number") + 
+  
+  scale_x_discrete(labels = c("female", "male"), 
+                   name = NULL) +
+  
+  scale_y_continuous(limits = c(0, 95), 
+                   breaks = seq(0, 95, 25), 
+                   name = "number") + 
+  
   scale_fill_manual(values = c("#D55E00D0", "#0072B2D0")) +
+  
   theme_minimal()
 
-exer2_p2 <- ggplot(athletes_dat, aes(rcc, wcc)) +  
-  geom_point(aes(color = sex, fill = sex), shape = 21,
-             size = 3, color = "white", show.legend = FALSE)+
+
+## PLOT 2 ##
+exer2_p2 <- ggplot(athletes_dat, aes(rcc, wcc)) + 
+  
+  geom_point(aes(color = sex, fill = sex), 
+             shape = 21, size = 3, color = "white",
+             show.legend = FALSE)+
+  
   scale_fill_manual(values = c("#D55E00D0", "#0072B2D0")) +
+  
   labs(x = "RBC count", y = "WBC count") + 
+  
   theme_minimal()
 
 
-exer2_p3 <- ggplot(athletes_dat, aes(sport, pcBfat)) + 
-  geom_boxplot(aes(fill = sex, 
-                   color = sex), width = 0.5) +
+
+## PLOT 3 ##
+exer2_p3 <- ggplot(athletes_dat, aes(sport, pcBfat)) +
+  
+  geom_boxplot(aes(fill = sex, color = sex), width = 0.5) +
+  
   scale_color_manual(values = c("#D55E00", "#0072B2"), 
                      labels = c("female", "male"), 
-                     # guide = FALSE is NOT necessary,
-                     # it is used to turn off one of the legend
+           # guide = FALSE is NOT necessary,
+           # it is used to turn off one of the legend
                      guide = FALSE ) +
+  
   # the 40 at the end of #D55E00 adds the transparency
   scale_fill_manual(values = c("#D55E0040", "#0072B240"),   
                     labels = c("female", "male")) + 
+  
   guides(color = guide_legend(override.aes = list(
-    color = NA, # remove the outline of boxplot
-    fill = c("#D55E00D0", "#0072B2D0")
-    ))) +
+                    # remove the outline of boxplot
+                    color = NA, 
+                    fill = c("#D55E00D0", "#0072B2D0")))) +
   labs(fill = NULL,  color = NULL, 
-       y = "% body fat", x = NULL) +
+                    y = "% body fat", x = NULL) +
+  
 theme_minimal() + 
+  
   theme(legend.position = c(1, 1), 
         legend.justification = c(1, 1), 
         legend.direction = "horizontal")
 
   
+
+## Combine three plots ##
 
 exer2_row1 <- plot_grid(exer2_p1, exer2_p2)
 
@@ -183,18 +224,27 @@ plot_grid(exer2_row1, exer2_p3, ncol = 1)
 
 Method 2 of making exer2_p3
 ```{r, eval = FALSE}
+
 exer2_p3 <- ggplot(athletes_dat, aes(sport, pcBfat)) + 
-  geom_boxplot(aes(fill = sex, 
-                   color = sex), width = 0.5) +
+  
+  geom_boxplot(aes(fill = sex, color = sex), width = 0.5) +
+  
   scale_color_manual(values = c("#D55E00", "#0072B2"), 
                      labels = c("female", "male")) +
+  
   # the 40 at the end of #D55E00 adds the transparency
   scale_fill_manual(values = c("#D55E0040", "#0072B240"),   
                     labels = c("female", "male")) + 
-  guides(fill = guide_legend(override.aes = list(fill = c("#D55E00D0", "#0072B2D0"))), color = guide_legend(override.aes = list(color = c("transparent", "transparent")))) +
+  
+  guides(fill = guide_legend(override.aes = 
+                    list(fill = c("#D55E00D0", "#0072B2D0"))), 
+                    color = guide_legend(override.aes = list(color = c("transparent", "transparent")))) +
+  
   labs(fill = NULL,  color = NULL, 
        y = "% body fat", x = NULL) +
+  
 theme_minimal() + 
+  
   theme(legend.position = c(1, 1), 
         legend.justification = c(1, 1), 
         legend.direction = "horizontal")
@@ -218,25 +268,37 @@ Using `cdc_small`construct a the following graphic as precisely as possible.
 <br>
 
 ```{r}
+
 # Add calculated weight change
 # Reorder genhlth levels
 cdc_small <- cdc_small %>%
+  
   mutate(
     weight_change = wtdesire - weight,
+    
     genhlth_order= factor(genhlth, levels = rev(levels(factor(genhlth))))
+    
   )
 
 gender.labs <- c("Women", "Men")
+
 names(gender.labs) <- c("f", "m")
 
 cdc_small2 <- select(cdc_small, -gender)
 
 ggplot(cdc_small, aes(weight, weight_change)) +
+  
   geom_point(data = cdc_small2, color = "grey80") +
-  geom_point(aes(color = gender), size = 2, show.legend = FALSE) +
-  facet_grid(gender ~ genhlth_order, labeller = labeller(gender = gender.labs)) +
+  
+  geom_point(aes(color = gender), size = 2, 
+             show.legend = FALSE) +
+  
+  facet_grid(gender ~ genhlth_order, 
+             labeller = labeller(gender = gender.labs)) +
+  
   scale_color_manual(values = c("#D55E00D0", "#0072B2D0")) + 
   labs(x = "Weight (lbs)" , y = "Weight Loss/Gain in Pounds") +
+  
   theme_minimal()
 
 
