@@ -1,0 +1,23 @@
+Level,Appeal Type,Country,ISO3 Code,Organisation,Appeal Name,Start Date,End Date,Duration (days),Original Requirement,Revised Requirement,Revision Date,Comment,Link
+Global,Health Response,Global,,WHO,Strategic Preparedness and Response Plan ,1/1/2020,4/1/2020,91,675000000,,,8 pillars focused on health preparedness and response,
+Global,Humanitarian Response,Global,,UNICEF,Novel Coronavirus (COVID-2019) Global Response,2/1/2020,12/31/2020,334,42000000,651000000,,,https://www.unicef.org/appeals/covid-2019.html
+Global,Humanitarian Response,Global,,IOM,Global Strategic Preparedness and Response Plan,2/1/2020,12/31/2020,334,17000000,499000000,,"over USD 43.4 million are to cover interventions in Eastern, Western and Southern Africa; more than USD 24.5 million are to be dedicated to the Asia-Pacific region; more than USD 17 million are for the Middle East and Northern Africa; over USD 13.6 million are for the Americas and, the remainder will support activities in Europe and Central Asia, as well as global interventions.",https://www.iom.int/sites/default/files/country_appeal/file/iom_covid19_appeal_15.04.2020_0.pdf
+Global,Humanitarian Response,Global,,UNHCR,Coronavirus emergency appeal UNHCR’s preparedness and response plan,3/8/2020,12/12/2020,279,33000000,255000000,,These requirements are fully represented in the GHRP,http://reporting.unhcr.org/node/27363
+Global,Humanitarian Response,Global,,UNRWA,UNRWA,3/1/2020,5/31/2020,91,14000000,,,,https://www.unrwa.org/sites/default/files/content/resources/covid-19_flash_appeal_english_idlc_edits_v2.pdf
+Global,Humanitarian Response,Global,,WFP,WFP,3/29/2020,6/29/2020,92,1900000000,,,WFP is appealing to government partners to accelerate an estimated $1.9 billion of contributions to enable the urgent procurement and pre-positioning of buffer stocks so that at least three months of assistance can be provided in fragile places.,
+Global,Humanitarian Response,Global,,OCHA,OCHA GHRP,3/26/2020,12/12/2020,261,2010000000,6700000000,5-7-20,"Version 1: FAO 110 M
+ IOM 100 M
+ UNDP 120 M
+ UNFPA 120 M
+ UN Habitat 2M
+ UNHCR 255 M
+ UNICEF 405 M
+ WFP 350 M
+ WHO 450 M
+ NGOs 100 M",https://fts.unocha.org/appeals/952/summary
+Global,Socio-economic Framework,Global,,DCO,A UN framework for the immediate socio-economic response to COVID-19,4/27/2020,,-43948,TBD,,,The collective know-how of the United Nations’ 131 Country Teams – serving 162 countries and territories – is being mobilized to implement this framework over the next 12 to 18 months. ,https://www.un.org/sites/un2.un.org/files/un_framework_report_on_covid-19.pdf
+Global,Humanitarian Response,Global,,UNFPA,COVID-19 Global Response Appeal,3/19/2020,4/30/2020,42,67000000,,,,https://www.unfpa.org/updates/global-response-appeal-safe-delivery-even-now-unfpa-coronavirus-disease-covid-19
+Global,Health Response,Global,,World Bank,COVID-19 Strategic Preparedness and Response Program (SPRP),2-Apr-2020,31-Mar-2025,1824,14000000000,,,,https://www.worldbank.org/en/about/what-we-do/brief/world-bank-group-operational-response-covid-19-coronavirus-projects-list
+Global,Humanitarian Response,Global,,IFRC,Revised Emergency Appeal -  COVID-19 Outbreak,1-Mar-2020,1-Mar-2021,365,150000000,566000000,26-Mar-2020,122 National Societies (will prioritise them and provide support to weakest health systems first),https://media.ifrc.org/ifrc/emergency/global-covid-19/
+Global,Humanitarian Response,Global,,ICRC,Revised Emergency Appeal - COVID-19 Outbreak,1-Mar-2020,1-Mar-2021,365,256000000,,,"The ICRC is appealing for 250 million Swiss francs (256 million US dollars) to respond in places of conflict and violence, to support medical facilities and places of detention, curb the spread among and ensure medical access for displaced people and detainees, and to support National Red Cross and Red Crescent Societies in their response.",https://www.icrc.org/en/document/international-red-cross-and-red-crescent-movement-appeals-800-million-swiss-francs-assist
+Global,,,,,,,,,,,,,

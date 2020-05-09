@@ -60,7 +60,7 @@ Which theme or themes do you particularly like? Why? There should be at least 8 
 
 <br>
 
-```{r base-plot-ex01, warning=FALSE}
+```{r base-plot-ex01, warning=FALSE, out.width = "50%", fig.show = "hold"}
 # Building plot
 plot_01 <- ggplot(data = cdc_small, 
                   aes(x = height, 

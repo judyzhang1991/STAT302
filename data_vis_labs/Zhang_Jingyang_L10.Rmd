@@ -1,0 +1,554 @@
+---
+title: "L10 Data Wrangling"
+subtitle: "Data Visualization (STAT 302)"
+author: "Jingyang Zhang"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r global_options, include = FALSE}
+library(knitr)
+opts_chunk$set(warning = FALSE, message = FALSE, comment = FALSE, dpi = 300)
+```
+
+## Overview
+
+The goal of this lab is to use data manipulation and transformation techniques to help use build a few plots. 
+
+## Datasets
+
+We'll be using the `mod_nba2014_15_advanced.txt` and `NU_admission_data.csv` datasets --- add both to the project's **data** subdirectory. The `codebook_mod_nba2014_15_advanced.txt` file supplies a quick description of the variables in the `mod_nba2014_15_advanced.txt` dataset --- suggest adding it to the **data** subdirectory as well. The `undergraduate-admissions-statistics.pdf` is the source for the `NU_admission_data.csv` dataset and it also contains the graphic/plot we will be attempting to re-create in the second exercise. 
+
+<br>
+
+```{r load-packages-data-seed, warning = FALSE}
+# Load package(s)
+library(tidyverse)
+
+library(janitor)
+
+library(showtext)
+
+library(ggthemes)
+
+
+
+
+# Read in the datasets
+nba_201415 <- read_delim("data/mod_nba2014_15_advanced.txt", "|") %>%
+  clean_names()
+
+
+nu_adm <- read_csv("data/NU_admission_data.csv") %>%
+  clean_names()
+
+```
+
+<br>
+
+## Exercises
+
+Complete the following exercises.
+
+<br>
+
+### Exercise 1
+
+Using the `mod_nba2014_15.txt` dataset try to recreate/approximate the plot type featured in the [http://fivethirtyeight.com/](fivethirtyeight.com) article [Kawhi Leonard Is The Most Well-Rounded Elite Shooter Since Larry Bird](http://fivethirtyeight.com/features/kawhi-leonard-is-the-most-well-rounded-elite-shooter-since-larry-bird/) for any player of your choice for the 2014-2015 season. When calculating quartiles or considering players you may want to exclude players that played less than 10 games or played less than 5 minutes a game. That is, we only want to look for "qualified" players.
+
+*Hints:*
+
+Image width 8 in, height 10 in. Can be achieved many ways:
+
+- Set figure height and width in R chuck's options
+- Save image with `ggsave()` and then insert it using markdown code:
+    - `![Caption - leave blank](/path/to/image.png)`
+- Set figure height and width in R chuck's options and then use `knitr::include_graphic(/path/to/image.png)`
+
+<br>
+
+```{r helper-function, warning = FALSE}
+quartile_rank <- function(x = 0:99) {
+  
+  # Set quartile
+  quart_breaks <- c(
+    -Inf,
+    quantile(x,
+      probs = c(.25, .5, .75),
+      na.rm = TRUE
+    ),
+    Inf
+  )
+
+  cut(x = x, breaks = quart_breaks, labels = FALSE)
+}
+```
+
+<br>
+
+Variables in graph: variables in dataset
+
+ASSIST RATE: AST_perc
+REBOUND RATE: TRB_perc
+DEFENSIVE BPM: DBPM
+TRUE SHOOTING: TS_perc
+USAGE RATE: USG_perc
+
+
+
+```{r nba_datawrangling, warning = FALSE}
+
+
+## Data for Graphic ##
+
+nba_graph_dat <- nba_201415 %>%
+  
+  filter(g >= 10, mp / g >= 5) %>%
+  
+  mutate(
+    ts_quant = quartile_rank(ts_perc),
+    trb_quant = quartile_rank(trb_perc),
+    dbpm_quant = quartile_rank(dbpm),
+    ast_quant = quartile_rank(ast_perc),
+    usg_quant = quartile_rank(usg_perc)
+  ) %>%
+  
+  select(player, contains("_quant")) %>%
+  
+  pivot_longer(cols = -player, 
+               names_to = "variable", 
+               values_to = "value")
+
+
+## transmute does everything mutate does but only keeps variables created
+
+## tidy data: use pivot_longer, can tell cols to pivot on or cols to not pivot on
+
+
+
+## Data for Labels ##
+nbasector_lab <- c("TRUE\nSHOOTING", "USAGE\nRATE", "DEFENSIVE\nBPM", "REBOUND\nRATE", "ASSIST\n RATE")
+
+nbaquartile_lab <- c("1^{st} - 25^{th}", "26^{th} - 50^{th}", "51^{st} - 75^{th}", "76^{th} - 99^{th}")
+
+
+
+
+```
+
+
+Add font (No need for now)
+```{r nba_font, warning=FALSE}
+## Loading a Google font (http://www.google.com/fonts)
+
+# font_add_google("Barlow Condensed", "Barlow Condensed")
+
+```
+
+
+
+```{r nba_plot, warning = FALSE, fig.width = 8, fig.height = 10, out.width = "75%", fig.align = "center"}
+
+## Visualize Data ##
+nba_graph_dat %>%
+  
+  filter(player == "Jeremy Lin") %>%
+  
+  ggplot(aes(x = variable, y = value)) + 
+  
+    # use geom_col when height is known
+    geom_col(color = "#F28291", 
+             fill = "#F28291", 
+             width = 1) +
+    
+    scale_y_continuous(NULL, 
+                       expand = c(0, 0)) +
+  
+    scale_x_discrete(NULL, 
+                   expand = c(0, 0), 
+                   limits = c("ts_quant", "usg_quant",
+                              "dbpm_quant", "trb_quant",
+                              "ast_quant")) + 
+  
+    # adding dotted lines
+    geom_hline(yintercept = 1:4, 
+               colour = "black", 
+               linetype = "dotted") +
+  
+    # adding solid lines
+    geom_segment(x = seq(0.5, 4.5, 1),
+                 xend = seq(0.5, 4.5, 1),
+                 y = 0,
+                 yend = 4) +
+  
+    # adding sector labels
+    annotate("text", 
+             label = nbasector_lab, 
+             x = seq(1, 5, by = 1), 
+             y = c(4.8, 4.7, 4.5, 5, 4.7), 
+             size = 5) + 
+  
+    # adding quantile range
+    annotate("text", 
+             label = nbaquartile_lab, 
+             x = 3, 
+             y = seq(0.75, 3.75, by = 1), 
+             size = 4, 
+             angle = 0,
+             parse = TRUE) +
+  
+  coord_polar() + 
+  
+  labs (x = NULL, 
+        y = NULL, 
+        title = "Jeremy Lin", 
+        subtitle = "(2015)") + 
+  
+  theme(
+    
+    #### Plot ####
+    
+    plot.title = element_text(color = "black", 
+                              size = 24, 
+                              face = "bold", 
+                              hjust = 0.5),
+    
+    plot.subtitle = element_text(color = "black",
+                                 size = 24,
+                                 hjust = 0.5),
+    
+    line = element_blank(),
+    
+    #### Axis ####
+    axis.text = element_blank(),
+    
+    axis.ticks = element_blank(),
+    
+    #### Panel ####
+    
+    panel.grid = element_blank()
+    )
+    
+
+
+
+
+
+
+```
+
+
+<br>
+
+### Exercise 2
+
+Using `NU_admission_data.csv` create two separate plots derived from the single plot depicted in `undergraduate-admissions-statistics.pdf`. They overlaid two plots on one another by using two y-axes. Create two separate plots that display the same information instead of trying to put it all in one single plot --- consider stacking them with `cowplot::plot_grid()`. Also, improve upon them by (1) fixing their error with the bar heights and (2) by using a "Northwestern" theme. 
+
+Also, practice placing all the text information on the appropriate plots. While I'm not a fan and think it is unnecessary for telling the actual story of the data, sometimes clients want this and there are those that think detailed labeling enhances the plot's value --- they do have a point. When including detailed labeling like this take care to pick label fonts and colors so the text doesn't take away the from the message of the data (the trend in these plots). With these labels you could image removing the y-axes altogether so they don't distracts the reader/consumer. 
+
+Which approach do you find communicates the information better, their single plot or the two plot approach? Why?
+
+*Hints:*
+
+- Form 4 datasets (helps you get organized, but not entirely necessary): 
+    - 1 that has bar chart data, 
+    - 1 that has bar chart label data, 
+    - 1 that has line chart data, and 
+    - 1 that has line chart labels 
+- Decide on image size to aid in the selection of text sizes and location (9 in width, 4 in height - just a suggestion)
+
+
+__Plot 1: Line Chart __
+```{r nu_linechart_datawrangle, warning = FALSE}
+
+## Manipulate Data ##
+
+nu_linechart_dat <- nu_adm %>%
+  
+  select(year, admission_rate, yield_rate) %>%
+  
+  pivot_longer(cols = -year, 
+               names_to = "rate_type", 
+               values_to = "rate")
+
+
+
+## Label Data ##
+
+line_chart_labels <- nu_adm %>%
+  
+  select(year, admission_rate, yield_rate) %>%
+  
+  mutate(
+    adm_rate_lab = paste(format(round(admission_rate, 1), nsmall = 1), "%", sep = ""),
+    
+    yield_rate_lab = paste(format(round(yield_rate, 1), nsmall = 1), "%", sep = "")
+  )
+
+
+
+
+```
+
+
+
+
+
+```{r nu_linechart_graph, warning = FALSE, fig.width = 9, fig.height = 4, , out.width = "75%", fig.align = "center"}
+
+## Visualize Data ##
+  
+ggplot(nu_linechart_dat, aes(year, rate)) + 
+  
+  geom_point(aes(color = rate_type, shape = rate_type), 
+             size = 2) + 
+  
+  geom_line(aes(color = rate_type), 
+            size = 1) +
+  
+  scale_color_manual(labels = c("Admission Rate", "Yield Rate"), values = c("#D85820", "#5091CD")) + 
+  
+  scale_shape_manual(labels = c("Admission Rate", "Yield Rate"), values = c(15, 8)) +
+
+  geom_text(aes(x = year, 
+                y = yield_rate, 
+                label = yield_rate_lab), 
+            data = line_chart_labels, 
+            size = 2.5, 
+            nudge_x = -0.01, 
+            nudge_y = 2) + 
+
+  geom_text(aes(x = year, 
+                y = admission_rate, 
+                label = adm_rate_lab), 
+            data = line_chart_labels, 
+            size = 2.5,
+            nudge_x = -0.01,
+            nudge_y = -2) +
+  
+  scale_x_continuous(breaks = seq(1999, 2018, by = 1)) + 
+  
+  scale_y_continuous(limits = c(0, 60)) + 
+  
+  labs(x = "Entering Year", 
+       y = NULL, 
+       title = "Northwestern Univeristy\nUndergrdaute Admissions 1998-2017") +
+  
+  theme_classic() +
+  
+  theme(
+    
+    #### Plot ####
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold", color = "#401F68"),
+    
+    #### Axis ####
+    axis.title.x = element_text(size = 10, face = "bold", color = "#401F68"),
+      
+    axis.ticks = element_blank(),
+    
+    axis.line.y = element_blank(),
+    
+    axis.text.y = element_blank(),
+    
+    axis.line.x = element_line(color = "#401F68"),
+    
+    axis.text.x = element_text(color = "#401F68"),
+    
+    
+    #### Legend ####
+    legend.title = element_blank(),
+    
+    legend.text = element_text(face = "bold", 
+                               color = "#401F68"),
+    
+    legend.position = c(0.5, 1), 
+
+    legend.justification = c(0.5, 1), 
+    
+    legend.direction = "horizontal"
+  
+  )
+
+
+
+```
+
+
+___Plot 2: Bar Chart___
+
+
+
+```{r nu_barchart_datawrangle, warning = FALSE}
+
+## Manipulate Data ##
+
+
+nu_barchart_dat <- nu_adm %>%
+  select(year, applications, admitted_students, matriculants) %>%
+  pivot_longer(cols = -year, names_to = "count_type", values_to = "count")
+
+
+
+bar_chart_labels <- nu_adm %>%
+  
+  select(year, applications, admitted_students, matriculants) %>%
+  
+  mutate(
+    app_lab = formatC(applications, format="d", big.mark=","), 
+    
+    adm_lab = formatC(admitted_students, format="d", big.mark=","),
+    
+    matri_lab = formatC(matriculants, format="d", big.mark=",")
+    
+  )
+
+
+
+# nu_barchart_ylabs <- formatC(seq(0, 50000, by = 5000), format="d", big.mark=",")
+
+
+nu_barchart_dat$count_type <- factor(nu_barchart_dat$count_type, levels = c("applications", "admitted_students", "matriculants"))
+
+
+
+
+
+
+```
+
+
+```{r nu_barchart_graph, warning = FALSE, fig.width = 9, fig.height = 4, , out.width = "75%", fig.align = "center"}
+
+
+## Visualize Data ##
+
+
+ggplot(nu_barchart_dat, aes(x= year, y = count)) + 
+  
+  geom_col(aes(color = count_type, 
+               fill = count_type), 
+           width = 0.5) +
+
+  
+  scale_color_manual(labels = c("Appllications", 
+                                "Admitted Students",
+                                "Matriculants"), 
+                     values = c("#58B947", 
+                                "#D85820", 
+                                "#5091CD")) +
+  
+  scale_fill_manual(labels = c("Appllications", 
+                               "Admitted Students",
+                               "Matriculants"), 
+                    values = c("#58B947", 
+                               "#D85820", 
+                               "#5091CD")) +
+  
+  scale_x_continuous(name = "Entering Year", 
+                     breaks = seq(1999, 2018, by = 1)) +
+  
+  scale_y_continuous(expand = c(0, 0)) + 
+  
+  geom_text(aes(x = year, 
+                y = matriculants/2, 
+                label = matri_lab), 
+            data = bar_chart_labels, 
+            size = 2.5) +
+  
+  geom_text(aes(x = year, 
+                y = matriculants / 2 + admitted_students / 2, 
+                label = adm_lab), 
+            data = bar_chart_labels, 
+            size = 2.5) + 
+
+geom_text(aes(x = year, 
+                y = matriculants / 2 + admitted_students / 2 + applications / 2, 
+                label = app_lab), 
+            data = bar_chart_labels, 
+            size = 2.5) + 
+  
+  labs(x = "Entering Year", 
+        y = NULL, 
+       title = "Northwestern Univeristy\nUndergrdaute Admissions 1998-2017") +
+  
+  theme_classic() +
+  
+  theme(
+    #### Plot ####
+    plot.title = element_text(hjust = 0.5, 
+                              size = 12, 
+                              face = "bold", 
+                              color = "#401F68"),
+    
+    #### Axis ####
+    axis.title.x = element_text(size = 10, 
+                                face = "bold", 
+                                color = "#401F68"),
+      
+    axis.ticks = element_blank(),
+    
+    axis.line.y = element_blank(),
+    
+    axis.text.y = element_blank(),
+    
+    axis.line.x = element_line(color = "#401F68"),
+    
+    axis.text.x = element_text(color = "#401F68"),
+    
+    
+    #### Legend ####
+    legend.title = element_blank(),
+    
+    legend.text = element_text(face = "bold", 
+                               color = "#401F68"),
+    
+    legend.position = c(0.5, 1), 
+    
+    legend.justification = c(0.5, 1), 
+    
+    legend.direction = "horizontal"
+    
+  )
+  
+  
+
+
+
+
+
+```
+
+
+
+__Which one I like and why__
+
+I actually like the single graph because it is very concise and allows me to get all the information without having to go back and forth between two graphs. 
+
+It also allows me to directly compare the actual count and the rate. For example, year 2009 has the largest number of admitted students (i.e. 6887) but the actual admission rate is not the largest (27.1%) because there are a lot more applications. 
+
+The graph will be better if the two y-axes are removed since all the data are already labeled. Also, they may want to change the transparency a little bit so the graph will be easier to see. For example, make the barchart more transparent in the background. 
+
+<br>
+
+## Challenge(s)
+
+**No not have to complete.**
+
+Using `NU_admission_data.csv` try to re-create/approximate the single plot depicted in `undergraduate-admissions-statistics.pdf`. Fix their error concerning the bar heights. Might want to simply start with one of your plots from Exercise 2 and see if it can be modified. 
+
+
+
+
+
+__Class Notes__
+
+1. Only use dual y-axis when there is one-to-one mapping from one axis to another. 
+
+2. Valid R variable names can not start with numbers, so a "X" will be placed in front. 
+
+
+
+
+
