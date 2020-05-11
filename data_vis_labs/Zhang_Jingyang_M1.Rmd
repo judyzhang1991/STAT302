@@ -1,7 +1,7 @@
 ---
 title: "M1 Midterm I"
 subtitle: "Data Visualization (STAT 302)"
-author: "YOUR NAME"
+author: "Jingyang Zhang"
 output:
   html_document:
     toc: yes
@@ -37,10 +37,21 @@ We will need the instructor provided `stephen_curry_shotdata_2014_15.txt` datase
 
 <br>
 
-```{r load-packages-data-seed, eval=FALSE}
+```{r load-packages-data-seed}
 # Load package(s)
 
+library(tidyverse)
+
+library(janitor)
+
+library(scales) ## For exercise 1 plot 1
+
 # Read in the dataset(s)
+
+curry_201415 <- read_delim("data/stephen_curry_shotdata_2014_15.txt", "|") %>%
+  clean_names()
+
+
 ```
 
 <br>
@@ -58,6 +69,50 @@ Figures for this exercise have width 6 inches and height 4 inches.
 Using the `stephen_curry_shotdata_2014_15.txt` dataset replicate, as close as possible, the 2 graphics below. After replicating the plots provide a summary of what the graphics indicate about Stephen Curry's shot selection (i.e. distance from hoop) and shot make/miss rate and how they relate/compare across distance and game time (i.e. across quarters/periods). 
 
 <br>
+
+
+```{r exer1_p1}
+
+ggplot(curry_201415, aes(x = as.factor(period), 
+                         y = shot_distance)) + 
+  
+  geom_boxplot(width = 0.5) +
+  
+  facet_wrap(~event_type)  +
+  
+  scale_x_discrete(labels = c("Q1", "Q2", "Q3", "Q4", "QT")) +
+  
+  scale_y_continuous(limits = c(0, 47), breaks = seq(0, 47, 10), 
+                     labels = scales::label_number(
+                       suffix = " ft"), 
+                     name = NULL,
+                     expand = c(0, 0)) +
+  
+  labs(x = "Quarter/Period", 
+       y = NULL, 
+       title = "Stephen Curry\n2014-2015") +
+  
+  theme_minimal() + 
+  
+  theme(
+    
+    #### Plot ####
+    
+    plot.title = element_text(color = "black", 
+                              size = 24, 
+                              face = "bold", 
+                              hjust = 0),
+    
+    #### Axis ####
+    axis.ticks = element_blank()
+    
+    #### Panel ####
+    #panel.grid.minor = element_blank(), 
+    #panel.grid.major.y = element_blank()
+  )
+  
+```
+
 
 
 
