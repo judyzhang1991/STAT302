@@ -46,6 +46,11 @@ library(janitor)
 
 library(scales) ## For exercise 1 plot 1
 
+library(grid) ## For exercise 2 plot 1
+
+library(jpeg) ## For exercise 2 plot 1
+
+
 # Read in the dataset(s)
 
 curry_201415 <- read_delim("data/stephen_curry_shotdata_2014_15.txt", "|") %>%
@@ -72,6 +77,8 @@ Using the `stephen_curry_shotdata_2014_15.txt` dataset replicate, as close as po
 
 __Exercise 1 Plot 1__
 
+Numbers: 12, 13
+
 ```{r exer1_p1_data}
 
 
@@ -86,11 +93,6 @@ period_count <- curry_201415 %>%
 
 
 
-Questions:
-1. Font size
-2. OT = Period 5?
-3. Padding for first plot: expand = c(0, 0) points at the top not show
-
 ```{r exer1_p1, fig.width = 6, fig.height = 4}
 
 ggplot(curry_201415, aes(x = as.factor(period), 
@@ -104,7 +106,8 @@ ggplot(curry_201415, aes(x = as.factor(period),
   
   scale_x_discrete(labels = c("Q1", "Q2", "Q3", "Q4", "OT")) +
   
-  scale_y_continuous(limits = c(0, 45), breaks = seq(0, 45, 10), 
+  scale_y_continuous(limits = c(0, 45), 
+                     breaks = seq(0, 45, 10), 
                      labels = scales::label_number(
                        suffix = " ft"), 
                      name = NULL) +
@@ -120,7 +123,7 @@ ggplot(curry_201415, aes(x = as.factor(period),
     #### Plot ####
     
     plot.title = element_text(color = "black", 
-                              size = 15, 
+                              size = 14, 
                               face = "bold", 
                               hjust = 0),
     
@@ -128,7 +131,7 @@ ggplot(curry_201415, aes(x = as.factor(period),
     axis.ticks = element_blank(),
     
     axis.title.x = element_text(
-      size = 10,
+      size = 12,
       face = "bold"
     ),
     
@@ -139,7 +142,7 @@ ggplot(curry_201415, aes(x = as.factor(period),
     
     #### Facet ####
     strip.text = element_text(
-      size = 10,
+      size = 12,
       face = "bold"
     )
     
@@ -159,10 +162,106 @@ ggplot(curry_201415, aes(x = as.factor(period),
 
 <br>
 
+Questions:
+1. Numbers: 0.3, 0.081, 3, 0.04, 27, 0.07, 14
+2. "Made Shots", "Missed Shots" labels positions
+
 
 __Exercise 1 Plot 2__
-```{r}
 
+Numbers: 0, 0.3, 0.04, 0.07, 0.081, 14, 3, 27
+
+```{r exer1_p2_data}
+exer1p2_labs <- data.frame(
+  labs = c("Made Shots", "Missed Shots"),
+  xpos = c(3, 27),
+  ypos = c(0.04, 0.07)
+)
+
+```
+
+
+
+
+```{r exer1_p2, fig.width = 6, fig.height = 4}
+
+
+
+ggplot(curry_201415, aes(shot_distance)) + 
+  
+  geom_density(aes(fill = event_type), 
+               show.legend = FALSE, 
+               alpha = 0.3) +
+  
+  geom_text(data = exer1p2_labs, 
+            aes(label = labs, x = xpos, y = ypos), 
+            hjust = 0,
+            vjust = 0) + 
+  
+  scale_x_continuous(limits = c(0, 45), 
+                     breaks = seq(0, 45, 10), 
+                     
+                     # Can also use unit
+                     labels = scales::label_number(
+                       suffix = " ft"), 
+                     name = NULL) + 
+  
+  scale_y_continuous(limits = c(0, 0.081),
+                     name = NULL, 
+                     labels = NULL,
+                     expand = c(0, 0)) + 
+  
+  scale_fill_manual(values = c("Made Shot" = "green", "Missed Shot" = "red")) +
+  
+  labs(title = "Stephen Curry\nShot Density (2014-2015)") + 
+
+  
+  theme_minimal() + 
+  
+  theme(
+    
+    #### Plot ####
+    
+    plot.title = element_text(color = "black", 
+                              size = 14, 
+                              hjust = 0),
+    
+    #### Axis ####
+    axis.ticks = element_blank(),
+    
+    #### Panel ####
+    panel.grid = element_blank()
+    
+  )
+  
+
+```
+
+__Summary of Exer 1 Plot 1 and Plot 2__:
+
+1. In general, regardless of the shot was made or missed, Curry made more attempts in period Q1 and Q3 (wider widths of boxplots) compared to the number of attempts made in period Q2 and Q4 (narrower widths of boxplots).
+
+2. There are more shots made during overtime period, OT, than missed shots during OT. 
+
+3. The median of shot distance in each period is shorter for shots made than the median of shot distance in corresponding period for shorts missed. 
+
+4. Comparing the IQR (i.e. the height of the box of boxplot) in the Made Shot plot to the IQR in the Missed Shot plot, the range of shot distance for making shots is larger than the range of shot distance for missing shots for all five periods. 
+
+
+5. Shot distance 1ft and 25 ft are two locations that Curry made most of his shots. 
+
+The number of shots made at 1ft is greater than the number of shots missed. 
+
+The number of shots made at 25ft is less than the number of shots missed. 
+
+```{r exer1_summary, include = FALSE}
+count_by_type <- curry_201415 %>%
+  
+  group_by(event_type, shot_distance) %>%
+  
+  summarise(
+    count = n()
+  )
 ```
 
 
@@ -197,6 +296,249 @@ ggplot() +
 
 <br>
 
+__Exercise 2 Plot 1__
+
+Numbers: 0, 0.7, 14, 20
+
+```{r exer2_p1p2_data}
+
+# Import the background picture into R
+
+## readJPEG(): reads an image from a JPEG file/content into a raster arry
+
+## rasterGrob(): render a raster object
+
+court <- rasterGrob(readJPEG(source = "data/nbahalfcourt.jpg"),
+  width = unit(1, "npc"), height = unit(1, "npc")
+)
+
+```
+
+
+
+```{r exer2_p1, fig.width = 7, fig.height = 7}
+
+
+ggplot(curry_201415, aes(x = loc_x, 
+                         y = loc_y)) +
+  # annotation_custom(): a special geom intended for use as static annotations that are the same in every panel. Here the annotation is the court image.
+  
+  annotation_custom(
+    grob = court,
+    xmin = -250, xmax = 250,
+    ymin = -52, ymax = 418
+  ) +
+  
+  geom_hex(bins = 20, 
+           color = "grey", 
+           alpha = 0.7) +
+  
+  # scale_fill_gradient: allows 2 transition colors
+  # scale_fill_gradientn: allows n transition colors
+  
+  scale_fill_gradientn(colors = c("yellow", 
+                                  "orange", 
+                                  "red"),
+                       
+                       # Top coating: set anything outside 15 to NA and it gets red value
+                       
+                       # Two Methods: na.value fill or change any data points > 15 to 15
+                       
+                       limits = c(0, 15),
+                       breaks = seq(0, 15, 5),
+                       labels = c("0", "5", "10", "15+"),
+                       na.value = "red") + 
+  
+  labs(x = NULL, 
+       y = NULL, 
+       title = "Shot Chart\nStephen Curry", 
+       fill = "Shot\nAttempts") + 
+  
+  coord_fixed() +
+  
+  xlim(250, -250) +
+  
+  ylim(-52, 418) + 
+  
+  theme_void() + 
+  
+  theme(
+    
+     #### Plot ####
+    
+    plot.title = element_text(color = "black",
+                              face = "bold",
+                              size = 14, 
+                              hjust = 0),
+    
+    plot.background = element_blank(), 
+    
+    #### Axis ####
+    axis.ticks = element_blank(),
+    
+    axis.text = element_blank(),
+    
+    #### Panel ####
+    panel.grid = element_blank()
+    
+    
+  )
+
+```
+
+
+<br>
+
+__Exercise 2 Plot 2__
+
+Numbers: 1, 4, 5, 12, 14
+
+```{r exer2_p2, fig.width = 7, fig.height = 7}
+
+
+ggplot(curry_201415, aes(x = loc_x, 
+                         y = loc_y)) +
+  # annotation_custom(): a special geom intended for use as static annotations that are the same in every panel. Here the annotation is the court image.
+  
+  annotation_custom(
+    grob = court,
+    xmin = -250, xmax = 250,
+    ymin = -52, ymax = 418
+  ) +
+  
+  geom_point(aes(shape = event_type, 
+                 color = event_type), 
+             size = 5) +
+  
+  scale_shape_manual(name = NULL, 
+                     values = c("Made Shot" = 1, 
+                                "Missed Shot" = 4)) + 
+  
+  scale_color_manual(name = NULL, 
+                     values = c("Made Shot" = "green",
+                                "Missed Shot" = "red")) + 
+  
+  labs(x = NULL, 
+       y = NULL, 
+       title = "Shot Chart\nStephen Curry") + 
+  
+  coord_fixed() +
+  
+  xlim(250, -250) +
+  
+  ylim(-52, 418) + 
+  
+  theme_void() + 
+  
+  theme(
+    
+     #### Plot ####
+    
+    plot.title = element_text(color = "black",
+                              face = "bold",
+                              size = 14, 
+                              hjust = 0),
+    
+    plot.background = element_blank(), 
+    
+    #### Axis ####
+    axis.ticks = element_blank(),
+    
+    axis.text = element_blank(),
+    
+    #### Panel ####
+    panel.grid = element_blank(),
+    
+    #### Legend ####
+    legend.position = "bottom",
+    
+    legend.direction = "horizontal",
+    
+    legend.text = element_text(
+      size = 12
+    )
+    
+    
+  )
+
+```
+
+
+
+
+
+__Summary of Exer 2 Plot 1 and Plot 2__:
+
+1. From the first plot, we see that Curry made most of his shot attempts at two locations: either roughly at the three-point line (which corresponds to a shot distance of roughly 25ft) or inside the free throw lane right below the basket (which corresponds to a shot distance of roughly 1ft). 
+
+2. From the second plot, we can see that there are more shots made inside the free throw lane right below the basket that shots missed. In contrast, there are mot shots missed at the three-point line than shots made. 
+
+
+
+__Summary of All Four Plots__
+
+The four plots are all useful in different ways:
+
+Exercise 1 Plot 1: 
+
+Good:
+a. The boxplot is the only plot that includes the information about periods. This plot allows us to see Curry's shot selection across time periods. 
+
+Bad: 
+
+a. Using width of the box to represent the number of observations can be difficult for readers to compare when widths of boxes are only slightly different. 
+
+b. We will not be able to see the two shot distances (i.e. 1ft and 25ft) at which Curry made most of his shot attempts from this plot. 
+
+
+Exercise 1 Plot 2:
+
+Good: 
+
+a. It clearly shows the two shot distances (i.e. 1ft and 25ft) at which Curry made most of his shot attempts.
+
+b. It also clearly shows at which one of the two shot distances Curry made more shots than missed and at which one of the two shot distances Curry missd more shots. 
+
+Bad:
+a. The plot provides no information about Curry's shot selection across time periods. 
+
+
+The two plots in exercise 1 are good at showing the distribution of Curry's shot selection by event time and across time periods. 
+
+However, knowing the shot distance only does not provide visualization of the exact shot location in the court. 
+
+
+Exercise 2 Plot 1:
+
+Good: 
+
+a. This plot is good at showing the locations at which Curry has made shot attempts. We see clearly that most of the shot attempts were made at either right below the basket inside the free throw lane or at the three-point line. 
+
+Bad:
+
+a. The plot provides no information about Curry's shot selection across time periods. 
+
+b. The plot does not show at each location whether or not a shot was missed. Even though we know the two locations at which Curry made most attempts, but we do not know if these shots were made or missed. 
+
+Exercise 2 Plot 2:
+
+Good: 
+
+a. Same as exercise 2 plot 1, this plots shows the two locations at which most shot attempts were made. 
+
+b. This plot is able to differentiate made shots and missed shots at each location. Therefore, it enables us to see that more shots were made right below the basket and more shots were missed at the three-point line. 
+
+Bad:
+
+a. The plot provides no information about Curry's shot selection across time periods.
+
+b. The plot looks a bit messy with points crowded makes it difficult to tell if there are more shots made or more shots missed at some locations. 
+
+
+
+<br>
+
+
 ### Exercise 3
 
 <br>
@@ -204,21 +546,53 @@ ggplot() +
 ##### Part 1
 In 3-5 sentences, describe the core concept/idea and structure of the `ggplot2` package.
 
+`ggplot2` package allows users to build plots iteratively by adding layers to a base layer. `ggplot2` is based on the grammar of graphics so that you can build statistical graphics by mapping data to aesthetic attributes (e.g. color, shape, size) of geometric objects (e.g. points, lines, bars), and specifying a coordinate system. In sum, plots created using `ggplot2` have three key parts: data (a data frame), aesthetics (e.g. x, y variables, color, size, shape), and geomtry (e.g. point, polygon, bar). 
+
 <br>
 
 ##### Part 2
 Describe each of the following:
 
-1. `ggplot()`
-2. `aes()`
-3. `geoms`
-4. `stats`
-5. `scales`
-6. `theme()`
+1. `ggplot()`: a function that initializes a ggplot object. 
+It creates a canvas for plotting. 
+
+You can declare the input data frame for a graphic and specify the set of plot aesthetics here. 
+
+The data frame and plot aesthetics specified in `ggplot()` will be inherited by all subsequent layers unless you override them in the subsequent layers.  
+
+
+
+2. `aes()`: a function of aesthetic mappings that specifies how variables in the data frame are mapped to visual properties (aesthetics) of geoms. 
+
+You can set aesthetics mappings in `ggplot()` layer and/or in subsequent individual layers.
+
+
+3. `geoms`: geometric objects that are used to provide visual representations of data points. 
+
+Geometric objects (i.e. geoms) are created by functions of the format `geom_*` where `*`, where `*` specifies the type of geometric object such as `point`, `density`, `polygon`, `text`, etc. 
+
+
+4. `stats`: statistical transformations that transform data, typically by summarising it in some manner. 
+
+Statistical transformations (i.e. stats) are created by functions of the format `stat_*` where `*` specifies the type of statistical transformation such as `bin`, `smooth`, `sum`, etc. 
+
+5. `scales`: controls the mapping from data to aesthetics (e.g. size, color, position, shape). Each scale is a function from a region in data space (the domain of the scale) to a region in aesthetic space (the range of the scale)
+
+Scales are created by functions of the format `scale_*_*` where the first `*` specifies the name of the aesthetic (e.g. color, shape, or x) and the second `*` specifies the name of the scale (e.g. continuous, discrete, brewer).
+
+6. `theme()`: a function that allows customization of the non-data components of the plots. 
+
+`theme()` allows you to specify color, font, size, family, face, etc. for titles, labels, legends, gridlines, etc. 
 
 <br>
 
 ##### Part 3
 Explain the difference between using this code `geom_point(aes(color = VARIABLE))` as opposed to using `geom_point(color = VARIABLE)`.
+
+__Answer__:
+
+`geom_point(aes(color = VARIABLE))` creates a mapping/scalling of the variable "VARIABLE" into the color aesthetic. 
+
+`geom_point(color = VARIABLE)` does not create a mapping/scalling between the color aesthetic and the variable "VARIABLE". It just tells `ggplot` that the color for the points should equal to "VARIABLE" which can take values such as "red", "green", or hex color values, etc. 
 
 <br>
