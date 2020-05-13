@@ -77,8 +77,6 @@ Using the `stephen_curry_shotdata_2014_15.txt` dataset replicate, as close as po
 
 __Exercise 1 Plot 1__
 
-Numbers: 12, 13
-
 ```{r exer1_p1_data}
 
 
@@ -194,7 +192,9 @@ ggplot(curry_201415, aes(shot_distance)) +
                alpha = 0.3) +
   
   geom_text(data = exer1p2_labs, 
-            aes(label = labs, x = xpos, y = ypos), 
+            aes(label = labs, 
+                x = xpos, 
+                y = ypos), 
             hjust = 0,
             vjust = 0) + 
   
@@ -276,7 +276,7 @@ Using the `stephen_curry_shotdata_2014_15.txt` dataset replicate, as close as po
 
 After examining the two graphics, what do you conclude about Stephen Curry's shot selection (i.e. distance form hoop) for the 2014-2015 season? Out of the four graphics (two from Exercise 1 and two from Exercise 2), which graphic(s) do you find the most useful when trying to understand Stephen Curry's shot selection? If you find them all useful, explain what information is better communicated in each.
 
-```{r, eval = FALSE}
+```{r, eval = FALSE, include = FALSE}
 # Provide comment!!
 court <- rasterGrob(readJPEG(source = "data/nbahalfcourt.jpg"),
   width = unit(1, "npc"), height = unit(1, "npc")
@@ -297,8 +297,6 @@ ggplot() +
 <br>
 
 __Exercise 2 Plot 1__
-
-Numbers: 0, 0.7, 14, 20
 
 ```{r exer2_p1p2_data}
 
@@ -391,8 +389,6 @@ ggplot(curry_201415, aes(x = loc_x,
 
 __Exercise 2 Plot 2__
 
-Numbers: 1, 4, 5, 12, 14
-
 ```{r exer2_p2, fig.width = 7, fig.height = 7}
 
 
@@ -482,6 +478,7 @@ The four plots are all useful in different ways:
 Exercise 1 Plot 1: 
 
 Good:
+
 a. The boxplot is the only plot that includes the information about periods. This plot allows us to see Curry's shot selection across time periods. 
 
 Bad: 
@@ -500,6 +497,7 @@ a. It clearly shows the two shot distances (i.e. 1ft and 25ft) at which Curry ma
 b. It also clearly shows at which one of the two shot distances Curry made more shots than missed and at which one of the two shot distances Curry missd more shots. 
 
 Bad:
+
 a. The plot provides no information about Curry's shot selection across time periods. 
 
 
