@@ -596,3 +596,7 @@ __Answer__:
 `geom_point(color = VARIABLE)` does not create a mapping/scalling between the color aesthetic and the variable "VARIABLE". It just tells `ggplot` that the color for the points should equal to "VARIABLE" which can take values such as "red", "green", or hex color values, etc. 
 
 <br>
+
+
+
+

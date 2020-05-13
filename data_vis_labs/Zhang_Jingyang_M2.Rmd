@@ -24,10 +24,23 @@ We will be using the `NH_2016pp_dem.txt` and `NH_2016pp_rep.txt` datasets. `NH_2
 
 <br>
 
-```{r load-packages-data-seed, eval=FALSE}
+```{r load-packages-data-seed}
 # Load package(s)
+library(tidyverse)
+library(janitor)
+library(maps)
+library(sf)
+library(cowplot)
+
 
 # Read in the dataset(s)
+NH_2016pp_dem <- read_delim("data/NH_2016pp_dem.txt", "|") %>%
+  clean_names()
+
+NH_2016pp_rep <- read_delim("data/NH_2016pp_rep.txt", "|") %>%
+  clean_names()
+
+
 ```
 
 <br>
@@ -68,6 +81,166 @@ nh_dat <- maps::map(
   rename(county = ID)
 ```
 
+
+
+
+
+__Exercise 1 Plot 1__
+Questions:
+1. NOT USE gather
+2. Color gradient
+3. Legend position
+4. Size of the two plots?
+
+```{r exer1_p1_data}
+
+# Setup NH map dataset
+nh_dat <- maps::map(
+  database = "county",
+  regions = "new hampshire",
+  plot = FALSE,
+  fill = TRUE
+) %>%
+  # Convert foreign object to an sf object, here we are converting the map to an sf object. 
+  
+  st_as_sf() %>%
+  
+  # Remove anything before the "," symbol in the ID string
+  # ".*" is regular expression where the wildcard "." matches any character and "*" indicates zero or more occurences of the preceding element which is this case is the wildcard ".".
+  
+  mutate(ID = str_remove(ID, ".*,")) %>%
+  
+  # Renames the column ID to county
+  rename(county = ID)
+
+
+
+# Calculate Sanders to Clinton ratio and Trump to Kasich ratio
+
+sanders_clinton <- NH_2016pp_dem %>%
+  select(county, clinton, sanders) %>%
+  mutate(
+    s_c_ratio = sanders/clinton
+  )
+
+
+trump_kasich <- NH_2016pp_rep %>%
+  select(county, kasich, trump) %>%
+  mutate(
+    t_k_ratio = trump/kasich
+  )
+
+
+
+
+# Select columns needed and join with the map data
+
+s_c_dat <- sanders_clinton %>% 
+  select(county, s_c_ratio) %>%
+  left_join(nh_dat, by = "county") %>%
+  st_as_sf()
+
+
+t_k_dat <- trump_kasich %>% 
+  select(county, t_k_ratio) %>%
+  left_join(nh_dat, by = "county") %>%
+  st_as_sf()
+
+
+
+
+```
+
+
+
+
+```{r exer1_p1, fig.width = 6, fig.height = 6}
+
+exer1p1 <- ggplot(s_c_dat) +
+  
+  geom_sf(aes(fill = s_c_ratio), 
+          color = "black") +
+  
+  labs(title = "Democratic Presidential Primary", 
+       subtitle = "New Hampshire (2016)", 
+       fill = "Sanders to Clinton\nRatio") +
+  
+  scale_fill_gradientn(colors = c("grey", "black"),
+                       limits = c(1, 3), 
+                       breaks = seq(1, 3, 0.5)
+                       ) + 
+  
+  theme_void() +
+  
+  theme(
+    #### Plot ####
+    
+    plot.title = element_text(color = "black", 
+                              size = 14, 
+                              hjust = 0),
+    
+    plot.subtitle = element_text(color = "black",
+                                 size = 12,
+                                 hjust = 0),
+    
+    #### Legend ####
+    legend.position = c(0, 0.9),
+    legend.justification = c(0, 1)
+    
+    
+  )
+
+
+
+exer1p2 <- ggplot(t_k_dat) +
+  
+  geom_sf(aes(fill = t_k_ratio), 
+          color = "black") +
+  
+  labs(title = "Republican Presidential Primary", 
+       subtitle = "New Hampshire (2016)", 
+       fill = "Trump to Kasich*\nRatio") +
+  
+  scale_fill_gradientn(colors = c("grey", "black"),
+                       limits = c(1, 3), 
+                       breaks = seq(1, 3, 0.5)
+                       ) + 
+  
+  theme_void() +
+  
+  theme(
+    #### Plot ####
+    
+    plot.title = element_text(color = "black", 
+                              size = 14, 
+                              hjust = 0),
+    
+    plot.subtitle = element_text(color = "black",
+                                 size = 12,
+                                 hjust = 0),
+    
+    #### Legend ####
+    legend.position = c(0, 0.9),
+    legend.justification = c(0, 1)
+    
+    
+  )
+
+
+plot_grid(exer1p1, exer1p2, nrow = 1)
+
+ 
+
+```
+
+
+???
+__Summary: how the two primaries relate to one another__:
+
+Democratic: Sanders is more popular (i.e. gets more votes) in southwestern counties. He becomes less popular compared to Clinto as we move toward northeastern counties. 
+
+Republican: Trump is more popular in southeastern counties and the north-most county. He becomes less popular compared to Kasich as we move toward northwestern counties (except Trump is more popular in the north-most county).
+
 <br>
 
 ### Exercise 2
@@ -86,6 +259,126 @@ Create a fake/randomly generated dataset to approximate the graphic shown below.
 - Note the order of plotting for the points and the ellipses. 
 
 <br>
+
+__Exercise 2 Plot 1__
+
+Questions:
+
+1. Legend position
+2. Font size
+3. alpha
+4. Norm
+
+
+
+```{r exer2_p1_data}
+
+set.seed(2468)
+
+# Generate x values for group low, medium, high
+lowx <- rnorm(20, mean = 5, sd = 2)
+
+medx <- rnorm(20, mean = 10, sd = 2)
+
+highx <- rnorm(20, mean = 15, sd = 2)
+
+# Generate y values for group low, medium, high
+
+lowy <- lowx + rnorm(20, mean = 0, sd = 1)
+
+medy <- medx + rnorm(20, mean = 0, sd = 2)
+
+highy <- highx + rnorm(20, mean = 0, sd = 3)
+
+
+
+# Make data frame
+exer2x = c(lowx, medx, highx)
+
+exer2y = c(lowy, medy, highy)
+
+grp = c(rep("Low", 20), rep("Medium", 20), rep("High", 20))
+
+
+exer2p1_dat <- data.frame(exer2x, exer2y, grp)
+
+
+# Specify factor levels
+
+exer2p1_dat$grp <- factor(exer2p1_dat$grp, levels = c("High", "Medium", "Low"))
+
+
+
+
+```
+
+
+
+
+```{r exer2p1, fig.height = 6, fig.width = 6}
+
+ggplot(exer2p1_dat, aes(exer2x, exer2y)) +
+  
+  geom_point(aes(color = grp, 
+                 fill = grp, 
+                 shape = grp), size = 3.5) + 
+  
+  # Compute normal data ellipses
+  stat_ellipse(aes(group = grp, 
+                   color = grp, 
+                   fill = grp), 
+               geom = "polygon", 
+               type = "t", 
+               alpha = 0.25) + 
+  
+  scale_fill_manual(name = "Group", 
+                    values = c("Low" = "#619CFF", 
+                               "Medium" = "#00BA38", 
+                               "High" = "#F8766D")) + 
+  
+  scale_color_manual(name = "Group", 
+                     values = c("Low" = "#619CFF", 
+                                "Medium" = "#00BA38", 
+                                "High" = "#F8766D")) + 
+  
+  scale_shape_manual(name = "Group", 
+                     values = c("Low" = 15, 
+                                "Medium" = 17, 
+                                "High" = 16)) + 
+  theme_minimal() +
+  
+  theme(
+    
+    #### Plot ####
+    
+    plot.title = element_text(color = "black",
+                              face = "bold",
+                              size = 14, 
+                              hjust = 0),
+    
+  
+    
+    #### Axis ####
+    axis.line = element_line(color = "black"),
+    
+    axis.ticks = element_line(color = "black"),
+    
+    
+  
+    
+    #### Panel ####
+    panel.grid = element_blank(),
+    
+    
+    
+    #### Legend ####
+    legend.position = c(0.1, 0.9),
+    
+    legend.justification = c(0, 1)
+    
+  )
+
+```
 
 
 
@@ -110,3 +403,33 @@ Build a dataset to replicate the graphic shown below. The dataset is not randoml
 Below are quick snapshots of the dataset you should create. The first is for rows 1 through 5, second is for rows 197 through 206, and the thrid is for rows 400 through 405. This should help in the construction of the dataset.  
 
 <br>
+
+__Exercise 2 Plot 1__
+
+Questions:
+1. Fill amount rounding?
+2. x^3-y or y-x^3
+
+
+```{r exer3_p1_data}
+
+# Create x and y
+
+exer3x <- rep(seq(-1, 1, by = 0.01), times = 201)
+
+exer3y <- rep(-1:1, length.out = 201^2, each = 201)
+
+
+# Create data frame
+
+exer3p1_dat <- data.frame(exer3x, exer3y) %>%
+  mutate(
+    fill_amount = exer3x^3 - exer3y
+  )
+
+
+
+
+
+```
+
