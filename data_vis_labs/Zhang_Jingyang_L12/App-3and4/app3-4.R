@@ -25,12 +25,25 @@ ui <- fluidPage(
                   min = 0, max = 100, value = c(0, 100))
     ),
     
-    mainPanel()
+    mainPanel(
+      textOutput("selected_var"),
+      textOutput("min_max")
+    )
   )
 )
 
 
 # Define server logic required to draw a histogram ----
-server <- function(input, output) {}
+server <- function(input, output) {
+  
+  output$selected_var <- renderText({
+    paste("You have selected", input$var)
+  })
+  
+  output$min_max <- renderText({
+    paste("You have chosen a range that goes from ",
+          input$range[1], " to ", input$range[2])
+  })
+}
 
 shinyApp(ui = ui, server = server)
