@@ -1,0 +1,50 @@
+---
+title: "STAT302 Final Project Data Memo"
+subtitle: "COVID-19 Case Study"
+author: "Jingyang(Judy) Zhang"
+date: "5/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Packages
+```{r}
+library(tidyverse)
+library(janitor)
+
+```
+
+
+Data:
+covid_glob: confirmed cases/acumulative confirmed cases of COVID-19 of 
+```{r}
+covid_glob <- read_csv("C:/Users/Judy Zhang/Documents/Academics/2019-2020/NU Spring2020/STAT302 Data Visualization/STAT302_GitRepo/Final\ Project/WHO-COVID-19-global-data.csv") %>%
+  clean_names()
+```
+
+
+Data Wrangling
+```{r}
+# Number of Countries, Number of data points per country
+covid_glob %>%
+  group_by("country") %>%
+  count(country)
+
+## 214 countries
+```
+
+
+
+Visualization
+```{r}
+
+ggplot(covid_glob_us, aes(day)) +
+  geom_line(aes(y = cumulative_confirmed), color = "red") + 
+  geom_line(aes(y = cumulative_deaths), color = "blue")
+
+```
+

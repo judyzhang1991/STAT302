@@ -1,0 +1,184 @@
+---
+title: "Shiny_Lec2"
+author: "Jingyang(Judy) Zhang"
+date: "5/18/2020"
+output: html_document
+---
+
+## Lession 2 Build a User Interface ##
+
+1. The bare minimum code needed to create a Shiny app:
+
+```{r eval = FALSE}
+library(shiny)
+
+# Define UI ----
+ui <- fluidPage(
+  
+  
+)
+
+
+
+# Define server logic ----
+server <- function(input, output) {
+  
+  
+}
+
+
+
+# Run the app ----
+shinyApp(ui = ui, server = server)
+```
+
+
+
+### Layout ###
+
+1. Shiny uses the function `fluidPage` to create a display that automatically adjusts to the dimensions of your user's browser window. 
+
+a. You layout the user interface of your app by placing elements in the `fluidPage` function. 
+
+b. The `ui` function below creates a user interface that has:
+
+(1) a title panel
+
+(2) a sidebar layout: includes a sidebar panel, and a main panel
+
+```{r}
+
+ui <- fluidPage(
+  
+  titlePanel("title panel"),
+  
+  sidebarLayout(
+    sidebarPanel("sidebar panel"),
+    mainPanel("main panel")
+    
+  )
+)
+
+```
+
+
+2. `titlePanel` and `sidebarLayout` are the two most popular elements to add to `fluidPage`. They create a basic Shiny app with a sidebar. 
+
+a. `sidebarLayout` always takes two arguments:
+
+(1) `sidebarPanel` function output.
+
+(a) The sidebar panel will appear on the left side of your app by default. You can move it to the right side by giving `sidebarLayout` the optional argument `position = "right"`. 
+
+```{r}
+
+ui <- fluidPage(
+  
+  titlePanel("title panel"),
+  
+  sidebarLayout(
+    position = "right",
+    sidebarPanel("sidebar panel"),
+    mainPanel("main panel")
+    
+  )
+)
+
+```
+
+
+(2) `mainPanel` function output. 
+
+These functions place content in either the sidebar or the main panels. 
+
+
+3. `titlePanel` and `sidebarLayout` create a basic layout for your Shiny app, but you can also create more advanced layouts. 
+
+a. Use `navbarPage` to give your app a multi-page user interface that includes a navigation bar. 
+
+b. Use `fluidRow` and `column` to build your layout up from a grid system. 
+More advanced options are in the Shiny Application Layout Guide: https://shiny.rstudio.com/articles/layout-guide.html
+
+
+
+### HTML Content ###
+
+1. You can add content to your Shiny app by placing it inside a `*Panel` function. 
+
+
+2. To add more advanced content, use one of Shiny's HTML tag functions. 
+
+
+![](screenshots/Shiny_Lec2_HTMLTags.png)
+
+
+
+### Headers ###
+1. To create a header element:
+
+a. Select a header function (e.g. h1 or h5)
+
+b. Give it the text you want to see in the header
+
+> library(shiny)
+> h1("My title")
+
+<h1> My title </h1>
+
+
+2. To place the element in your app:
+
+a. Pass `h1("My title")` as an argument to `titlePanel`, `sidebarPanel`, or `mainPanel`.
+
+The text will appear in the corresponding panel of your web page. 
+
+b. You can place multiple elements in the same panel if you separate them with a comma. 
+
+
+3. In general, any HTML tag attribute can be set as an argument in any Shiny tag function. 
+
+
+### Formatted Text ###
+
+1. Shiny offers many tag functions for formatting text. 
+
+
+
+### Images ###
+
+1. Shiny looks for the `img` function to place image files in your app. 
+
+a. To insert an image, give the `img` function the name of your image file as the `src` argument (e.g. `img(src = "my_image.png")`). 
+You must spell out this argument since `img` passes your input to an HTML tag, and `src` is what the tag expects. 
+
+b. Can also include other HTML friendly parameters such as height and width. Note that height and width numbers will refer to pixels. 
+
+2. The `img` function looks for your image file in a specific place. Your file must be in a folder named `www` in the same directory as the `app.R` script. 
+a. Shiny treats this directory in a special way. Shiny will share any file placed here with your user's web browser, which makes `www` a great place to put images, style sheets, and other things the browser will need to build the web components of your SHiny app. 
+
+
+
+### Other Tags ###
+
+1. Additional tag functions can be found here: https://shiny.rstudio.com/articles/html-tags.html and
+https://shiny.rstudio.com/articles/tag-glossary.html
+
+
+
+### Recap ###
+
+1. You can:
+
+a. Create a user interface with `fluidPage`, `titlePanel` and `sidebarLayout`.
+
+b. Create an HTML element with one of Shiny's tag functions.
+
+c. Set HTML tag attributes in the arguments of each tag function. 
+
+d. Add an element to your web page by passing it to `titlePanel`, `sidebarPanel`, or `mainPanel`. 
+
+e. Add multiple elements to each panel by separating them with a comma.
+
+f. Add images by placing your image in a folder labeled `www` within your Shiny app directory and then calling the `img` function.
+
+

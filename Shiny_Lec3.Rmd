@@ -1,0 +1,75 @@
+---
+title: "Shiny_Lec3"
+author: "Jingyang(Judy) Zhang"
+date: "5/18/2020"
+output: html_document
+---
+
+## Lession 3 Add Control Widgets ##
+
+
+1. Widget: a web element that your users can interact with. 
+a. Widgets provide a way for your users to send messages to the Shiny app. 
+
+
+b. Shiny widgets collect a value from your user. When a user changes the widget, the value will change as well. 
+
+### Control Widgets ###
+1. Shiny comes with a family of pre-built widgets, each created with a transparently named R function. 
+
+a. `actionButton`: Action Button.
+
+2. `checkboxGroupInput`: A group of check boxes.
+
+3. `checkboxInput`: A single check box.
+
+4. `dateInput`: A calendar to aid date selection. 
+
+5. `dateRangeInput`: A pair of calendars for selecting a date range.
+
+6. `fileInput`: A file upload control wizard. 
+
+7. `helpText`: Help text that can be added to an input form.
+
+8. `numericInput`: A field to enter numbers.
+
+9. `radioButtons`: A set of radio buttons.
+
+10. `selectInput`: A box with choices to select from. 
+
+11. `sliderInput`: A slider bar.
+
+12. `submitButton`: A submit button.
+
+13. `textInput`: A field to enter text. 
+
+
+
+### Adding Widgets ###
+
+1. You can add widgets to your web page in the same way that you added other types of HTML content. To add a widget to your app, place a widget function in `sidebarPanel` or `mainPanel` in your `ui` object. 
+
+
+2. Each widget function requires several arguments. The first two arguments for each widget are:
+
+a. A name for the widget: the user will not see this name, but you can use it to access the widget's value. The name should be a character string. 
+b. A label: this label will appear with the widget in your app. It should be a character string, but it can be an empty string `""`.
+
+3. The remaining arguments vary from widget to widget, depending on what the widget needs to do its job. 
+
+a. They include things like initial values, range, and increments. 
+
+b. Find the exact arguments needed by a widget on the widget function's help page (e.g. `?selectInput`).
+
+
+
+### Recap ###
+1. It is easy to add fully functional widgets to your Shiny app.
+
+a. Shiny provides a family of functions to create these widgets.
+
+b. Each function requires a name and a label.
+
+c. Some widgets need specific instructions to do their jobs. 
+
+d. You add widgets to your Shiny app just like you add other types of HTML content. 
