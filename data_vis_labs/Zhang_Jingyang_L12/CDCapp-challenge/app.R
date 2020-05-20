@@ -239,13 +239,61 @@ server <- function(input, output) {
   
   # Generate a summary of variable ----
   output$summary1 <- renderPrint({
-      skim_without_charts(v())
+    if(input$var == "weight"){
+      actual_weight = cdc$weight
+      
+      skim_without_charts(actual_weight)
+    }else{if(input$var == "wtdesire"){
+      desired_weight = cdc$wtdesire
+      
+      skim_without_charts(desired_weight)
+    }else{
+      height = cdc$height
+      skim_without_charts(height)
+    }
+      
+    }
  
   })
   
   
   output$summary2 <- renderPrint({
-    skim_without_charts(f()) 
+    if(input$choice == "genhlth"){
+      general_health = cdc$genhlth
+      
+      skim_without_charts(general_health)
+    }
+    else{if(input$choice == "hlthplan"){
+      health_plan = cdc$hlthplan
+      
+      skim_without_charts(health_plan)
+    }
+      else{if(input$choice == "exerany"){
+        any_exercise = cdc$exerany
+        
+        skim_without_charts(any_exercise)
+      }else{if(input$choice == "smoke100"){
+        smoke_100cigarettes = cdc$smoke100
+        
+        skim_without_charts(smoke_100cigarettes)
+      }else{if(input$choice == "gender"){
+        gender = cdc$gender
+        
+        skim_without_charts(gender)
+      }else{
+        print("No summary for None")
+      }
+        
+        
+      }
+        
+        
+      }
+        
+        
+      }}
+    
+    
     
     
     
