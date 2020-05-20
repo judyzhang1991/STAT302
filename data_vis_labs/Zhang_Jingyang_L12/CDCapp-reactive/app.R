@@ -2,11 +2,20 @@
 library(shiny)
 library(tidyverse)
 library(janitor)
+library(ggthemes)
 
 
 # Read data
 cdc <- read_delim("data/cdc.txt", "|") %>%
-  clean_names() 
+  clean_names()
+
+# Specify factor levels
+cdc$exerany <- factor(cdc$exerany, levels = c(1, 0))
+
+cdc$hlthplan <- factor(cdc$hlthplan, levels = c(1, 0))
+
+cdc$smoke100 <- factor(cdc$smoke100, levels = c(1, 0))
+  
 
 
 
@@ -14,7 +23,7 @@ cdc <- read_delim("data/cdc.txt", "|") %>%
 ui <- fluidPage(
   
   # App title ----
-  titlePanel("CDC BRFSS: Histogram of Weight Grouped by Gender"),
+  titlePanel("CDC BRFSS Histograms"),
   
   # Sidebar layout with input and output definitions ----
   sidebarLayout(
@@ -80,9 +89,17 @@ server <- function(input, output) {
     
   
     vars    <- case_when(
-      input$var == "Actual Weight" ~ list(cdc$weight, "Actual Weight in Pounds"),
-      input$var == "Desired Weight" ~ list(cdc$wtdesire, "Desired Weight in Pounds"),
-      input$var == "Height" ~ list(cdc$height, "Height in Inches")
+      input$var == "Actual Weight" ~ list(cdc$weight, 
+                                          seq(0, 500, by = 100), 
+                                          "Actual Weight in Pounds"),
+      
+      input$var == "Desired Weight" ~ list(cdc$wtdesire, 
+                                           seq(0, 600, by = 200),
+                                           "Desired Weight in Pounds"),
+      
+      input$var == "Height" ~ list(cdc$height, 
+                                   seq(50, 90, by = 10),
+                                   "Height in Inches")
     )
     
     legs <- case_when(
@@ -92,29 +109,29 @@ server <- function(input, output) {
                                                 "Good", 
                                                 "Fair", 
                                                 "Poor"), 
-                                              "horizontal"),
+                                              "General Health"),
       
-      input$choice == "Health Coverage" ~ list(cdc$hlthplan, 
+      input$choice == "Health Coverage" ~ list(factor(cdc$hlthplan), 
                                                c("Yes",
                                                  "No"),
-                                               "horizontal"),
+                                               "Health Coverage"),
       
-      input$choice == "Exercised in Past Month" ~ list(cdc$exerany, 
+      input$choice == "Exercised in Past Month" ~ list(factor(cdc$exerany), 
                                                        c("Yes",
                                                          "No"),
-                                                       "horizontal"),
+                                                       "Exercised in Past Month"),
       
       
-      input$choice == "Smoked 100 Cigarettes" ~ list(cdc$smoke100, 
+      input$choice == "Smoked 100 Cigarettes" ~ list(factor(cdc$smoke100), 
                                                      c("Yes",
                                                        "No"),
-                                                     "horizontal"),
+                                                     "Smoked 100 Cigarettes"),
       
       
       input$choice == "Gender" ~ list(cdc$gender, 
                                       c("Female",
                                         "Male"),
-                                      "horizontal")
+                                      "Gender")
     )
     
   
@@ -124,23 +141,47 @@ server <- function(input, output) {
       
       geom_histogram(aes(fill = unlist(legs[1])), 
                      color = "black", 
+                     size = 1,
                      position = "stack", 
                      breaks = bins) + 
       
+      scale_x_continuous(breaks = unlist(vars[2])) + 
+      
       scale_fill_discrete(labels = unlist(legs[2])) + 
       
-      labs(x = unlist(vars[2]),
+      guides(fill = guide_legend(title.position = "top")) + 
+      
+      labs(x = unlist(vars[3]),
            y = "Count",
-           fill = "Gender") + 
+           fill = legs[3]) + 
       
       theme_minimal() + 
       
       theme(
         
-        ### Legend ###
-        legend.position = c(0.45, 0.8),
+        ### Plot ###
+        plot.background = element_rect(fill = "#F0F0F0"),
         
-        legend.justification = c(0, 1)
+        
+        
+        ### Panel ###
+        panel.grid.major = element_line(color = "#D2D2D2"),
+        panel.border = element_blank(),
+        
+        panel.grid.minor = element_blank(),
+        
+        
+        
+        
+        
+        ### Legend ###
+        legend.position = c(0.5, 1),
+        
+        legend.title.align = 0.5,
+        
+        legend.justification = c(0, 1),
+        
+        legend.direction = "horizontal"
         
       )
     
@@ -150,3 +191,24 @@ server <- function(input, output) {
 
 shinyApp(ui = ui, server = server)
 
+
+
+
+# Questions
+##1. Remove plot border
+##2. Plot size/dimension
+##3. Binwidth?
+
+
+
+
+#ggplot(cdc, aes(height)) + 
+ # geom_histogram(aes(fill = factor(exerany)), 
+     #            position = "stack", 
+        #         bins = 30)
+
+
+
+
+  
+  
