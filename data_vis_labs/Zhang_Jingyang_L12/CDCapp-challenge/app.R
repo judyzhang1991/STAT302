@@ -4,6 +4,7 @@ library(tidyverse)
 library(janitor)
 library(ggthemes)
 library(skimr)
+library(knitr)
 
 
 # Read data
@@ -16,6 +17,14 @@ cdc$exerany <- factor(cdc$exerany, levels = c(1, 0))
 cdc$hlthplan <- factor(cdc$hlthplan, levels = c(1, 0))
 
 cdc$smoke100 <- factor(cdc$smoke100, levels = c(1, 0))
+
+cdc$genhlth <- factor(cdc$genhlth, levels = c("excellent", 
+                                              "very good", 
+                                              "good", 
+                                              "fair", 
+                                              "poor"))
+
+cdc$gender <- factor(cdc$gender, levels = c("f", "m"))
   
 
 
@@ -73,7 +82,8 @@ ui <- fluidPage(
       # Output: Tabset w/ plot, summary
       tabsetPanel(type = "tabs",
                   tabPanel("Plot", plotOutput("distPlot")),
-                  tabPanel("Summary", verbatimTextOutput("summary"))
+                  tabPanel("Summary", verbatimTextOutput("summary1"), verbatimTextOutput("summary2"))
+                 
       )
       
     )
@@ -201,7 +211,7 @@ server <- function(input, output) {
       theme(
         
         ### Plot ###
-        plot.background = element_rect(fill = "#F0F0F0"),
+        plot.background = element_rect(fill = "#F0F0F0", color = NA),
         
         
         
@@ -214,13 +224,12 @@ server <- function(input, output) {
         
         
         
-        
         ### Legend ###
-        legend.position = c(0.5, 1),
+        legend.position = "top",
         
         legend.title.align = 0.5,
         
-        legend.justification = c(0, 1),
+        #legend.justification = c(0, 0),
         
         legend.direction = "horizontal"
         
@@ -229,10 +238,20 @@ server <- function(input, output) {
   })
   
   # Generate a summary of variable ----
-  output$summary <- renderPrint({
-    partition(skim(f()))
+  output$summary1 <- renderPrint({
+      skim_without_charts(v())
+ 
+  })
+  
+  
+  output$summary2 <- renderPrint({
+    skim_without_charts(f()) 
+    
+    
     
   })
+  
+  
 
   
 }
@@ -241,19 +260,6 @@ shinyApp(ui = ui, server = server)
 
 
 
-
-# Questions
-##1. Remove plot border
-##2. Plot size/dimension
-##3. Binwidth?
-
-
-
-
-#ggplot(cdc, aes(height)) + 
- # geom_histogram(aes(fill = factor(exerany)), 
-     #            position = "stack", 
-        #         bins = 30)
 
 
 

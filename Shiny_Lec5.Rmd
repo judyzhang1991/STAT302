@@ -1,0 +1,126 @@
+---
+title: "Shiny_Lec5"
+author: "Jingyang(Judy) Zhang"
+date: "5/20/2020"
+output: html_document
+---
+
+## Lession 5 Use R Scripts and Data ##
+
+### conties.rds ###
+1. `counties.rds`: a dataset of demographic data for each county in the United States, collected with the `UScensus2010` R package. 
+
+The dataset in `counties.rd` contains:
+
+a. The name of each county in the U.S.
+
+b. The total population of the county
+
+c. The percent of residents in the county who are White, Black, Hispanic, or Asian
+
+```{r}
+counties <- readRDS("census-app/data/counties.rds")
+
+head(counties)
+```
+
+
+
+### helpers.R ###
+1. `helpers.R`: an R script that can help you make choropleth maps. 
+
+2. Choropleth Map: a map that uses color to display the regional variation of a variable. 
+
+__Example__: U.S. Census 2010
+
+1. The `percent_map` function in `helpers.R` takes five arguments and it plots the counties data as a choropleth map:
+
+a. `var`: a column vector from the `counties.rds` dataset
+
+b. `color`: any character string you see in the output of `colors()`
+
+c. `legend.title`: a character string to use as the title of the plot's legend
+
+d. `max`: a parameter for controlling shade range (defaults to 100)
+
+e. `min`: a parameter for controlling shade range (defaults to 0)
+
+
+### Loading Files and File Paths ###
+
+1. Use `percent_map` to plot the counties data as a choropleth map:
+
+
+```{r}
+library(map)
+library(mapproj)
+
+# This assumes that census-app is a sub-directory in your working directory. 
+source("census-app/helpers.R")
+counties <- readRDS("census-app/data/counties.rds")
+percent_map(counties$white, "darkgreen", "% White")
+```
+
+
+a. To use `percent_map`, we first run `helpers.R` with the `source` function, and then loaded `counties.rds` with the `readRDS` function.
+
+(1) Both `source` and `readRDS` require a file path, and file path do not behave the same way in a Shiny app as they do at the command line. 
+
+(a) When Shiny runs the commands in `server.R`, it will treat all file pahts as if they begin in the SAME DIRECTORY as `server.R`. 
+
+In other words, the directory that you save `server.R` in will become the working directory of your Shiny app. 
+
+Since you saved `helpers.R` in the same directory as `server.R` and saved `counties.rds` in a sub-directory (named data) of the directory that `server.R` is in, you can ask Shiny to load them with:
+
+```{r eval = FALSE}
+source("helpers.R")
+
+counties <- readRDS("data/counties.rds")
+```
+
+
+b. We also ran `library(maps)` and `library(mapproj)` and they can be ran in the normal way as they do not require a file path. 
+
+
+### Execution ###
+
+1. Shiny will execute all of these commands if you place them in your `app.R` script.
+
+2. However, where you place them will determine how many times they are run (or re-run), which will in turn affect the performance o your app, since Shiny will run some sections of `app.R` script more often than others. 
+
+a. Shiny will run the whole script the first time you call `runApp`. 
+
+This causes Shiny to execute the `server` function. 
+
+![](screenshots/Shiny_lec5_exeRunOnce.png)
+
+b. Shiny saves the `server` function until a new user arrives. 
+
+Each time a new user visits your app, Shiny runs the `server` function again, one time.
+
+The function helps Shiny build a distinct set of reactive objects for each user. 
+
+![](screenshots/Shiny_lec5_exeRunOnceUser.png)
+
+c. As users interact with the widgets and change their values, Shiny will re-run the R expressions assigned to each reactive object that depend on a widget whose value was changed. 
+
+![](screenshots/Shiny_lec5_exeRunOnceAct.png)
+
+__Summary__:
+
+1. The `shinyApp` function is run once, when you launch your app.
+
+a. Source scripts, load libraries, and read data sets at the begining of `app.R` outside of the `server` function. Shiny will only run this code once, which is all you need to set your server up to run the R experssions contained in the `server`. 
+
+2. The `server` function is run once each time a user visit your app. 
+
+a. Define user specific objects inside `server` function, but ouside of any `render*` calls. These would be objects that you think each user will need their own personal copy of. For example, an object that records the user's session info. This code will be run once per user. 
+
+
+
+3. The R expressions inside `render*` functions are run many times. Shiny runs them once each time a user change the value of a widget. 
+
+a. Only place code that Shiny must rerun to build an object inside of a `render*` function. Shiny will rerun all of the code in a `render*` chunk each time a user changes a widget mentioned in the chunk. 
+
+Generally avoid placing code inside a `render` function that does NOT need to be there as it will slow down the entire app. 
+
