@@ -1,167 +1,234 @@
 ---
-title: "Shiny_Lec4"
+title: "Shiny_Lec6"
 author: "Jingyang(Judy) Zhang"
-date: "5/19/2020"
+date: "5/20/2020"
 output: html_document
 ---
 
-## Lession 4 Display Reactive Output ##
+## Lession 6 Use Reactive Expressions ##
+
+1. Reactive expressions let you control which parts of your app update when, which prevents unnecessary computation that can slow down your app. 
 
 
-1. Reactive Output: automatically responds when your user toggles a widget. 
+### A New App: stockVis
+
+1. The stockVis app looks up stock prices by ticker symbol and displays the results as a lne chart. The app lets you:
+
+a. Select a stock to examine
+
+b. Pick a range of dates to review
+
+c. Choose whether to plot stock prices or the log of the stock prices on the y axis
+
+d. Decide whether or not to correct prices for inflation
+
+e. By default, stock Vis displays the SPY ticker (an index of the entire S$P 500). To look up a different stock, type in a stock symbol that Yahoo finance will recognize. 
+
+2. stockVis relies heavily on two functions from the `quantmod` package:
+
+a. It uses `getSymbols` to download financial data straight into R from websites like Yahoo finance and the Federal Reserve Bank of St. Louis. 
+
+b. It uses `chartSeries` to display prices in an attractive chart. 
+
+3. stockVis also relies on an R script named `helpers.R`, which contains a function that adjusts stock prices for inflation. 
 
 
-### Two Steps ###
+### Check Boxes and Date Ranges ###
 
-1. You can create reactive output with a two step process.
+1. The stockVis app uses a few new widgets:
 
-a. Add an R object to your user interface. 
+a. A date range selector, created with `dateRangeInput`
 
-b. Tell Shiny how to build the object in the server function. The object will be reactive if the code that builds it calls a widget value. 
-
-
-### Step 1: Add an R object to the UI
-
-1. Shiny provides a family of functions that turn R objects into output for your user interface. Placing a function in `ui` tells Shiny where to display your object. 
-
-a. Each function creates a specific type of output. 
-
-![](screenshots/Shiny_Lec4_OutputFns.png)
+b. A couple of check boxes made `checkboxInput`. Check box widgets are very simple. They return a `TRUE` when the checkbox is checked, and a `FALSE` when the checkbox is not checked. 
 
 
-b. You can add output to the user interface in the same way that you added HTML elements and widgets. 
+### Streamline Computation ###
 
-c. Place the output function inside `sidebarPanel` or `mainPanel` in the `ui`. 
+1. Plot y axis on the log scale Checkbox: the value of `input$log` will change, which will cause the entire expression in `renderPlot` to rerun:
 
-__Example__
+```{r eval = FALSE}
 
-```{r}
-ui <- fluidPage(
-  titlePanel("censusVis"),
+output$plot <- renderPlot({
+  data <- getSymbols(input$symb, src = "yahoo",
+                     from = input$dates[1],
+                     to = input$dates[2],
+                     auto.assign = FALSE)
+  chartSeries(data, theme = chartTheme("white"),
+              type = "line", log.scale = input$log, TA = NULL)
   
-  sidebarLayout(
-    sidebarPanel(
-      helpText("Create demographic maps with 
-               information from the 2010 US Census."),
-      
-      selectInput("var", 
-                  label = "Choose a variable to display",
-                  choices = c("Percent White", 
-                              "Percent Black",
-                              "Percent Hispanic", 
-                              "Percent Asian"),
-                  selected = "Percent White"),
-      
-      sliderInput("range", 
-                  label = "Range of interest:",
-                  min = 0, max = 100, value = c(0, 100))
-    ),
+  
+})
+```
+
+
+2. Each time `renderPlot` reruns:
+
+a. It re-fetches the data from Yahoo finance with `getSymbols` 
+
+b. It re-draws the cahrt with the correct axis
+
+This is NOT good, because you do NOT need to re-fetch the data to re-draw the plot. In fact, Yahoo finance will cut you off if you re-fetch your data too often (because you begin to look like a bot). 
+
+But more importantly, re-running `getSymbols` is unnecessary work, which can slow down your app and consume server bandwidth. 
+
+
+### Reactive Expressions ###
+
+1. You can limit what gets re-run during a reaction with reactive expressions. 
+
+a. Reative Expression: an R expression that uses widget input and return a value. The reactive expression will update this value whenever the original widget changes. 
+
+b. To create a reactive use the `reactive` function, which takes an R expression surrounded by braces (just like the `render*` functions)
+
+
+__Example__: Reactive Expression 
+
+```{r eval = FALSE}
+
+
+# A reactive expression that uses the widgets of stockVis to fetch data from Yahoo.
+dataInput <- reactive({
+  getSymbols(input$symb, src = "yahoo",
+             from = input$dates[1],
+             to = input$dates[2],
+             auto.assign = FALSE)
+})
+
+```
+
+When you run the expression, it will run `getSymbols` and return the results, a data frame of price data. You can use the expression to access price data in `renderPlot` by calling `dataInput()`. 
+
+```{r eval = FALSE}
+
+output$plot <- renderPlot({
+  chartSeries(dataInput(), theme = chartTheme("white"),
+              type = "line", log.scale = input$log, TA = NULL)
+  
+})
+
+```
+
+
+2. Reactive expression are a bit smarter than regular R functions. They cache their values and know when their values have become outdated. 
+
+a. The first time that you run a reactive expression, the expression will save its result in your computer's memory. 
+
+b. The next time you call the reactive expression, it can return this saved result without doing any computation (which make your app faster). 
+
+c. The areactive expression will only return the saved result if it knows that the result is up-to-date. If the reactive expression has learned that the result is obsolete (because a widget has changed), the expression will recalculate the result. It then returns the new result and saves a new copy. The reactive expression will use this new copy until it too becomes out of date. 
+
+
+___Summary___: Reactive Expression
+
+1. A reactive expression saves its result the first time you run it. 
+
+2. The next time the reactive expression is called, it checks if the saved value has become out of date (i.e. Whether the widgets it depends on have changed).
+
+3. If the value is out of date: the reactive object will recalculate and then save the new result.
+
+4. If the value is up to date: the reactive expression will return the saved value without doing any computation. 
+
+
+__Example__: stockVis Reactive Expression
+
+```{r eval = FALSE}
+
+server <- function(input, output) {
+  dataInput <- reactive({
+    getSymbols(input$symb, src = "yahoo",
+               from = input$dates[1],
+               to = input$dates[2],
+               auto.assign = FALSE)
+  })
+  
+  output$plot <- renderPlot({
     
-    mainPanel(
-      textOutput("selected_var")
-    )
-  )
-)
-```
-
-
-d. Each of the `*Output` functions require a single argument a character string that Shiny will use as the name of your reactive element. 
-
-(1) Your user will not see this name, but you will use it later. 
-
-
-### Step 2: Provide R code to build the object ###
-
-1. Tell Shiny how to build the object: provide the R code that builds the object in the `server` function. 
-
-a. The `server` function plays a special role in the Shiny process, it builds a list-like object named `output` that contains all of the code needed to update the R objects in your app. 
-
-(1) Each R object needs to have its own entry in the list. 
-
-b. You can create an entry by defining a new element for `output` within the `server` function. 
-
-(1) The element name shoudl match the name of the reactive element that you created in the `ui` in the `server` function.
-
-
-```{r}
-
-# The output$selected_var matches textOutput("selected_var") in ui
-
-server <- function(input, output) {
-  
-  output$selected_var <- renderText({ 
-    "You have selected this"
+    chartSeries(dataInput(), theme = chartTheme("white"),
+                type = "line",
+                log.scale = input$log, TA = NULL)
   })
-  
 }
 
 ```
 
+When you click "Plot y axis on the log scale", `input$log` will change and `renderPlot` will re-execute. Now:
 
-c. You do not need to explicitly state in the `server` function to return `output` in its last line of code. 
+a. `renderPlot` will call `dataInput()`
 
-(1) R will automatically update `output` through reference class semantics. 
+b. `dataInput` will check that the `dates` and `symb` widgets have not changed
 
-d. Each entry to `output` should contain the output of one of Shiny's `render*`functions.
+c. `dataInput` will return its saved data set of stock prices without re-fectching data from Yahoo
 
-(1) These functions caputure an R expression and do some light pre-processing on the expression. 
-
-(2) Use the `render*` function that corresponds to the type of reactive object you are making. 
-
-
-![](screenshots/Shiny_Lec4_RenderFns.png)
-
-e. Each `render*` function takes a single argument an R expression surrounded by braces, `{}`. The expression can be one simple line of text, or it can involve many lines of code, as if it were a complicated function call. 
-
-f. This R expression is a set of instructions that you give Shiny to store for later. Shiny will run the instructions when you first launch your app, and then Shiny will re-run the instructions every time if needs to update your object. 
+d. `renderPlot` will re-draw the chart with the correct axis
 
 
 
-### Using Widget Values ###
+### Dependencies ###
 
-1. You can make the text reactive by asking Shniy to call a widget value when it builds the text. 
+1. Shiny keeps track of which reactive expressions and `output` object depends on, as well as which widget inputs. Shiny will automatically re-build an object if:
 
-a. In the `server` function, the argument `input` is a second list-like object. It stores the current values of all of the widgets in your app. These values will be saved under the names that you gave the wdigets in your `ui`. 
+a. An `input` value in the objects's `render*` function changes OR
 
-b. Shiny will automatically make an object reactive if the object uses an `input` value. 
+b. A reactive expression in the objects's `render*` function becomes obsolete
+
+2. Reactive expressions are like links in a chain that connect `input` values to `output` objects. The objects in `output` will respond to changes made anywhere downstream in the chain. 
+
+3. Only call a reactive expression from within a `reactive` or a `render*` function as these R functions are equipped to deal with reactive output, which can change without warning. 
+
+In fact, Shiny will prevent you from calling reactive expressions outside of these functions. 
 
 
-__Example__
-```{r}
-# The server function creates a reactive lien of text by calling the values of the select box widget to build the text. 
+__Answer 1__
+
+```{r eval = FALSE}
 server <- function(input, output) {
-  
-  output$selected_var <- renderText({ 
-    paste("You have selected", input$var)
+
+  dataInput <- reactive({  
+      getSymbols(input$symb, src = "yahoo",
+          from = input$dates[1],
+          to = input$dates[2],
+          auto.assign = FALSE)
   })
-  
+
+  finalInput <- reactive({
+    if (!input$adjust) return(dataInput())
+    adjust(dataInput())
+  })
+
+  output$plot <- renderPlot({
+    chartSeries(finalInput(), theme = chartTheme("white"),
+        type = "line", log.scale = input$log, TA = NULL)
+  })
 }
 ```
 
 
-2. Shiny tracks which outputs depend on which wdigets. 
+The above code isolates each input in its own reactive expression or `render*` function. If an input changes, only out of date expressions will re-run. 
 
-a. When a user chagnes a widget, Shiny will rebuild all of the outputs that depend on the widget, using the new value of the widget as it goes. As a result, the result objects will be completely up-to-date. 
+The flow:
+1. A user clicks "Plot y axis on the log scale"
 
+2. `renderPlot` re-runs
 
-### Launch your app and see the reactive output ###
+3. `renderPlot` calls `finalInput`
 
-1. When you are ready, update your `server` and `ui` functions to match those above. 
+4 `finalInput` checks with `dataInput` and `input$adjust`. 
 
-2. Then launch your Shiny app by running `runApp("census-app", display.mode = "showcase")` at the command line. 
+5. If neither has changed, `finalInput` returns its saved value. 
 
-3. Watch the `server` portion of the script. When Shiny rebuilds an output, it highlights the code it is running. 
+6. If either has changed, `finalInput` calculates a new value with the current inputs. It will pass the new value to `renderPlot` and store the new value for future queries. 
 
 
 ### Recap ###
-1. Creating your first reactive Shiny app:
 
-a. Use an `*Output` function in the `ui` to place reactive objects in your Shiny app. 
+1. YOu can make your app faster by modularizing your code with reactive expressions:
 
-b. Use a `render*` function in the `server` to tell Shiny how to build your objects. 
+a. A reactive expression takes `input` values, or values from other reactive expressions, and returns a new value
 
-c. Surround R expressions by curly braces, `{}`, in each `render*` function. 
+b. Reactive expressions save their results and will only re-calculate if their input has changed. 
 
-d. Save your `render*` expressions in the `output` list, with one entry for each reactive object in your app.
+c. Create reactive expressions with `reactive({})`
 
-e. Create reactivity by including an `input` value in a `render*` expression. 
+d. Call reactive expressions with the name of the expression followed by parenthese `()`
+
+e. Only call reactive expressions from within other reactive expressions or `render*` functions. 
