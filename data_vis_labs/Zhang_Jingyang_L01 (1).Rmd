@@ -1,0 +1,358 @@
+---
+title: "L01 Introduction"
+subtitle: "Data Visualization (STAT 302)" 
+author: "Jingyang Zhang"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    highlight: "tango"
+---
+
+## Overview
+
+The goals of this lab are to (1) ensure that the major software for this course is properly installed and functional, (2) develop and follow a proper workflow, and (3) work together to construct a few plots to explore a dataset using `ggplot2` --- demonstration of the utility and power of `ggplot2`. 
+
+**Don't worry if you cannot do everything here by yourself.** You are just getting started and the learning curve is steep, but remember that the instructional team and your classmates will be there to provide support. Persevere and put forth an honest effort and this course will payoff.
+
+```{r load-packages, warning=FALSE, message=FALSE}
+# Load package(s) - We will do this together
+
+library(tidyverse)
+library(ggstance)
+library(skimr)
+```
+
+<br>
+
+## Dataset
+
+We'll be using data from the [**lego** package](https://github.com/seankross/lego) which is already in the `/data` subdirectory, along with many other processed datasets, as part of the zipped folder for this lab. 
+
+
+<br><br>
+
+## Tasks
+Complete the following tasks. For many of these you'll need to simply indicate that you have completed the task. In others, you'll need to run some R code and/or supply a sentence or two.
+
+<br><br>
+
+### Task 1
+
+Download and install [R Software](https://cran.rstudio.com/).
+
+__DONE__
+
+<br><br>
+
+### Task 2
+
+1. Download and install [RStudio](https://www.rstudio.com/products/rstudio/download4/).
+2. Open RStudio and ensure it and R have been properly installed. 
+3. Go to **Tools** > **Global Options** and change the two indicated settings below and click **Applly**.
+
+![](screen_shot/rstudio-workspace.png)
+<strong>DONE</strong>
+
+<br>
+
+### Task 3
+Install the following packages:
+
+- `tidyverse`
+- `ggstance`
+- `skimr`
+
+__DONE__
+
+<br><br>
+
+### Task 4
+
+1. Download `data_vis_labs.zip` from Canvas. 
+2. Unzip the file and place the unzipped `data_vis_labs` directory where you would like to keep all of your lab work for this course.
+3. Open RStudio and create a project folder for this *exsisting directory*.  
+4. Appropriately rename `template_L01.Rmd` for submission (e.g. *Kuper_Arend_L01.Rmd*).
+5. Compile the *_L01.Rmd file with `Cmd/Ctrl + Shift + K`.
+
+__DONE__
+
+<br><br>
+
+### Task 5 
+Optional: It is always handy to have a versatile text editor and I would suggest downloading [Sublime Text](https://www.sublimetext.com/). It is free to use.
+<strong>DONE</strong>
+
+<br><br>
+
+
+
+## Exercise 1
+
+Let's look at some interesting patterns in the history of LEGO! We'll be using data from the [**lego** package](https://github.com/seankross/lego) located `data/legosets.rda`. We will work through this exercise together in class.
+<br><br>
+
+.rda files are R binary files and can be load using the ``load()`` function. 
+```{r load-data}
+
+load(file="data/legosets.rda")
+
+```
+
+
+### Inspect the data
+
+The **lego** package provides a helpful dataset some interesting variables. Let's take a quick look at the data.
+
+
+```{r inspect-data}
+
+# Print the dataset
+#legosets
+
+# Take a focused look at variables: gives us what 
+glimpse(legosets)
+
+# skim() may not work on everyone's computer
+#skim(legosets)
+
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+
+```
+
+Number of variables: 15
+
+Number of observations: 6172 
+
+Missing data: all character variables do not have missing values. However, only two numerical variables ``Year``, ``duplo`` do not have missing values. All other numerical variables have missing values. 
+
+Unusuallness: 
+
+(1) There are some legosets with price 0 as the minimum value for ``GBP_MSRP``, ``USD_MSRP``, ``EUR_MSRP`` which may mean some of legosets are given out for free as promotions.
+
+(2) There are legosets with 0 pieces: Search Sub and Lego Minifigures. 
+
+Because of 0s in the data, we may want to look at median price and mean pieces instead of means. 
+
+<br><br>
+
+### Price per year
+
+First, let's look at the average cost of LEGO sets over time. The main variable of interest here is `USD_MSRP`, or the manufacturer's suggested retail price in constant dollars (i.e. not adjusted for inflation).
+
+Require data wrangling to see price per year
+
+cmd-shift-m: shortcut for pipe operator %>%
+
+```{r add-duplo-ind}
+legosets=legosets %>% mutate(duplo=ifelse(Theme %in% c("Duplo"), 1, 0))
+```
+
+
+```{r price-per-year}
+# Overall mean cost
+mean_cost=mean(legosets$USD_MSRP, na.rm = TRUE)
+
+mean_cost
+
+# Mean cost by year
+## First drop missing values
+## Group by: calculating per variable
+
+avg_price_per_yr=legosets %>% 
+  drop_na(USD_MSRP) %>%
+  group_by(Year) %>%
+  summarise(
+   count=n(),
+   sum=sum(USD_MSRP),
+   mean_price_per_yr=mean(USD_MSRP)
+  )
+
+avg_price_per_yr
+
+# Visualizing: scatterplot
+## aes: specify mappings: takes information in the data, columns(variables), and renders them into aesthetic attributes 
+## Inheritance: from base layer: data and aes but non-mapping will not be inheritated (e.g. size, colo, etc. )
+
+## USD variable is not adjusted for inflation
+
+
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+  geom_line(color="purple", size=0.5)+
+  geom_point(color="blue", size=0.5)+
+  geom_smooth()+
+  labs(
+    x = "Year",
+    y= "Mean Price Per Year (USD)",
+    title="Average Price of Lego Sets ",
+    subtitle="Amounts are reported in current USD",
+    caption="Source: LEGO"
+  )+theme_minimal()
+
+
+```
+
+
+<br><br>
+
+### Pieces per year
+
+Next, let’s look at how the number of pieces per set has changed over time. Because Duplo sets are much smaller (since they’re designed for toddlers), we’ll make a special indicator variable for them.
+
+```{r piece-per-year}
+
+
+# Overall mean pieces
+mean_pieces=mean(legosets$Pieces, na.rm = TRUE)
+
+mean_pieces
+
+# Mean pieces by year
+
+avg_pieces_per_yr=legosets %>% 
+  drop_na(Pieces) %>%
+  group_by(Year, duplo) %>%
+  summarise(
+   num_sets=n(),
+   sum=sum(Pieces),
+   mean_ps_per_yr=mean(Pieces)
+  )
+
+avg_pieces_per_yr
+
+
+
+
+ggplot(avg_pieces_per_yr, aes(Year,  mean_ps_per_yr))+
+  geom_line()+
+  facet_wrap(~duplo, ncol=1)+
+  labs(
+    x = "Year",
+    y= "Pieces",
+    title="Average Price of Lego Sets ",
+    subtitle="Average Number of Pieces in LEGO Sets",
+    caption="Source: LEGO"
+  )+theme_minimal()
+
+
+
+  
+
+
+
+```
+
+
+
+
+<br><br>
+
+### LEGO set themes
+
+In the 1990s, [LEGO began partnering with famous brands and franchises](https://www.cnbc.com/2018/04/27/lego-marketing-strategy-made-it-world-favorite-toy-brand.html) to boost its own sales. First, let's see how many different "themes" LEGO now offers:
+
+```{r}
+legosets %>%
+  distinct(Theme)
+
+```
+
+
+There are 115 distinct themes.
+
+```{r}
+theme_counts=legosets %>% 
+  count(Theme, sort=TRUE) %>%
+  # fct_inorder: turns chr into fct -- meaning a categorical variable
+  mutate(Theme=fct_inorder(Theme, ordered=TRUE))
+
+
+theme_counts %>% 
+  filter(n>150, Theme != "Duplo") %>%
+  ggplot(aes(x=fct_rev(Theme), y=n))+
+  # Not use geom_bar as it calculates the total for us
+  # Since we have already calculated the totals for each them use geom_col
+  geom_col() +
+  coord_flip()+
+  labs(x=NULL, y="Number of Sets")+
+  theme_minimal()
+
+```
+
+
+
+## Class Notes ##
+
+__Types of Variables__
+
+Categorical/Factor; Continuous/Numeric
+
+__Two Questions to Ask Before Deciding the Graphics:__
+
+1. How many variables? Uivariate or multivariate?
+
+2. Type of variable(s)?
+
+
+__When and why we use a ?__
+
+1. Histogram: 
+
+a. cts/numerical, can be discrete but cts works better
+
+b. univariate
+
+
+2. Boxplot: 5 summary of the data: min, 0.25 Percentile (first quadrat), Median (second quadrat), 0.75 Percentile (third quadrat), max
+
+a. cts/numerical
+
+b. univarite
+
+
+
+3. Bar plot (or called frequency plot): how frequent does the category/factor level show up (measured by the height of the bar)
+
+a. categorical/factor
+
+b. univariate
+
+c. Histogram and bar plot are for different types of variables:
+
+(1) Histogram: for cts variable, usually does not have spaces in between bars
+
+(2) Bar plot: for categorical variable, usually has spaces in between bars
+
+
+
+4. Scatterplot: shows relathips between two numerical variables
+
+a. cts/numerical
+
+b. bivariate
+
+
+5. Segmented/Stacked Bar Plot: shading categories within a bar (another categorical var)
+
+a. categorical by categorical
+
+b. bivariate
+
+
+
+6. Side-by-Side/Grouped Boxplot: boxplots for multiple groups so we can compare
+
+a. cts/numerical by categorical
+
+b. bivariate
+
+
+
+__We are able to take the above basic graphics and add additional aesthetics (i.e. information) and turn them to more than bivariate graphics (e.g. multivariate, showing relationships among more than 2 variables)__
+
+

@@ -1,60 +1,66 @@
+
+# Load packages ----
+
 library(shiny)
 
-# Define UI for app that draws a histogram ----
+library(maps)
+
+library(mapproj)
+
+# Load data ----
+counties <- readRDS("data/counties.rds")
+
+# Source helper functions -----
+source("helpers.R")
+
+# User interface ----
 ui <- fluidPage(
+  titlePanel("censusVis"),
   
-  # App title ----
-  titlePanel("Hello World"),
-  
-  # Sidebar layout with input and output definitions ----
   sidebarLayout(
-    
-    # Sidebar panel for inputs ----
     sidebarPanel(
+      helpText("Create demographic maps with 
+        information from the 2010 US Census."),
       
-      # Input: Slider for the number of bins ----
-      sliderInput(inputId = "bins",
-                  label = "Number of bins:",
-                  min = 5,
-                  max = 50,
-                  value = 30)
+      selectInput("var", 
+                  label = "Choose a variable to display",
+                  choices = c("Percent White", "Percent Black",
+                              "Percent Hispanic", "Percent Asian"),
+                  selected = "Percent White"),
       
+      sliderInput("range", 
+                  label = "Range of interest:",
+                  min = 0, max = 100, value = c(0, 100))
     ),
     
-    # Main panel for displaying outputs ----
-    mainPanel(
-      
-      # Output: Histogram ----
-      plotOutput(outputId = "distPlot")
-      
-    )
+    mainPanel(plotOutput("map"))
   )
 )
 
-
-
-# Define server logic required to draw a histogram ----
+# Server logic ----
 server <- function(input, output) {
-  
-  # Histogram of the Old Faithful Geyser Data ----
-  # with requested number of bins
-  # This expression that generates a histogram is wrapped in a call
-  # to renderPlot to indicate that:
-  #
-  # 1. It is "reactive" and therefore should be automatically
-  #    re-executed when inputs (input$bins) change
-  # 2. Its output type is a plot
-  output$distPlot <- renderPlot({
+  output$map <- renderPlot({
     
-    x    <- faithful$waiting
-    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+    args <- switch(input$var, 
+                   "Percent White" = list(counties$white, "darkgreen", "% White"),
+                   "Percent Black" = list(counties$black, "black", "% Black"),
+                   "Percent Hispanic" = list(counties$hispanic, "darkorange", "% Hispanic"),
+                   "Percent Asian" = list(counties$asian, "darkviolet", "% Asian"))
     
-    hist(x, breaks = bins, col = "#75AADB", border = "orange",
-         xlab = "Waiting time to next eruption (in mins)",
-         main = "Histogram of waiting times")
+    args$min <- input$range[1]
+    
+    args$max <- input$range[2]
+    
+    
+    # do.call constructs and executes a function call from a name or 
+    ## a function and a list of args to be passed to it.
+    
+    do.call(percent_map, args)
+    
+    #percent_map(unlist(args[1]), unlist(args[2]), unlist(args[3]), input$range[1], input$range[2])
     
   })
-  
 }
 
-shinyApp(ui = ui, server = server)
+# Run app ----
+shinyApp(ui, server)

@@ -124,3 +124,169 @@ a. Only place code that Shiny must rerun to build an object inside of a `render*
 
 Generally avoid placing code inside a `render` function that does NOT need to be there as it will slow down the entire app. 
 
+
+### Model Answer 1 ###
+
+1. Since your app only needs to load `helper.R` and `counties.rds` once, they should go outside of the `ui` and `server` functions. 
+
+2. Also all packages need to be loaded only once so they should be placed outside the `ui` and `server` functions. 
+
+
+4. Note that each user does NOT need his/her own copy of `counties` or `percent_map`. User's computer will NOT run any of the R code in your Shiny app. 
+
+Instead, the computer that you use as a server will run all of the R code necessary for all of your users. It will send the results over to your users as HTML elements. 
+
+5. Your server can rely on a single global copy of `counties.rds` and `percent_map` to do all of the R execution necessary for all of the users. 
+
+6. You only need to build a separate object for each user if the objects will have different values for each of your users. 
+```{r eval = FALSE}
+library(maps)
+library(mapproj)
+source("helpers.R")
+counties <- readRDS("data/counties.rds")
+
+# User interface ----
+ui <- fluidPage(
+  titlePanel("censusVis"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      helpText("Create demographic maps with 
+        information from the 2010 US Census."),
+      
+      selectInput("var", 
+                  label = "Choose a variable to display",
+                  choices = c("Percent White", "Percent Black",
+                              "Percent Hispanic", "Percent Asian"),
+                  selected = "Percent White"),
+      
+      sliderInput("range", 
+                  label = "Range of interest:",
+                  min = 0, max = 100, value = c(0, 100))
+    ),
+    
+    mainPanel(plotOutput("map"))
+  )
+)
+
+# Server logic ----
+server <- function(input, output) {
+  output$map <- renderPlot({
+    percent_map( # some arguments )
+  })
+}
+
+# Run app ----
+shinyApp(ui, server)
+```
+
+
+
+### Model Answer 2 ###
+
+```{r eval = FALSE}
+
+
+# Load packages ----
+library(shiny)
+library(maps)
+library(mapproj)
+
+# Load data ----
+counties <- readRDS("data/counties.rds")
+
+# Source helper functions -----
+source("helpers.R")
+
+# User interface ----
+ui <- fluidPage(
+  titlePanel("censusVis"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      helpText("Create demographic maps with 
+        information from the 2010 US Census."),
+      
+      selectInput("var", 
+                  label = "Choose a variable to display",
+                  choices = c("Percent White", "Percent Black",
+                              "Percent Hispanic", "Percent Asian"),
+                  selected = "Percent White"),
+      
+      sliderInput("range", 
+                  label = "Range of interest:",
+                  min = 0, max = 100, value = c(0, 100))
+    ),
+    
+    mainPanel(plotOutput("map"))
+  )
+)
+
+# Server logic ----
+server <- function(input, output) {
+  output$map <- renderPlot({
+    data <- switch(input$var, 
+                   "Percent White" = counties$white,
+                   "Percent Black" = counties$black,
+                   "Percent Hispanic" = counties$hispanic,
+                   "Percent Asian" = counties$asian)
+    
+    color <- switch(input$var, 
+                    "Percent White" = "darkgreen",
+                    "Percent Black" = "black",
+                    "Percent Hispanic" = "darkorange",
+                    "Percent Asian" = "darkviolet")
+    
+    legend <- switch(input$var, 
+                     "Percent White" = "% White",
+                     "Percent Black" = "% Black",
+                     "Percent Hispanic" = "% Hispanic",
+                     "Percent Asian" = "% Asian")
+    
+    percent_map(data, color, legend, input$range[1], input$range[2])
+  })
+}
+
+# Run app ----
+shinyApp(ui, server)
+
+```
+
+
+
+A more concise version of the `server` function:
+
+```{r eval = FALSE}
+
+server <- function(input, output) {
+  output$map <- renderPlot({
+    args <- switch(input$var,
+      "Percent White" = list(counties$white, "darkgreen", "% White"),
+      "Percent Black" = list(counties$black, "black", "% Black"),
+      "Percent Hispanic" = list(counties$hispanic, "darkorange", "% Hispanic"),
+      "Percent Asian" = list(counties$asian, "darkviolet", "% Asian"))
+        
+    args$min <- input$range[1]
+    args$max <- input$range[2]
+  
+    do.call(percent_map, args)
+  })
+}
+
+```
+
+
+
+### Recap ###
+
+1. You can create more complicated Shiny apps by loading R Scripts, pacakages, and data sets. 
+
+2. Keep in mind:
+
+a. The directory that `app.R` appears in will become the working directory of the Shiny app. 
+
+b. Shiny will run code placed at the start of `app.R`, before the `server` function, only once during the life of the app. 
+
+c. Shiny will run code placed inside `server` function multiple times, which can slow down the app. 
+
+3. `switch` is a useful companion to multiple choice Shiny widgets. Use `switch` to change the values of a widget into R expressions. 

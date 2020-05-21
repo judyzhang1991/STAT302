@@ -1,0 +1,512 @@
+skim(legosets)
+glimpse(legosets)
+skim_without_charts(legosets)
+skim(legosets)
+glimpse(legosets)
+skim_without_charts(legosets)
+mean_cost_yr=legosets %>%
+drop_na(USD_MSRP) %>%
+group_by(Year) %>%
+summarise(
+count=n(),
+sum=sum(USD_MSRP),
+mean_price_per_yr=mean(USD_MSRP)
+)
+mean_cost_yr
+avg_price_per_yr=legosets %>%
+drop_na(USD_MSRP) %>%
+group_by(Year) %>%
+summarise(
+count=n(),
+sum=sum(USD_MSRP),
+mean_price_per_yr=mean(USD_MSRP)
+)
+avg_price_per_yr
+View(avg_price_per_yr)
+# Visualizing: line plot
+ggplot(avg_price_per_yr, aes(Year, mean_price_per_year))+
+geom_line()
+# Visualizing: line plot
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_point
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets "
+)
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD"
+)
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line()+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="Purple")+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr), color="Purple")+
+geom_line()+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="#666666")+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="#666666", size=0.5)+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr), color="purple")+
+geom_line(color="#666666", size=0.5)+
+geom_point(size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+View(legosets)
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="purple", size=0.5)+
+geom_point(color="blue", size=0.5)+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="purple", size=0.5)+
+geom_point(color="blue", size=0.5)+
+geom_smooth()+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+avg_pieces_per_yr=legosets %>%
+group_by(Year) %>%
+summarise(
+count=n(),
+sum=sum(Pieces, na.rm=TRUE),
+mean_pieces_per_year=mean(Pieces, na.rm=TRUE)
+)
+avg_pieces_per_yr
+legosets %>% mutate(Duplo=ifelse(Theme=="Duplo", 1, 0))
+avg_pieces_per_yr=legosets %>%
+group_by(Year, Duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_year=mean(Pieces)
+)
+View(legosets)
+legosets %>% mutate(Duplo=ifelse(Theme=="Duplo", 1, 0))
+avg_pieces_per_yr=legosets %>%
+group_by(Year, Duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_year=mean(Pieces)
+)
+View(legosets)
+avg_pieces_per_yr=legosets %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_year=mean(Pieces)
+)
+avg_pieces_per_yr
+load(file="data/legosets.rda")
+# Print the dataset
+#legosets
+# Take a focused look at variables: gives us what
+glimpse(legosets)
+# skim() may not work on everyone's computer
+#skim(legosets)
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+legosets %>% mutate(duplo=ifelse(Theme=="Duplo", 1, 0))
+legosets=legosets %>% mutate(duplo=ifelse(Theme=="Duplo", 1, 0))
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_year, color=duplo))+
+geom_line(color="purple", size=0.5)+
+geom_point(color="blue", size=0.5)
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_year, color=duplo))+
+geom_line()+
+geom_point()
+avg_pieces_per_yr=legosets %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+avg_pieces_per_yr=legosets %>%
+drop.na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr, color=duplo))+
+geom_line()+
+facet_wrap(~duplo)
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()+
+facet_wrap(~duplo)
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()+
+facet_wrap(~duplo, ncol=1)+
+theme_minimal()
+View(legosets)
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()+
+facet_wrap(~duplo, ncol=1)
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()+
+facet_wrap(~duplo, ncol=1)+
+labs(
+x = "Year",
+y= "Pieces",
+title="Average Price of Lego Sets ",
+subtitle="Average Number of Pieces in LEGO Sets",
+caption="Source: LEGO"
+)+theme_minimal()
+View(legosets)
+legosets=legosets %>% mutate(duplo=ifelse(Theme %in% c("Duplo"), 1, 0))
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()+
+facet_wrap(~duplo, ncol=1)+
+labs(
+x = "Year",
+y= "Pieces",
+title="Average Price of Lego Sets ",
+subtitle="Average Number of Pieces in LEGO Sets",
+caption="Source: LEGO"
+)+theme_minimal()
+# Chunk 1: load-packages
+# Load package(s) - We will do this together
+library(tidyverse)
+library(ggstance)
+library(skimr)
+# Chunk 2: load-data
+load(file="data/legosets.rda")
+# Chunk 3: inspect-data
+# Print the dataset
+#legosets
+# Take a focused look at variables: gives us what
+glimpse(legosets)
+# skim() may not work on everyone's computer
+#skim(legosets)
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+# Chunk 4: add-duplo-ind
+legosets=legosets %>% mutate(duplo=ifelse(Theme %in% c("Duplo"), 1, 0))
+# Chunk 5: price-per-year
+# Overall mean cost
+mean_cost=mean(legosets$USD_MSRP, na.rm = TRUE)
+mean_cost
+# Mean cost by year
+## First drop missing values
+## Group by: calculating per variable
+avg_price_per_yr=legosets %>%
+drop_na(USD_MSRP) %>%
+group_by(Year) %>%
+summarise(
+count=n(),
+sum=sum(USD_MSRP),
+mean_price_per_yr=mean(USD_MSRP)
+)
+avg_price_per_yr
+# Visualizing: scatterplot
+## aes: specify mappings: takes information in the data, columns(variables), and renders them into aesthetic attributes
+## Inheritance: from base layer: data and aes but non-mapping will not be inheritated (e.g. size, colo, etc. )
+## USD variable is not adjusted for inflation
+ggplot(avg_price_per_yr, aes(Year,  mean_price_per_yr))+
+geom_line(color="purple", size=0.5)+
+geom_point(color="blue", size=0.5)+
+geom_smooth()+
+labs(
+x = "Year",
+y= "Mean Price Per Year (USD)",
+title="Average Price of Lego Sets ",
+subtitle="Amounts are reported in current USD",
+caption="Source: LEGO"
+)+theme_minimal()
+# Overall mean pieces
+mean_pieces=mean(legosets$Pieces, na.rm = TRUE)
+mean_pieces
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_pieces_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_price_per_yr, aes(Year,  mean_pieces_per_yr))+
+geom_line()
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_ps_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_price_per_yr, aes(Year,  mean_ps_per_yr))+
+geom_line()
+View(avg_pieces_per_yr)
+ggplot(avg_price_per_yr, aes(Year,  mean_ps_per_yr))+
+geom_line()
+View(avg_pieces_per_yr)
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+#num_sets=n(),
+#sum=sum(Pieces),
+mean_ps_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+avg_pieces_per_yr=legosets %>%
+drop_na(Pieces) %>%
+group_by(Year, duplo) %>%
+summarise(
+num_sets=n(),
+sum=sum(Pieces),
+mean_ps_per_yr=mean(Pieces)
+)
+avg_pieces_per_yr
+ggplot(avg_pieces_per_yr, aes(Year,  mean_ps_per_yr))+
+geom_line()+
+facet_wrap(~duplo, ncol=1)+
+labs(
+x = "Year",
+y= "Pieces",
+title="Average Price of Lego Sets ",
+subtitle="Average Number of Pieces in LEGO Sets",
+caption="Source: LEGO"
+)+theme_minimal()
+legosets %>%
+distinct(Theme)
+legosets %>%
+count(Theme, sort=TRUE)
+legosets %>%
+count(Theme, sort=TRUE) %>%
+# fct_inorder: turns the variable to a factor
+mutate(Theme=fct_inorder(Theme, ordered=TRUE))
+theme_counts=legosets %>%
+count(Theme, sort=TRUE) %>%
+# fct_inorder: turns the variable to a factor
+mutate(Theme=fct_inorder(Theme, ordered=TRUE))
+theme_counts %>%
+ggplot(aes(x=Theme, y=n))+
+geom_bar()
+theme_counts %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col()
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col()
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x="Number of Sets")
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(y="Number of Sets")
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x=NULL, y="Number of Sets")
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=Theme, y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x=NULL, y="Number of Sets")+
+theme_minimal()
+nmonths = 24
+x = seq(as.Date("2015/1/1"), by = "month", length.out = nmonths)
+prescription1 <- data.frame(
+x,
+Percent.Change = 25 + runif(nmonths,1,100)
+)
+prescription2 <- data.frame(
+x,
+Percent.Change = 75 + runif(nmonths,1,50)
+)
+cols = c("dates", "Difference")
+colnames(prescription1) = cols
+colnames(prescription2) = cols
+p = ggplot() +
+geom_line(data = prescription1, aes(x = dates, y = Difference), color = "blue") +
+geom_line(data = prescription2, aes(x = dates, y = Difference), color = "red") +
+xlab('Dates') +
+ylab('percent.change')
+print(p)
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=ffct_rev(Theme), y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x=NULL, y="Number of Sets")+
+theme_minimal()
+theme_counts %>%
+filter(n>150) %>%
+ggplot(aes(x=fct_rev(Theme), y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x=NULL, y="Number of Sets")+
+theme_minimal()
+theme_counts %>%
+filter(n>150, Theme != "Duplo") %>%
+ggplot(aes(x=fct_rev(Theme), y=n))+
+# Not use geom_bar as it calculates the total for us
+# Since we have already calculated the totals for each them use geom_col
+geom_col() +
+coord_flip()+
+labs(x=NULL, y="Number of Sets")+
+theme_minimal()
+# Short EDA (exploratory data analysis)
+# skim_without_charts() usually works for everyone's computer
+# One important thing to take notes: missing values
+# Secondly, check the 5 number summaries
+# Table summary is one of the data visualizations
+skim_without_charts(legosets)
+View(legosets)

@@ -1,0 +1,1002 @@
+---
+title: "ggplot2_CH2"
+author: "Jingyang(Judy) Zhang"
+date: "3/31/2020"
+output: html_document
+---
+# CH2 Getting Started with ggplot2 #
+
+## 2.1 Introduction ##
+```{r}
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+```
+
+
+## 2.2 Fuel Economy Data ##
+```{r}
+mpg
+dat=mpg
+```
+
+- ``cty``: miles per gallon (mpg) for city driving
+
+- ``hwy``: miles per gallon (mpg) for highway driving
+
+- ``displ``: engine displacement in liters
+
+- ``drv``: drivetrain: fromt wheel (f), rear wheel (r), or four whell (4)
+
+- ``model``: model of car: 38 models, selected as they had a new edition every year btw 1999 and 2008
+
+- ``class``: a categ variable describing the "type" if car: two seater, SUV, compact, etc. 
+
+
+RQ1: Q5: Using the ``mpg`` dataset, what is the mean number of city miles per gallon for all vehicles from 2008? Round to two decimal places. 
+
+```{r}
+mpg %>% 
+  filter(year==2008) %>%
+  summarise(
+    mean_cty=mean(cty)
+  )
+```
+
+
+RQ1: Q7 Which variable is being mapped to the color aesthetic from the ``mpg`` dataset?
+
+```{r}
+unique(mpg$model)
+
+ggplot(mpg, aes(displ, hwy, color=model))+
+  geom_point()
+
+unique(mpg$drv)
+ggplot(mpg, aes(displ, hwy, color=drv))+
+  geom_point()
+
+unique(mpg$manufacturer)
+
+ggplot(mpg, aes(displ, hwy, color=manufacturer))+
+  geom_point()
+
+unique(mpg$cyl)
+
+ggplot(mpg, aes(displ, hwy, color=cyl))+
+  geom_point()
+```
+
+
+RQ1: Q8 In the ``mpg`` dataset, which variable would be best to use for size aesthetics when plotting points (i.e. scatterplot) with ``cty`` as the $x$ variable and hwy as the $y$ variable?
+
+
+```{r}
+
+
+ggplot(mpg, aes(cty, hwy, size=displ))+
+  geom_point()
+
+
+```
+
+
+
+
+### 2.2.1 Exercises ###
+1. List five functions that you could use to get more information about the ``mpg`` dataset.
+
+mean(), median(), sd(), plot(), histogram
+
+2. How can you find out what other datasets are included with ggplot2? 
+Use google search to find the reference page of the ggplot2 official website. Other datasets included with ggplot2 are ``diamonds``, ``economics``, ``economics_long``, ``midwest``, etc. 
+
+3. Aprt from the US, most countries use fuel consumption (fuel consumed over fixed distance) rather than fuel economy (distance travelled with fixed amount of fuel). How could you convert ``cty`` and ``hwy`` intro the European standard of $1/100$km? 
+
+First, mpg is fuel economy as it measures the distance (miles) travelled with fixed amount of fuel (per gallon). 
+Assume we have $x$ mpg, to convert it to $1/100$ km, we have:
+
+1 gallon correspond to $x$ miles $\Rightarrow$ 1 gallon correspond to $1.609x$ km $\Rightarrow$ $\frac{100}{1.609x}\times 1$ per $100$ km. 
+
+
+4. Which manufacturer has the most models in this dataset? Which model has the most variations? Does your answer change if you remove the redundant specification of drive train (e.g. "pathfinder 4wd", "a4 quattro") from the model name?
+
+```{r}
+ggplot(dat, aes(x=as.factor(manufacturer)))+
+  geom_bar()+
+  geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))
+```
+
+Dodge has the most models in this dataset. 
+
+!!! Does your answer change if you remove the redundant specification of drive train (e.g. "pathfinder 4wd", "a4 quattro") from the model name? !!!
+```{r}
+ggplot(dat, aes(x=as.factor(model)))+
+  geom_bar()+
+  geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+```
+
+
+## 2.3 Key Components ##
+1. Every ggplot2 has three key components:
+
+a. Data (supplied in ``ggplot()``)
+
+b. Aesthetic Mappings: a set of aesthetic mappings between variables in the data and visual properties (supplied in ``ggplot()``)
+
+c. Layer: at least one layer which describes how to render each observation. Layers are usually created with a \textbf{geom} function (add to a ``ggplot()`` using ``+``)
+
+
+2. Example
+```{r}
+ggplot(mpg, aes(x=displ, y=hwy))+
+  geom_point()
+```
+
+a. Data: mpg
+
+b. Aesthetic Mappings: engine size (``displ``) mapped to x position; fuel economy on highway (``hwy``) mapped to y position
+
+c. Layer: points
+
+d. The plot shows a strong correlation: as the engine size gets bigger, the fuel economy gets worse. There are also some outliers: some cars with large engines get higher fuel economiy than average (Hybrid car??). 
+
+
+3. The first two unnamed arguments to ``aes()``: will be mapped to x and y. 
+
+
+### 2.3.1. Exercises ###
+1. How would you describe the relationship between ``cty`` and ``hwy``? Do you have any concerns about drawing conclusions from that plot?
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+geom_point()+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+```
+
+The relationship between ``cty`` and ``hwy`` should be strongly positively correlated which means the higher fuel economy when driving in the city correspond to higher fuel economy when driving on highway. 
+
+Concerns about drawing conclusions from just a scatter plot are:
+
+??????????
+
+
+2. What does ``ggplot(mpg, aes(model, manufacturer))+geom_point()`` show? Is it useful? How could you modify the data to make it more informative?
+
+```{r}
+ggplot(mpg, aes(model, manufacturer))+
+  geom_point()+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+  
+
+
+```
+
+
+The plot shows a scatter plot with model mapped to x position and manufacturer mapped to y position. It shows model and its corresponding manufacturer. It is not very useful as the information can be obtained by looking at the data itself. 
+
+To make it more useful, we can modify the data by grouping ???
+
+3. Describe the data, aesthetic mappings and layers used for each of the following plots. You will need to guess a little because you have not seen all the datasets and functions yet, but use your common sense. See if you can predict what the plot will look like before running the code. 
+a. ``ggplot(mpg, aes(cty, hwy))+geom_points()``:
+
+(1) Data: mpg
+
+(2) Aesthetic Mappings: fuel economy when driving in the city (``cty``) mapped to x position and fuel economy when driving on highway (``hwy``) mapped to y position
+
+(3) Layer: points
+
+
+b. ``ggplot(diamonds, aes(carat, price))+geom_point()``:
+
+(1) Data: diamonds
+
+(2) Aesthetic Mappings: carat of diamonds (``carat``) mapped to x position and price of diamonds (``price``) mapped to y position
+
+(3) Layer: points
+
+
+c. ``ggplot(economics, aes(date, unemploy))+geom_line()``:
+
+(1) Data: economics
+
+(2) Aesthetic Mappings: date (``date``) mapped to x position and a measure of unemployment such as unemployment rate (``unemploy``) mapped to y position
+
+(3) Layer: line
+
+
+d. ``ggplot(mpg, aes(cty))+geom_histogram()``:
+
+(1) Data: mpg
+
+(2) Aesthetic Mappings: fuel economy when driving in the city (``cty``) is mapped to x position, corresponding frequency of the values of the fuel economy when driving in the city (``cty``) is mapped to y position
+
+(3) Layer: histogram
+
+
+
+## 2.4 Colour, Size, Shape and Other Aesthetic Attributes ##
+1. Other aesthetics that can be added to ``aes()``:
+
+a. color
+
+b. shape
+
+c. size
+
+etc.
+
+These work in the same way as ``x`` and ``y`` aesthetics, and are added into the call to ``aes()``:
+
+```{r}
+ggplot(dat, aes(displ, hwy, color=class, shape=drv, size=cyl))+
+  geom_point()
+```
+
+2. Scale: map values in the data space to values in the aesthetic space (color, size, shape, etc.). Scales are reported on the plot using axes and legends.
+
+a. Scales do have a big effect on the visual appearance of the plot, but the dominant way of visual appearance is theme command.
+
+b. Take experience ot know when you change scale and when the theme:
+
+(1) Rule of Thumb: themes do NOT add words and change ranges of variables, they change the font, size, color, etc. 
+
+
+3. To learn more about the outlying variables (e.g. cars with large engines but with higher fuel economy than average) in the ``ggplot(mpg, aes(x=displ, y=hwy))+geom_point()``, use the following plot:
+```{r}
+ggplot(mpg, aes(displ, cty, color=class))+
+  geom_point()
+
+```
+
+a. ``color=class``: gives each point a unique color corresponding to its class. 
+
+b. The group of cars with unusually high fuel economy for their engine size are: two seaters (cars with big engines but light weight bodies).
+
+?????????????
+4. If want to set an aesthetic to a fixed value, without scaling it, do so in the individual layer outside of ``aes()``:
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(color="blue"))
+```
+????????
+The value "blue" is scaled to a pinkish color, and a legend is added. 
+
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(color="blue")
+```
+
+The points are given the R color blue. 
+
+
+5. Different types of aesthetic attributes work better with different types of variables:
+
+a. Categorical Variables: color, shape, etc. 
+
+v. Continuous Variables: size, etc. 
+
+
+6. The amount of data also makes a difference: if there is a lot of data, it can be hard to distinguish different groups. 
+
+Solution: use facetting. 
+
+
+
+### 2.4.1 Exercises ###
+
+1. Experiment with the color, shape and size aesthetics. What happens when you map them to continous values? What about categorical values? What happens when you use more than one aesthetic in a plot?
+
+a. Map color, shape, size to continuous values; Use more than one aesthetic in a plot
+```{r error=TRUE}
+ggplot(mpg, aes(displ, hwy, aes(color=cty, shape=cty, size=hwy)))+
+  geom_point()
+# Nothing gets mapped
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(color=cty, shape=cty, size=hwy))
+
+# Error: A continuous variable can not be mapped to shape
+
+
+##### EUIQVALENT #####
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(color=cty, size=hwy))
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point(aes(color=cty, size=hwy))
+# No error, able to map but not very informative
+
+
+```
+
+b. Map color, shape, size to categorical values
+
+```{r}
+ggplot(mpg, aes(displ, hwy, color=manufacturer, shape=drv))+
+  geom_point()
+```
+
+
+
+2. What happens if you map a continuous variable to shape? Why? What happens if you map ``trans`` to shape? Why?
+
+Map to a continuous variable to shape will result in an error because shape is discrete not continuous. 
+
+
+Map ``trans`` to shape
+```{r}
+ggplot(mpg, aes(displ, hwy, shape=trans))+
+  geom_point()
+
+unique(mpg$trans)
+```
+Get warning messages because the shape palette can deal with a maximum of 6 discrete values and ``trans`` has 10 distinct values. 
+
+
+3. How is drive train related to fuel economy? How is drive train related to engine size and class? 
+
+?????????? Fuel economy =hwy and cty???
+Drive Train v.s. Fuel Economy
+```{r}
+
+
+```
+
+Drive Train v.s. Engine Size v.s. Class
+```{r}
+ggplot(mpg, aes(class, displ, color=drv))+
+  geom_point()+
+  theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+```
+
+
+## 2.5 Facetting ##
+
+1. Facetting: another technique for displaying additional categorical variables on a plot. Facetting creates tables of graphics by splitting the data into subsets and displaying the sam egraph for each subset. 
+
+a. Two Type of Facetting
+
+(1) Grid
+
+(2) Wrapped (most useful): to facet a plot, add a facetting specification with ``facet_wrap()`` which takes the name of a varible preceded by ``~``.
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~class)
+```
+
+
+### 2.5.1 Exercises ###
+
+1. What happens if you try to facet by a continuous variable like ``hwy``? What about ``cyl``? What's the key difference?
+
+Facet by a continuous variable
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~hwy)
+```
+Facet by ``hwy`` will treat the continuous variable ``hwy`` as categorical variable. As ``hwy`` is a continuous variable with many distinct values, the plot treats each distinct value as a level of a categorical variable and creates a plot for it. The result will be many plots with little information provided in each plot. 
+
+Facet by ``cyl``
+```{r}
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~cyl)
+
+```
+The difference in that ``cyl`` is categorical  with only 4 levels. The result will be more informative as it shows the relationshipbetween ``hwy`` and ``displ`` for each level of ``cyl``. 
+
+2. Use facetting to explore the three-way relationship between fuel economy, engine size, and number of cylinders. How does facetting by number of cylinders change your assessment of the relationship between engine size and fuel economy?
+
+```{r}
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~cyl)
+
+```
+Facetting by number of cylinders shows that the relationship between engine size and fuel economy is different for different number of cylinders. 
+
+3. Read the documentation for ``facet_wrap()``. What arguments can you use to control how many rows and columns appear in the output?
+The arguments that control how many rows and columns are ``nrows`` and ``ncols``.
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~cyl, nrow=1, ncol=4)
+```
+
+
+4. What does the ``scales`` argument to ``facet_wrap()`` do? When might you use it? 
+
+The ``scales`` argument decides if the scales should be fixed ("fixed", default) or free ("free"), or free in onde dimention ("free_x","free_y").
+
+The default "fixed" means the same scales are used for all panels. 
+
+"free" allows scales to vary across the panels, it will be easier to see patterns within each panel but harder to compare across panels. 
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  facet_wrap(~cyl, scales="free")
+# Each panel will have different scales for x-axis and y-axis. 
+```
+
+
+
+
+## 2.6 Plot Geoms ##
+
+1. Commonly used plot types:
+
+a. ``geom_smooth()``: fits a smoother to the data and displays the smooth and its standard error. It adds a smoothing line to see the trand of points. The standard error is represented as a band covering the smoothing line. 
+
+b. ``geom_boxplot()``: produces a box-and-whisker plot to summarise the distribution of a set of points. 
+
+c. ``geom_histogram()``: shows the distribution of continuous variables.
+
+d. ``geom_freqpoly``: shows the distribution of continuous variables. 
+
+e. ``geom_bar()``: shows the distribution of categorical variables. 
+
+f. ``geom_path()``: draws lines between the data points. A path plot can go in any direction. 
+
+h. ``geom_line()``: draws lines between the data points. A line plot is constrained to produce lines that travel from left to right. Lines are typically used to explore how things change over time. 
+
+
+### 2.6.1. Adding a Smoother to a Plot ###
+
+1. Adding a smoothing line/curve to a scatterplot with a lot of noise can help to see the dominant pattern. 
+
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth()
+```
+
+``geom_smooth()`` overlays the scatterplot with a smooth curve, including an assessment of uncertainty in the form of point-wise confidence intervals shown in grey. 
+
+a. ``geom_smooth(se=FALSE)``: will turn off the confidence interval. 
+
+
+2. ``method`` argument to ``geom_smooth()``: allows you to choose which type of model is used to fit the smooth curve:
+
+a. ``method="loess"``: the default for small $n (n<1000)$ as it is $O(n^{2})$ in memory. It uses a smooth local regression.
+
+(1) ``span`` parameter: control the wiggliness of the line. It ranges from $0$ (extremely wiggly) to $1$ (not so wiggly). 
+
+```{r}
+# No need to specify method="loess" as it is the default
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth(span=0.2)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth(span=1)
+```
+
+
+b. ``method="gam"``: method used for small $n (n<1000)$ or large $n (n\geq 1000)$. It fits a generalized additive model provided by the ``mgcv`` package (thus need to first load the package). It uses a formula like ``formula=y~s(x)`` or ``y~s(x, bs="cs")`` (for large data). 
+```{r}
+library(mgcv)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth(method="gam", formula=y~s(x))
+```
+
+
+
+c. ``method="lm"``: fits a lienar model giving the line of best fit. 
+```{r}
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth(method="lm")
+```
+
+
+d. ``method="rlm"``: works like ``lm()``, but uses a robust fitting algorithm so that outliers dont affect the fits as much. It is part of the ``MASS`` package (thus need to be loaded before using).
+```{r}
+library(MASS)
+
+ggplot(mpg, aes(displ, hwy))+
+  geom_point()+
+  geom_smooth(method="rlm")
+```
+
+
+
+### 2.6.2 Boxplots and Jittered Points ###
+
+1. Three Techniques for Alleviating Overplotting (i.e. many points are plotted in the same location s.t. it's difficult to see the dist):
+
+a. Jittering ``geom_jitter()``: adds a little random noise to the data which can help avoid overplotting. 
+
+(1) Strength & Weakness: jittered plots show every pt but only work with relatively small datasets. 
+
+b. Boxplots ``geom_boxplot()``: summarises the shape of the dist with a handful of summary statistics: min, max, first quartile (25th percentile; Q1), median (50th percentile; Q2), third quartile (75th percentile; Q3). 
+
+(1) Strength & Weakness: boxplots summarise the bulk of the dist with only 5 numbers.
+
+Interquartile Range (IQR)=Q3-Q1=$q_{n}(0.75)-q_{n}(0.25)$.
+
+c. Violoin plots ``geom_violin``: shows a compact representation of the "density" of the dist, highlighting the areas where more points are found. 
+
+(1) Strength & Weakness: violin plots give the richest display but rely on the cal of a density estimate, which can be hard to interpret. 
+
+```{r}
+jitter=ggplot(mpg, aes(drv, hwy))+geom_jitter()
+box=ggplot(mpg, aes(drv, hwy))+geom_boxplot()
+violin=ggplot(mpg, aes(drv, hwy))+geom_violin()
+
+
+##NOTE: par(mfrow=c(x,y)) does NOT work for ggplot
+
+ggarrange(jitter, box, violin+ rremove("x.text"), 
+          labels = c("Jittering", "Boxplot", "Violin Plot"),
+          ncol = 2, nrow = 2)
+
+# rremove: removes the object x.text for violin plot
+
+ggarrange(jitter, box, violin, 
+          labels = c("Jittering", "Boxplot", "Violin Plot"),
+          ncol = 2, nrow = 2)
+```
+
+2. For jittered points: ``geom_jitter()`` offers the same control over aesthetics as ``geom_point()``: ``size``, ``color``, ``shape``. 
+
+
+3. For ``geom_boxplot()`` and ``geom_violin()``: can control the outline ``color`` or the internal ``fill`` color. 
+
+
+### 2.6.3. Histogram and Frequency Polygons ###
+
+1. Histograms; Frequency Polygons: show the dist of a single numeric var. 
+
+a. Provide more info about dist than boxplots
+
+b. Need more space than boxplots
+
+```{r}
+ggplot(mpg, aes(hwy))+geom_histogram()
+
+ggplot(mpg, aes(hwy))+geom_freqpoly()
+```
+
+c. Both histograms and freq polygons work in the same way:
+
+(1) Bin the data
+
+(2) Count the number of obs in each bin
+
+(3) Difference: histograms use bars; freq polygons use lines. 
+
+d. ``binwidth`` argument: controls the width of the bins.
+
+(1) ``breaks`` argument: allows for unevenly spaced bins.
+
+e. Default splits data into $30$ bins.
+
+
+```{r}
+ggplot(mpg, aes(hwy))+
+  geom_freqpoly(binwidth=2.5)
+
+ggplot(mpg, aes(hwy))+
+  geom_freqpoly(binwidth=1)
+```
+
+
+2. Density Plot ``geom_density()``: an alt. to the freq polygons. 
+
+a. Density plots are harder to interpret since the underlying computations are more complex. 
+
+b. Density plots make assumptions that are not true for all data (assume the underlying dist is cts, unbounded and smooth).
+
+3. To compare the dists of diff subgroups: map a categorical var to:
+
+a. ``fill`` argument: for ``geom_histogram()``
+
+b. ``color`` argument: for ``geom_freqpoly()``
+
+c. Facetting: makes comparisons a little harder but it's easier to see the dist of each group. 
+
+```{r}
+ggplot(mpg, aes(displ, color=drv))+
+  geom_freqpoly(binwidth=0.5)
+
+ggplot(mpg, aes(displ, fill=drv))+
+  geom_histogram(binwidth=0.5)+
+  facet_wrap(~drv, ncol=1)
+```
+
+
+
+### 2.6.4 Bar Charts ###
+
+1. Bar chart ``geom_bar()``: the discrete analogue of the histogram. 
+
+```{r}
+ggplot(mpg, aes(manufacturer))+
+  geom_bar()
+```
+
+2. There are two rather different plots that are both commonly called bar charts:
+
+a. Form 1: expects unsummarised data, and each obs contributes one unit to the height of each bar. 
+
+b. Form 2: used for presummarised data. 
+
+c. Example: three drugs with their avg effect
+```{r}
+drugs=data.frame(
+  drug=c("a","b","c"),
+  effect=c(4.2, 9.7, 6.1)
+)
+```
+(1) To display this sort of data, need to tell ``geom_bar()`` to not run the default stat which bins and counts the data (i.e. if count the data, will all be 1, 1, 1). 
+
+(2) In this case it's better to use ``geom_point()`` as pts take up less space than bars, and not require that the y axis includes 0. 
+
+```{r}
+ggplot(drugs, aes(drug, effect))+geom_bar(stat="identity")
+
+ggplot(drugs, aes(drug, effect))+geom_point()
+```
+
+
+### 2.6.5 Time Series with Line and Path Plots ###
+
+1. Line plot, Path plots: typically used for time series data. 
+
+a. Line plots: join the pts from left to right. A line plot is a path plot of the data sorted by $x$ value. 
+
+(1) Line plots usually have time on the x-axis, showing how a single variable has changed over time. 
+
+b. Path plots: join the pts in the order that they appear in the dataset. 
+
+(1) Path plots show how two vars have simultaneously changed over time, with time encoded in the way taht obs are connected. 
+
+2. Example: Line plot for unemployment rate (First), Line plot for median number of weeks unemployed (Second)
+
+```{r}
+# Unemployment rate
+unemp_rate=ggplot(economics, aes(date, unemploy/pop))+geom_line()
+
+
+# Median number of weeks unemployed
+unemp_length=ggplot(economics, aes(date, uempmed))+geom_line()
+
+
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+```
+
+
+a. Use a path plot to draw both time series on the same plot.
+
+```{r}
+ggplot(economics, aes(unemploy/pop, uempmed))+
+  geom_path()+
+  geom_point()
+```
+This plot has many line corssings, the direction in which time flows is NOT easy to see. 
+
+b. Use a path plot to draw both time series on the same plot and use color for the year(date). 
+```{r}
+
+# Converte date to year
+year=function(x){
+  as.POSIXlt(x)$year+1900
+}
+## as.POSIX*: Functions to manipulate objects of classes "POSIXlt" and "POSIXct" representing calendar dates and times.
+
+ggplot(economics, aes(unemploy/pop, uempmed))+
+  geom_path(color="grey50")+
+  geom_point(aes(color=year(date)))
+
+
+
+```
+We can see that unemployment rate and length of unemployment are highly correlated, but in recent years the length of unmployment has been increasing relative to the unemployment rate. 
+
+
+3. With longitudinal data, often want to display multiple time series on each plot, each series representing one individual. To do this, need to map the ``group`` aesthetic to a variable encoding the group membership of each obs. 
+
+
+
+### 2.6.6. Exercises ###
+
+1. What is the problem with the plot create by ``ggplot(mpg, aes(cty, hwy))+geom_point()``? Which of the geoms described above is most effective at remedying the problem?
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+geom_point()
+
+```
+
+?????????????????????
+It's better to fit a smoother to the data so that we can see the general trend of the relationship between ``hwy`` and ``cty`` better. The geom that should be use is ``geom_smooth()``.
+
+```{r}
+ggplot(mpg, aes(cty, hwy))+
+  geom_point()+
+  geom_smooth(method="lm")
+```
+
+2. One challenge with ``ggplot(mpg, aes(class, hwy))+geom_boxplot()`` is that the ordering of ``class`` is alphabetical, which is not teribbly useful. How could you change the factor level to be more informative?
+
+```{r}
+ggplot(mpg, aes(class, hwy))+geom_boxplot()
+```
+
+
+Rather than reordering the factor by hand, you can do it automatically based on the data: ``ggplot(mpg, aes(reorder(class, hwy), hwy))+geom_boxplot()``. 
+```{r}
+ggplot(mpg, aes(reorder(class, hwy), hwy))+geom_boxplot()
+```
+
+What does ``reorder()`` do? Read the documentation.
+
+``reorder()`` is a generic function. The ``default`` method treats its frist argument as a categorical variable, and reorder its levels based on the values of a second variable, usually numeric. 
+
+In our case, ``reorder(class, hwy)`` will reorder the levels of ``class`` based on the value of ``hwy`` ascendingly. 
+
+
+3. Explore the distribution of the carat variable in the ``diamonds`` dataset. What biwidth reveals the most interesting patterns?
+
+```{r}
+
+fifty=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 50 )
+
+two_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 200)
+
+eight_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 800 )
+
+fifteen_hundred=ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 1500 )
+
+
+
+ggarrange(fifty, two_hundred, eight_hundred, fifteen_hundred, labels=c("Binwidth=50", "Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+
+ggplot(diamonds, aes(price))+
+  geom_histogram(binwidth = 50)+
+  xlim(0, 2500)
+
+```
+
+Using binwidth of $\$50$ we can see a drop at price $\$1500$, this is not show in plots using binwdith greater than $\$50$. Using binwidth of $\$50$ also shows that there is no diamond priced below $\$250$ in this dataset. 
+
+
+
+4. Explore the distribution of the price variable in the ``diamonds`` data. How does the distribution vary by cut?
+
+```{r}
+ggplot(diamonds, aes(price))+
+  geom_histogram()+
+  facet_wrap(~cut)
+
+```
+????????????
+We can see that the distribution peaks at different number for different cut. The peak for cut fair is the lowest while the peak for idea is the hightest. 
+
+
+5. You now know at least three ways to compare the distributions of subgroups: ``geom_violin()``, ``geom_freqpoly`` and the color aesthetic, or ``geom_histogram`` and facetting. Whatt are the strengths and weak nesses of each approach? What other approaches could you try?
+
+``geom_violin()``: 
+
+Strength: show a compact representation of the "density" of the distribution by groups in one plot so it will be easier to compare. 
+
+Weakness: relys on the calculation of a density estimate, which can be hard to interpret. 
+
+``geom_freqpoly`` and the color aesthetic:
+
+```{r}
+ggplot(diamonds, aes(price))+
+  geom_freqpoly(aes(color=cut))
+```
+
+
+Strength: able to display mutliple distributions by groups in one plot so it will be easier to compare. 
+
+Weakness: when there are a lot of groups, there are many lines in the plot and can be hard to see and compare. 
+
+
+``geom_histogram`` and facetting:
+
+Strength: able to show distributions of groups in multiple plots so it is clear to see the distribution within each plot and there is no overlappings. 
+
+Weakness: it can be difficult to compare since distributions of groups are in different plots. 
+
+
+Other approaches:
+- Boxplots by group
+
+- Overlapping densities
+
+- Ridgeline plot
+
+
+6. Read the documentation for ``geom_bar()``. What does the ``weight`` aesthetic do? 
+
+The ``weight`` aesthetic can be used to create weighted histogra and barcharts where the height of the bar no longer represent a count of observations, but a sum over other variable. 
+
+
+7. Using the techniques already discussed in this chapter, come up with three ways to visualise a 2d categorical distribution. Try them out by visualizing the distribution of ``model`` and ``manufacturer``, ``trans`` and ``class``, and ``cyl`` and ``trans``.
+
+???????????????????????????????????????
+``model`` and ``manufacturer``:
+
+```{r}
+
+```
+
+
+
+## 2.7 Modifying the Axes ##
+
+1. ```` and `````: modify the x- and y-axis labels:
+```{r}
+
+# Without specify, use variable name as label
+varnamelabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)
+
+withlabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)+
+  xlab("city driving (mpg)")+
+  ylab("highway driving (mpg)")
+
+# Remove the axis labels with NULL
+nulllabel=ggplot(mpg, aes(cty, hwy))+
+  geom_point(alpha=1/3)+
+  xlab(NULL)+
+  ylab(NULL)
+
+
+ggarrange(varnamelabel, withlabel, nulllabel, labels = c("Variable Name Label", "With Label", "Null Label"), ncol=2, nrow=2)
+```
+
+2. ``xlim`` and ``ylim``: modify the limits of axes:
+
+```{r}
+noset=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25)
+
+
+# Remove drv level 4 and display only hwy btw 20 to 30
+set=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25)+
+  xlim("f", "r")+
+  ylim(20,30)
+
+
+# For cts scales, use NA to set only one limit
+# Changing the axes limits sets values outside the range to NA. Suppress the associated warning with na.rm=TRUE
+setone=ggplot(mpg, aes(drv, hwy))+
+  geom_jitter(width=0.25, na.rm=TRUE)+
+  ylim(NA, 30)
+
+
+ggarrange(noset, set, setone, labels = c("Do not set Limits", "Set Limits", "Set only One Limit"), ncol=2, nrow=2)
+```
+
+a. Changing the axes limits sets values outside the range to ``NA``.
+
+
+
+## 2.8 Output ##
+
+1. Save a plot to a variable so you can manupulate it later:
+```{r}
+
+# Save the plot as a plot object
+p=ggplot(mpg, aes(displ, hwy, color=factor(cyl)))+
+  geom_point()
+```
+
+Once you have a plot object, you can do the following:
+
+a. Render it on screen with ``print()``: this happens automatically when running interactively, but inside a loop or function, you will need to ``print()`` it yourself. 
+
+```{r}
+print(p)
+```
+
+b. Save it to disk with ``ggsave()``.
+```{r}
+ggsave("Ch2_plot.png", p, width=5, height=5)
+```
+
+c. Briefly describe the plot's structure with ``summary()``.
+
+```{r}
+summary(p)
+```
+
+
+d. Save a cached copy of the plot to disk with ``saveRDS()``: this saves a complete copy of the plot object, so you can easily re-create it with ``readRDS()``.
+
+```{r}
+saveRDS(p, "ch2_plotRDS.rds")
+q=readRDS("ch2_plotRDS.rds")
+q
+```
+
+The plot structure is not guarantted to stay the same over time, so use this for short-term chaching, not long term storage. 
+
+
+
+## 2.9 Quick Plots ##
+
+1. ``qplot()``: define a plot in a single call, picking a geom by default if you do NOT supply one. To use it, provide a set of aesthetics and a data set:
+
+```{r}
+qplot(displ, hwy, data=mpg)
+
+qplot(displ, data=mpg)
+```
+
+a. Unless otherwise specified, ``qplot`` tries to pick a sensible geometry and statistic based on the arguments provided. 
+
+(1) Supply ``qplot`` x and y variables: it will create a scatterplot.
+
+(2) Supply ``qplot`` x only: it will create a histogram or bar chart dep on the type of var. 
+
+b. ``qplot`` assumes that all variables should be scaled by default. 
+
+c. If you want to set an aesthetic to a constant, need to use ``I()``:
+
+```{r}
+qplot(displ, hwy, data=mpg, color="blue")
+
+qplot(displ, hwy, data=mpg, color=I("blue"))
+```
+
+
+
+Reading Quiz 02
+
+Q5
+```{r}
+ggplot(mpg, aes(class))+
+  geom_bar(aes(fill=drv))
+
+```
+
+
+Q6
+```{r}
+ggplot(mpg, aes(class, cty))+
+  geom_boxplot()+
+  xlim("minivan", "pickup")+
+  ylim(c(5,20))
+```
+
+
+Q9: A Northwestern student ID number (ex. 2383396) would be a \textbf{categorical unordered} type of variable. 
+
+Q10: Scales have to be one-to-one mapping
+
+
+Q11: A short and wide figure emphasized change along the x axis. 
+
+
+Q12: The correct axis title for a log scale is name of variable.
+
+Q13: A qualitative color scale should NOT have colors that are distinct but equivalent, an order to the color through shade. 
+
+Q14: A squential color scale can be based on a single hue (e.g. from dark blue to light blue) or on multiple hues (e.g. from dark red to light yellow). 
+
+
+Q15: What would be an inappropriate accent color for a baseline of blue hues? PINK (FDV CH4 Color Scales: When working with accent colors, it is critical that the baseline colors do NOT compete for attention.)

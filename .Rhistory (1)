@@ -1,0 +1,512 @@
+# Chunk 16
+ggplot(mpg, aes(displ, hwy, color=manufacturer, shape=drv))+
+geom_point()
+# Chunk 17
+ggplot(mpg, aes(displ, hwy, shape=trans))+
+geom_point()
+unique(mpg$trans)
+# Chunk 18
+# Chunk 19
+ggplot(mpg, aes(class, displ, color=drv))+
+geom_point()+
+theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+# Chunk 20
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~class)
+# Chunk 21
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~hwy)
+# Chunk 22
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl)
+# Chunk 23
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl)
+# Chunk 24
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl, nrow=1, ncol=4)
+# Chunk 25
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl, scales="free")
+# Each panel will have different scales for x-axis and y-axis.
+# Chunk 26
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth()
+# Chunk 27
+# No need to specify method="loess" as it is the default
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(span=0.2)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(span=1)
+# Chunk 28
+library(mgcv)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="gam", formula=y~s(x))
+# Chunk 29
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="lm")
+# Chunk 30
+library(MASS)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="rlm")
+# Chunk 31
+jitter=ggplot(mpg, aes(drv, hwy))+geom_jitter()
+box=ggplot(mpg, aes(drv, hwy))+geom_boxplot()
+violin=ggplot(mpg, aes(drv, hwy))+geom_violin()
+ggarrange(jitter, box, violin + rremove("x.text"),
+labels = c("Jittering", "Boxplot", "Violin Plot"),
+ncol = 2, nrow = 2)
+ggplot(mpg, aes(hwy))+geom_histogram()
+ggplot(mpg, aes(hwy))+geom_freqpoly()
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(bindwith=2.5)
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(bindwith=1)
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(binwidth=2.5)
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(binwidth=1)
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(binwidth=2.5)
+ggplot(mpg, aes(displ, color=drv))+
+geom_freqpoly(binwidth=0.5)
+ggplot(mpg, aes(displ, fill=drv))+
+geom_freqpoly(binwidth=0.5)+
+facet_wrap(~drv, ncol=1)
+ggplot(mpg, aes(displ, color=drv))+
+geom_freqpoly(binwidth=0.5)
+ggplot(mpg, aes(displ, fill=drv))+
+geom_histogram(binwidth=0.5)+
+facet_wrap(~drv, ncol=1)
+ggplot(mpg, aes(manufacturer))+
+geom_bar()
+drugs=data.frame(
+drug=c("a","b","c"),
+effect=c(4.2, 9.7, 6.1)
+)
+ggplot(drugs, aes(drug, effect))+geom_bar(stat="identity")
+ggplot(drugs, aes(drug, effect))+geom_point()
+# Unemployment rate
+ggplot(economics, aes(date, unemploy/pop))+geom_line()
+# Median number of weeks unemployed
+ggplot(economics, aes(date, uempmed))+geom_line()
+# Chunk 1
+library(tidyverse)
+library(reshape)
+library(ggpubr)
+# Chunk 2
+mpg
+dat=mpg
+# Chunk 3
+mpg %>%
+filter(year==2008) %>%
+summarise(
+mean_cty=mean(cty)
+)
+# Chunk 4
+unique(mpg$model)
+ggplot(mpg, aes(displ, hwy, color=model))+
+geom_point()
+unique(mpg$drv)
+ggplot(mpg, aes(displ, hwy, color=drv))+
+geom_point()
+unique(mpg$manufacturer)
+ggplot(mpg, aes(displ, hwy, color=manufacturer))+
+geom_point()
+unique(mpg$cyl)
+ggplot(mpg, aes(displ, hwy, color=cyl))+
+geom_point()
+# Chunk 5
+ggplot(mpg, aes(cty, hwy, size=displ))+
+geom_point()
+# Chunk 6
+ggplot(dat, aes(x=as.factor(manufacturer)))+
+geom_bar()+
+geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))
+# Chunk 7
+ggplot(dat, aes(x=as.factor(model)))+
+geom_bar()+
+geom_text(stat = 'count',aes(label =..count.., vjust = -0.2))+
+theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+# Chunk 8
+ggplot(mpg, aes(x=displ, y=hwy))+
+geom_point()
+# Chunk 9
+ggplot(mpg, aes(cty, hwy))+geom_point()+
+theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+# Chunk 10
+ggplot(mpg, aes(model, manufacturer))+
+geom_point()+
+theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+# Chunk 11
+ggplot(dat, aes(displ, hwy, color=class, shape=drv, size=cyl))+
+geom_point()
+# Chunk 12
+ggplot(mpg, aes(displ, cty, color=class))+
+geom_point()
+# Chunk 13
+ggplot(mpg, aes(displ, hwy))+
+geom_point(aes(color="blue"))
+# Chunk 14
+ggplot(mpg, aes(displ, hwy))+
+geom_point(color="blue")
+# Chunk 15
+ggplot(mpg, aes(displ, hwy, aes(color=cty, shape=cty, size=hwy)))+
+geom_point()
+# Nothing gets mapped
+ggplot(mpg, aes(displ, hwy))+
+geom_point(aes(color=cty, shape=cty, size=hwy))
+# Error: A continuous variable can not be mapped to shape
+##### EUIQVALENT #####
+ggplot(mpg, aes(displ, hwy))+
+geom_point(aes(color=cty, size=hwy))
+ggplot(mpg, aes(displ, hwy))+
+geom_point(aes(color=cty, size=hwy))
+# No error, able to map but not very informative
+# Chunk 16
+ggplot(mpg, aes(displ, hwy, color=manufacturer, shape=drv))+
+geom_point()
+# Chunk 17
+ggplot(mpg, aes(displ, hwy, shape=trans))+
+geom_point()
+unique(mpg$trans)
+# Chunk 18
+# Chunk 19
+ggplot(mpg, aes(class, displ, color=drv))+
+geom_point()+
+theme(axis.text.x=element_text(angle=90, hjust=1, size=7))
+# Chunk 20
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~class)
+# Chunk 21
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~hwy)
+# Chunk 22
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl)
+# Chunk 23
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl)
+# Chunk 24
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl, nrow=1, ncol=4)
+# Chunk 25
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+facet_wrap(~cyl, scales="free")
+# Each panel will have different scales for x-axis and y-axis.
+# Chunk 26
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth()
+# Chunk 27
+# No need to specify method="loess" as it is the default
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(span=0.2)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(span=1)
+# Chunk 28
+library(mgcv)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="gam", formula=y~s(x))
+# Chunk 29
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="lm")
+# Chunk 30
+library(MASS)
+ggplot(mpg, aes(displ, hwy))+
+geom_point()+
+geom_smooth(method="rlm")
+# Chunk 31
+jitter=ggplot(mpg, aes(drv, hwy))+geom_jitter()
+box=ggplot(mpg, aes(drv, hwy))+geom_boxplot()
+violin=ggplot(mpg, aes(drv, hwy))+geom_violin()
+ggarrange(jitter, box, violin + rremove("x.text"),
+labels = c("Jittering", "Boxplot", "Violin Plot"),
+ncol = 2, nrow = 2)
+# Chunk 32
+ggplot(mpg, aes(hwy))+geom_histogram()
+ggplot(mpg, aes(hwy))+geom_freqpoly()
+# Chunk 33
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(binwidth=2.5)
+ggplot(mpg, aes(hwy))+
+geom_freqpoly(binwidth=1)
+# Chunk 34
+ggplot(mpg, aes(displ, color=drv))+
+geom_freqpoly(binwidth=0.5)
+ggplot(mpg, aes(displ, fill=drv))+
+geom_histogram(binwidth=0.5)+
+facet_wrap(~drv, ncol=1)
+# Chunk 35
+ggplot(mpg, aes(manufacturer))+
+geom_bar()
+# Chunk 36
+drugs=data.frame(
+drug=c("a","b","c"),
+effect=c(4.2, 9.7, 6.1)
+)
+# Chunk 37
+ggplot(drugs, aes(drug, effect))+geom_bar(stat="identity")
+ggplot(drugs, aes(drug, effect))+geom_point()
+# Unemployment rate
+ggplot(economics, aes(date, unemploy/pop))+geom_line()
+# Median number of weeks unemployed
+ggplot(economics, aes(date, uempmed))+geom_line()
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+# Unemployment rate
+unemp_rate=ggplot(economics, aes(date, unemploy/pop))+geom_line()
+# Median number of weeks unemployed
+unemp_length=ggplot(economics, aes(date, uempmed))+geom_line()
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+ggarrange(unemp_rate, unemp_length+rremove("x.text"), labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+ggarrange(unemp_rate, unemp_length+rremove("x.text"), labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+ggarrange(unemp_rate, unemp_length, labels=c("Unempolyment Rate", "Unemployment Length"), nrow=2, ncol=2
+)
+ggarrange(jitter, box, violin+ rremove("x.text"),
+labels = c("Jittering", "Boxplot", "Violin Plot"),
+ncol = 2, nrow = 2)
+ggplot(economics, aes(unemploy/pop, uempmed))+
+geom_path()+
+geom_point()
+ggplot(economics, aes(unemploy/pop, uempmed))+
+geom_path(color="grey50")+
+geom_point(aes(color=year(date)))
+# Converte date to year
+year=function(x){
+as.POSIXlt(x)$year+1900
+}
+ggplot(economics, aes(unemploy/pop, uempmed))+
+geom_path(color="grey50")+
+geom_point(aes(color=year(date)))
+ggplot(economics, aes(unemploy/pop, uempmed, color=year(date)))+
+geom_path(color="grey50")+
+geom_point()
+ggplot(economics, aes(unemploy/pop, uempmed))+
+geom_path(color="grey50")+
+geom_point(aes(color=year(date)))
+ggplot(mpg, aes(cty, hwy))+geom_point()
+ggplot(mpg, aes(cty, hwy))+
+geom_point()+
+geom_smooth()
+ggplot(mpg, aes(cty, hwy))+
+geom_point()+
+geom_smooth(method="lm")
+ggplot(mpg, aes(reorder(class, hwy), hwy))+geom_boxplot()
+ggplot(mpg, aes(class, hwy))+geom_boxplot()
+ggplot(diamonds, aes(price))+
+geom_histogram()
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 500)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+par(mfrow=c(1,2))
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+par(mfrow=c(2,2))
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+par(mfrow=c(2,2))
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+par(mfrow=c(2,2))
+par(mar=c(0.5, 4.5, 0.5, 0.5))
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+plot(diamonds$price)
+histogram(diamonds$price)
+hist(diamonds$price)
+ggarrange(two, eight, fifiten, labels=c("Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+two=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+eight=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1500 )
+ggarrange(two, eight, fifiten, labels=c("Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+two=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+eight=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1500 )
+ggarrange(two, eight, fifiteen, labels=c("Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+two=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+eight=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1500 )
+ggarrange(two, eight, fifteen, labels=c("Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+onehundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 10000 )
+onehundred
+onehundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 2500 )
+onehundred
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1500 )
+fifteen
+onehundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1000 )
+onehundred
+onehundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1200 )
+onehundred
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 500 )
+fifteen
+fifteen=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 50 )
+fifteen
+fifty=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 50 )
+two_hundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 200)
+eight_hundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 800 )
+fifteen_hundred=ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 1500 )
+ggarrange(fifty, two_hundred, eight_hundred, fifteen_hundred, labels=c("Binwidth=50", "Binwidth=200", "Binwidth=800", "Binwidth=1500"), ncol=2, nrow=2)
+fifty
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 50)+
+xlim(0, 2500)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 20)+
+xlim(0, 2500)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 50)+
+xlim(0, 2500)
+ggplot(diamonds, aes(price))+
+geom_histogram(binwidth = 50)+
+xlim(0, 2500)
+load(diamonds)
+load("diamonds")
+dat2=diamonds
+View(dat2)
+ggplot(diamonds, aes(price))+
+geom_histogram()+
+facet_wrap(~cut)
+ggplot(diamonds, aes(price))+
+geom_freqpoly(aes(color=cut))
+ggplot(mpg, aes(manufacturer, fill=model))+
+geom_histogram(binwidth=0.5)+
+facet_wrap(~model, ncol=1)
+ggplot(mpg, aes(manufacturer, fill=model))+
+geom_bar()+
+facet_wrap(~model, ncol=1)
+ggplot(mpg, aes(manufacturer, fill=model))+
+geom_bar(position="dodge", stat="identity")
+ggplot(mpg, aes(manufacturer, model, fill=model))+
+geom_bar(position="dodge", stat="identity")
+ggplot(mpg, aes(manufacturer, model, fill=model))+
+geom_bar(position="stack", stat="identity")
+ggplot(mpg, aes(manufacturer))+
+geom_bar(aes(color=model))
+ggplot(mpg, aes(manufacturer))+
+geom_bar()+
+facet_wrap(~model)
+ggarrange(nolabel, withlabel, nulllabel, labels = c("No Label", "With Label", "Null Label"), ncol=2, nrow=2)
+nolabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)
+withlabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)+
+xlab("city driving (mpg)")+
+ylab("highway driving (mpg)")
+# Remove the axis labels with NULL
+nulllabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)+
+xlab(NULL)+
+ylab(NULL)
+ggarrange(nolabel, withlabel, nulllabel, labels = c("No Label", "With Label", "Null Label"), ncol=2, nrow=2)
+# Without specify, use variable name as label
+varnamelabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)
+withlabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)+
+xlab("city driving (mpg)")+
+ylab("highway driving (mpg)")
+# Remove the axis labels with NULL
+nulllabel=ggplot(mpg, aes(cty, hwy))+
+geom_point(alpha=1/3)+
+xlab(NULL)+
+ylab(NULL)
+ggarrange(varnamelabel, withlabel, nulllabel, labels = c("Variable Name Label", "With Label", "Null Label"), ncol=2, nrow=2)
+noset=ggplot(mpg, aes(drv, hwy))+
+geom_jitter(width=0.25)
+set=ggplot(mpg, aes(drv, hwy))+
+geom_jitter(width=0.25)+
+xlim("f", "r")+
+ylim(20,30)
+# For cts scales, use NA to set only one limit
+# Changing the axes limits sets values outside the range to NA. Suppress the associated warning with na.rm=TRUE
+setone=ggplot(mpg, aes(drv, hwy))+
+geom_jitter(width=0.25, na.rm=TRUE)+
+ylim(NA, 30)
+ggarrange(noset, set, setone, labels = c("Do not set Limits", "Set Limits", "Set only One Limit"), ncol=2, nrow=2)
+# Save the plot as a plot object
+p=ggplot(mpg, aes(displ, hwy, color=factor(cyl)))+
+geom_point()
+print(p)
+ggsave(plot.png, width=5, height=5)
+ggsave("plot.png", p, width=5, height=5)
+ggsave("Ch2_plot.png", p, width=5, height=5)
+summary(p)
+saveRDS(p, "ch2_plotRDS.rds")
+q=readRDS("ch2_plotRDS.rds")
+q
+qplot(displ, hwy, data=mpg)
+qplot(displ, data=mpg)
+qplot(displ, hwy, data=mpg, color="blue")
+qplot(displ, hwy, data=mpg, color=I("blue"))
+ggplot(mpg, aes(class, count))+
+geom_bar(aes(color=drv))
+library(ggplot2)
+ggplot(mpg, aes(class, count))+
+geom_bar(aes(color=drv))
+ggplot(mpg, aes(class))+
+geom_bar(aes(color=drv))
+ggplot(mpg, aes(class, cty))+
+geom_boxplot()+
+xlim("minivan", "pickup")+
+ylim(c(5,20))
