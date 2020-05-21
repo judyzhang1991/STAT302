@@ -133,7 +133,7 @@ server <- function(input, output) {
   output$distPlot <- renderPlot({
     
   
-    vars    <- case_when(
+    vars <- case_when(
       input$var == "weight" ~ list(cdc$weight, 
                                           seq(0, 500, by = 100), 
                                           "Actual Weight in Pounds"),
@@ -222,8 +222,6 @@ server <- function(input, output) {
         panel.grid.minor = element_blank(),
         
         
-        
-        
         ### Legend ###
         legend.position = "top",
         
@@ -239,70 +237,90 @@ server <- function(input, output) {
   
   # Generate a summary of variable ----
   output$summary1 <- renderPrint({
+    
     if(input$var == "weight"){
+      
       actual_weight = cdc$weight
       
       skim_without_charts(actual_weight)
-    }else{if(input$var == "wtdesire"){
-      desired_weight = cdc$wtdesire
-      
-      skim_without_charts(desired_weight)
-    }else{
-      height = cdc$height
-      skim_without_charts(height)
-    }
       
     }
- 
-  })
+    else{
+      
+        if(input$var == "wtdesire"){
+          
+          desired_weight = cdc$wtdesire
+      
+          skim_without_charts(desired_weight)
+        }
+        else{
+          
+          height = cdc$height
+          
+          skim_without_charts(height)
+        }
+    }
+    
+ })
   
   
   output$summary2 <- renderPrint({
     if(input$choice == "genhlth"){
+      
       general_health = cdc$genhlth
       
       skim_without_charts(general_health)
-    }
-    else{if(input$choice == "hlthplan"){
-      health_plan = cdc$hlthplan
       
-      skim_without_charts(health_plan)
     }
-      else{if(input$choice == "exerany"){
-        any_exercise = cdc$exerany
+    else{
+      
+      if(input$choice == "hlthplan"){
         
-        skim_without_charts(any_exercise)
-      }else{if(input$choice == "smoke100"){
-        smoke_100cigarettes = cdc$smoke100
-        
-        skim_without_charts(smoke_100cigarettes)
-      }else{if(input$choice == "gender"){
-        gender = cdc$gender
-        
-        skim_without_charts(gender)
-      }else{
-        print("No summary for None")
-      }
-        
+        health_plan = cdc$hlthplan
+      
+        skim_without_charts(health_plan)
         
       }
+      else{
         
+        if(input$choice == "exerany"){
+          
+          any_exercise = cdc$exerany
         
+          skim_without_charts(any_exercise)
+        
+        }
+        else{
+          
+          if(input$choice == "smoke100"){
+            smoke_100cigarettes = cdc$smoke100
+        
+            skim_without_charts(smoke_100cigarettes)
+            
+          }
+          else{
+            
+            if(input$choice == "gender"){
+              gender = cdc$gender
+        
+              skim_without_charts(gender)
+            }else{
+              
+              print("No summary for None")
+            }
+          }
+        }
       }
-        
-        
-      }}
-    
-    
-    
+    }
     
     
   })
   
   
-
-  
 }
+
+
+
 
 shinyApp(ui = ui, server = server)
 

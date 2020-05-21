@@ -10,19 +10,26 @@ cdc <- read_delim("data/cdc.txt", "|") %>%
   clean_names()
 
 # Specify factor levels
+
+  
 cdc$exerany <- factor(cdc$exerany, levels = c(1, 0))
-
+  
 cdc$hlthplan <- factor(cdc$hlthplan, levels = c(1, 0))
-
+  
 cdc$smoke100 <- factor(cdc$smoke100, levels = c(1, 0))
-
+  
 cdc$genhlth <- factor(cdc$genhlth, levels = c("excellent", 
-                                               "very good", 
-                                               "good", 
-                                               "fair", 
-                                               "poor"))
-
+                                            "very good", 
+                                            "good", 
+                                            "fair", 
+                                            "poor"))
+  
 cdc$gender <- factor(cdc$gender, levels = c("f", "m"))
+
+
+
+
+
 
 
 # Define UI for app that draws a histogram ----
@@ -65,7 +72,6 @@ ui <- fluidPage(
                                  "Gender"),
                   selected = "Gender")
       
-      
     ),
     
     # Main panel for displaying outputs ----
@@ -83,7 +89,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram ----
 server <- function(input, output) {
   
-  # Histogram of the Old Faithful Geyser Data ----
+  # Histogram of CDC data ----
   # with requested number of bins
   # This expression that generates a histogram is wrapped in a call
   # to renderPlot to indicate that:
@@ -94,7 +100,7 @@ server <- function(input, output) {
   output$distPlot <- renderPlot({
     
   
-    vars    <- case_when(
+    vars <- case_when(
       input$var == "Actual Weight" ~ list(cdc$weight, 
                                           seq(0, 500, by = 100), 
                                           "Actual Weight in Pounds"),
@@ -177,9 +183,6 @@ server <- function(input, output) {
         panel.grid.minor = element_blank(),
         
         
-        
-        
-        
         ### Legend ###
         legend.position = "top",
         
@@ -192,6 +195,9 @@ server <- function(input, output) {
   })
   
 }
+
+
+
 
 shinyApp(ui = ui, server = server)
 
