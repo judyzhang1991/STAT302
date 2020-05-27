@@ -18,3 +18,15 @@ b. Share your Shiny app as a web page: this is definitely the most user friendly
 1. Need: a copy of your `app.R` file, as well as any supplementary materials used in your app (e.g. `www` folders or `helpers.R` files).
 
 
+2. Send: email the files (perhaps in a zip file) or host the files oneline. 
+
+a. Your user can place the files into an app directory in their working directory. They can launch the app in R with the same commands you used on your computer. 
+```{r eval = FALSE}
+library(shiny)
+runApp("census-app")
+
+```
+
+3. Shiny has three built-in commands that make it easy to use files that are hosted online:
+
+a. runUrl: will download and launch a Shiny app straight from a weblink. 

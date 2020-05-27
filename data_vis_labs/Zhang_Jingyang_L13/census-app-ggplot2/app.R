@@ -1,3 +1,10 @@
+# -- STAT302 --
+# -- May 25th 2020
+# -- Jingyang Zhang
+# -- Lab13 Exer2 census-app-ggplot2
+
+
+
 
 # Load packages ----
 

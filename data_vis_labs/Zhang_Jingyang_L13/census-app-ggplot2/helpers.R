@@ -376,7 +376,7 @@ state_cartogram <- function(var, color, legend_title, min, max){
                       guide =guide_legend(reverse = TRUE)) + 
     
     
-    geom_statebins() +
+    geom_statebins(border_size = 0.5) +
     
     theme_statebins() + 
     
