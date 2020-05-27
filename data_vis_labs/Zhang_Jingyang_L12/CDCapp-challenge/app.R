@@ -182,6 +182,7 @@ server <- function(input, output) {
   
     bins <- seq(min(unlist(vars[1])), max(unlist(vars[1])), length.out = input$bins + 1)
     
+    
     hist <- ggplot(cdc, aes(unlist(vars[1])))
     
     if(input$choice != "none"){

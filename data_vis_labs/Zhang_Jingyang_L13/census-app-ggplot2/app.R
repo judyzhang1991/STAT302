@@ -13,6 +13,8 @@ library(janitor)
 
 library(sf)
 
+library(statebins)
+
 
 # Read states names -----
 states <- read_csv("data/states.csv") %>% 
@@ -31,7 +33,7 @@ ui <- fluidPage(
       helpText("Create demographic maps with 
         information from the 2010 US Census."),
       
-      selectInput("state", 
+      selectInput("state_input", 
                   label = "Select a state or the contiguous 48 states to display",
                   choices = states$state,
                   selected = "South Dakota"),
@@ -65,13 +67,19 @@ server <- function(input, output) {
     
     args$max <- input$range[2]
     
-    args$state <- input$state
+    args$state_input <- input$state_input
     
     
-    # do.call constructs and executes a function call from a name or 
-    ## a function and a list of args to be passed to it.
+    # Check which type of graph to plot based on the selection of state
+    if(grepl("48", input$state_input, fixed = TRUE) & !(grepl(",", input$state_input, fixed = TRUE))){
+      state_cartogram(unlist(args[1]), unlist(args[2]), unlist(args[3]), args$min, args$max)
+     
+    }else{
+      
+      do.call(percent_map, args)
+    }
     
-    do.call(percent_map, args)
+    
     
   })
 }
