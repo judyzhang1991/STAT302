@@ -1,0 +1,20 @@
+---
+title: "Shiny_Lec7"
+author: "Jingyang(Judy) Zhang"
+date: "5/25/2020"
+output: html_document
+---
+
+## Lession 7 Share Your Apps ##
+
+1. Two Basic Options:
+a. Share your Shiny app as R scripts: this is the simplest way to share an app, but it works only if your users have R on their own computer (and know how to use it). Users can use these cripts to launch the app from their own R session, just like you have been launching the apps so far in this tutorial. 
+
+b. Share your Shiny app as a web page: this is definitely the most user friendly way to share a Shiny app. Your users can navigate to your app through the internet with a web browser. They will find your app fully rendered, up to date, and ready to go. 
+
+
+### Share as R Scripts ###
+
+1. Need: a copy of your `app.R` file, as well as any supplementary materials used in your app (e.g. `www` folders or `helpers.R` files).
+
+

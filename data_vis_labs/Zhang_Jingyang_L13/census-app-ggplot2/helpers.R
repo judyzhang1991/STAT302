@@ -157,7 +157,6 @@ get_usageodat <- function(){
 
 # Get outline data for a given state
 get_state_outline <- function(state_input){
-  
   states_outline <- maps::map(
     database = "state",
     plot = FALSE,
@@ -165,8 +164,16 @@ get_state_outline <- function(state_input){
   ) %>%
     st_as_sf() 
   
-  state_outline <- subset(states_outline, ID == tolower(state_input))
-  return(state_outline)
+  if(grepl(",", state_input, fixed = TRUE)){
+    return(states_outline)
+  }
+  else{
+    states_outline <- subset(states_outline, 
+                              ID == tolower(state_input))
+    return(states_outline)
+  }
+  
+  
 }
 
 
@@ -233,16 +240,20 @@ percent_map <- function(state_input, var, color, legend_title, min = 0, max = 10
       
      if(grepl(",", state_input, fixed = TRUE)){
        plot_dat <- get_usageodat()
+       
+       outline_color = "white"
      }
    
     else{
       # Load data
       plot_dat <- get_county_geodat(state_input)
       
-      # Load state outline
-      state_outline <- get_state_outline(state_input)
-      
+      outline_color = "black"
     }
+  
+    # Load state outline
+    states_outline <- get_state_outline(state_input)
+    
   
      
       
@@ -270,14 +281,13 @@ percent_map <- function(state_input, var, color, legend_title, min = 0, max = 10
         
         geom_sf(aes(fill = var_fill,
                     geometry = geom),
-                color = NA,
-                size = 0.5) + 
+                color = NA) + 
         
-       # geom_sf(aes(geometry = geom), 
-             #   fill = "transparent",
-              #  color = "gray90",
-              #  size = 1,
-              #  data = . %>% group_by(state) %>% summarise()) +
+       geom_sf(aes(geometry = geom), 
+               data = states_outline,
+               color = outline_color,
+               fill = NA,
+               size = 0.5) +
         
        
         
